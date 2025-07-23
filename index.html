@@ -1,383 +1,190 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snake Game</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <title>项目目录导航</title>
     <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+        * {
             margin: 0;
-            background-color: #000;
-            font-family: Arial, sans-serif;
+            padding: 0;
+            box-sizing: border-box;
         }
-        #uiContainer {
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .pages-list {
+            padding: 2rem;
+        }
+        
+        .page-item {
+            display: block;
+            text-decoration: none;
+            color: #333;
+            background: #f8f9fa;
+            margin-bottom: 1rem;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
             position: relative;
-            width: 800px;
-            height: 600px;
-            /* border: 1px solid #fff; /* Optional: if you want a border around the game area */
+            overflow: hidden;
         }
-        canvas {
-            display: block; /* Removes extra space below canvas */
-        }
-        .uiOverlay {
+        
+        .page-item::before {
+            content: '';
             position: absolute;
             top: 0;
-            left: 0;
+            left: -100%;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.75);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s;
+        }
+        
+        .page-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-color: #4facfe;
+            background: #ffffff;
+        }
+        
+        .page-item:hover::before {
+            left: 100%;
+        }
+        
+        .page-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+        
+        .page-description {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .page-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        
+        .footer {
             text-align: center;
-            z-index: 10;
-            visibility: hidden; /* Hidden by default */
+            padding: 1.5rem;
+            color: #666;
+            border-top: 1px solid #eee;
+            font-size: 0.9rem;
         }
-        #scoreDisplay {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            color: white;
-            font-size: 24px;
-            z-index: 5; /* Above canvas, below overlays */
-            visibility: hidden; /* Start hidden, shown after difficulty select */
-        }
-        #difficultyMenu h2 { margin-bottom: 20px; font-size: 30px;}
-        #difficultyMenu p { margin: 10px 0; font-size: 24px; cursor: pointer; }
-        #gameOverScreen h2 { margin-bottom: 15px; font-size: 36px; color: #f00;}
-        #gameOverScreen p { margin: 8px 0; font-size: 22px;}
-        #pauseMessage {
-            background-color: rgba(0,0,0,0.5); /* Lighter background for pause */
-            font-size: 36px;
-            z-index: 9; /* Below full screen overlays but above score */
+        
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .pages-list {
+                padding: 1rem;
+            }
+            
+            .page-item {
+                padding: 1rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="uiContainer">
-        <canvas id="gameCanvas" width="800" height="600"></canvas>
-        <div id="scoreDisplay">Score: 0</div>
-        <div id="difficultyMenu" class="uiOverlay">
-            <!-- Content generated by JS -->
+    <div class="container">
+        <div class="header">
+            <h1>🚀 项目导航</h1>
+            <p>选择你想要访问的页面</p>
         </div>
-        <div id="gameOverScreen" class="uiOverlay">
-            <h2>Game Over!</h2>
-            <p id="finalScore">Score: 0</p>
-            <p>Press Space to Play Again</p>
+        
+        <div class="pages-list">
+            <a href="snake-game.html" class="page-item">
+                <div class="page-title">
+                    <span class="page-icon">🐍</span>
+                    贪吃蛇游戏 (Snake Game)
+                </div>
+                <div class="page-description">
+                    使用Three.js构建的2.5D贪吃蛇游戏，支持多种难度选择和暂停功能
+                </div>
+            </a>
+            
+            <a href="npm-tutorial.html" class="page-item">
+                <div class="page-title">
+                    <span class="page-icon">📦</span>
+                    NPM 教程
+                </div>
+                <div class="page-description">
+                    Node.js包管理器的使用指南和教程
+                </div>
+            </a>
+            
+            <a href="opencode-system-architecture.html" class="page-item">
+                <div class="page-title">
+                    <span class="page-icon">🏗️</span>
+                    OpenCode 系统架构
+                </div>
+                <div class="page-description">
+                    OpenCode项目的系统架构设计和技术文档
+                </div>
+            </a>
+            
+            <a href="opencode-tools-manual.html" class="page-item">
+                <div class="page-title">
+                    <span class="page-icon">🛠️</span>
+                    OpenCode 工具手册
+                </div>
+                <div class="page-description">
+                    OpenCode开发工具的使用说明和操作指南
+                </div>
+            </a>
         </div>
-        <div id="pauseMessage" class="uiOverlay">PAUSED</div>
+        
+        <div class="footer">
+            <p>💡 点击任意项目卡片即可访问对应页面</p>
+        </div>
     </div>
-
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const scoreDisplay = document.getElementById('scoreDisplay');
-        const difficultyMenu = document.getElementById('difficultyMenu');
-        const gameOverScreen = document.getElementById('gameOverScreen');
-        const finalScoreDisplay = document.getElementById('finalScore');
-        const pauseMessage = document.getElementById('pauseMessage');
-
-        // const ctx = canvas.getContext('2d');
-
-        const width = canvas.width;
-        const height = canvas.height;
-        const snakeBlock = 20;
-
-        let snake = [];
-        let food = {};
-        let direction = 'RIGHT';
-        let score = 0;
-        let gameOver = false;
-        let gamePaused = false;  // New variable to track pause state
-        let difficulty = 7; // Changed from 10 to 7 for Easy mode
-
-        let renderer, scene, camera;
-        let snakeMeshes = [];
-        let foodMesh = null;
-
-        function init() {
-            // UI Setup
-            scoreDisplay.textContent = 'Score: 0';
-            scoreDisplay.style.visibility = 'hidden'; // Hide until difficulty is chosen
-            gameOverScreen.style.visibility = 'hidden';
-            difficultyMenu.style.visibility = 'hidden';
-            pauseMessage.style.visibility = 'hidden';
-            gamePaused = false; // Reset pause state
-
-            // Clear existing meshes from scene and arrays
-            snakeMeshes.forEach(mesh => scene.remove(mesh));
-            snakeMeshes = [];
-            if (foodMesh) {
-                scene.remove(foodMesh);
-                foodMesh = null;
-            }
-
-            // Renderer
-            renderer = new THREE.WebGLRenderer({ canvas: canvas });
-            renderer.setSize(width, height);
-
-            // Scene
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x000000); // Black background
-
-            // Camera
-            camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-            camera.position.set(400, 300, 500);
-            camera.lookAt(400, 300, 0);
-            scene.add(camera);
-
-            // Lighting
-            const ambientLight = new THREE.AmbientLight(0x404040); // soft white light
-            scene.add(ambientLight);
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-            directionalLight.position.set(0, 1, 1); // Shining from above
-            scene.add(directionalLight);
-
-            // Initialize Snake
-            snake = [{x: width / 2, y: height / 2}];
-            snake.forEach(segment => { // This will run once for the initial head
-                const geometry = new THREE.BoxGeometry(snakeBlock, snakeBlock, snakeBlock);
-                const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 }); // Green
-                const mesh = new THREE.Mesh(geometry, material);
-                mesh.position.set(segment.x, segment.y, 0);
-                scene.add(mesh);
-                snakeMeshes.push(mesh);
-            });
-
-            createFood(); // Food mesh is created here
-            score = 0;
-            gameOver = false;
-            
-            // Ensure renderer is ready before first render call in chooseDifficulty or gameLoop
-            if (!renderer) { // Should only happen on very first load
-                 renderer = new THREE.WebGLRenderer({ canvas: canvas });
-                 renderer.setSize(width, height);
-                 scene = new THREE.Scene();
-                 scene.background = new THREE.Color(0x000000);
-                 camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-                 camera.position.set(400, 300, 500);
-                 camera.lookAt(400, 300, 0);
-                 scene.add(camera);
-                 const ambientLight = new THREE.AmbientLight(0x404040);
-                 scene.add(ambientLight);
-                 const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-                 directionalLight.position.set(0, 1, 1);
-                 scene.add(directionalLight);
-            }
-            
-            chooseDifficulty(); // This will make difficultyMenu visible
-            // renderer.render(scene, camera); // Initial render happens after difficulty selection or in gameLoop
-        }
-
-        function chooseDifficulty() {
-            const difficulties = ['Easy', 'Medium', 'Hard'];
-            let currentSelection = 0; // Renamed from selected to avoid conflict
-
-            function renderDifficultyOptions() {
-                difficultyMenu.innerHTML = '<h2 style="font-size: 30px;">Choose difficulty:</h2>'; // Clear previous
-                difficulties.forEach((diff, index) => {
-                    const p = document.createElement('p');
-                    p.textContent = diff;
-                    p.style.color = index === currentSelection ? '#f00' : '#fff'; // Red for selected
-                    p.style.cursor = 'pointer';
-                    // Optional: Add click listener to select difficulty
-                    p.addEventListener('click', () => {
-                        currentSelection = index;
-                        selectDifficulty();
-                    });
-                    difficultyMenu.appendChild(p);
-                });
-            }
-
-            function selectDifficulty() {
-                difficulty = currentSelection === 0 ? 7 : (currentSelection === 1 ? 15 : 20);
-                document.removeEventListener('keydown', difficultyKeyPressHandler);
-                difficultyMenu.style.visibility = 'hidden';
-                scoreDisplay.style.visibility = 'visible'; // Show score display
-                gameLoop();
-            }
-
-            function difficultyKeyPressHandler(e) {
-                switch(e.key) {
-                    case 'ArrowUp':
-                        currentSelection = (currentSelection - 1 + difficulties.length) % difficulties.length;
-                        renderDifficultyOptions();
-                        break;
-                    case 'ArrowDown':
-                        currentSelection = (currentSelection + 1) % difficulties.length;
-                        renderDifficultyOptions();
-                        break;
-                    case 'Enter':
-                        selectDifficulty();
-                        return; // Return to prevent further processing
-                }
-            }
-            
-            difficultyMenu.style.visibility = 'visible';
-            renderDifficultyOptions();
-            document.addEventListener('keydown', difficultyKeyPressHandler);
-        }
-
-        function createFood() {
-            // Remove old food mesh if it exists
-            if (foodMesh) {
-                scene.remove(foodMesh);
-            }
-
-            food = {
-                x: Math.floor(Math.random() * (width / snakeBlock)) * snakeBlock,
-                y: Math.floor(Math.random() * (height / snakeBlock)) * snakeBlock
-            };
-
-            const geometry = new THREE.BoxGeometry(snakeBlock, snakeBlock, snakeBlock);
-            const material = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Red
-            foodMesh = new THREE.Mesh(geometry, material);
-            foodMesh.position.set(food.x, food.y, 0);
-            scene.add(foodMesh);
-        }
-
-        function draw() {
-            // Temporarily disable draw as it uses 2D context
-            // ctx.fillStyle = '#000';
-            // ctx.fillRect(0, 0, width, height);
-
-            // ctx.fillStyle = '#0f0';
-            // snake.forEach(segment => {
-            //     ctx.fillRect(segment.x, segment.y, snakeBlock, snakeBlock);
-            // });
-
-            // ctx.fillStyle = '#f00';
-            // ctx.fillRect(food.x, food.y, snakeBlock, snakeBlock);
-
-            // ctx.fillStyle = '#fff';
-            // ctx.font = '20px Arial';
-            // ctx.textAlign = 'right';
-            // ctx.fillText(`Score: ${score}`, width - 10, 30);
-            // console.log("2D draw() function disabled for 3D setup."); // Fully disable this, or remove function
-        }
-
-        function moveSnake() {
-            // const oldHeadPos = {x: snake[0].x, y: snake[0].y}; // Not strictly needed with current mesh logic
-            const head = {x: snake[0].x, y: snake[0].y};
-
-            switch(direction) {
-                case 'UP': head.y -= snakeBlock; break;
-                case 'DOWN': head.y += snakeBlock; break;
-                case 'LEFT': head.x -= snakeBlock; break;
-                case 'RIGHT': head.x += snakeBlock; break;
-            }
-
-            if (head.x < 0 || head.x >= width || head.y < 0 || head.y >= height) {
-                gameOver = true;
-                return;
-            }
-
-            snake.unshift(head); // Add new logical head
-
-            let foodEaten = false;
-            if (head.x === food.x && head.y === food.y) {
-                score += difficulty === 7 ? 1 : (difficulty === 15 ? 2 : 3);
-                scoreDisplay.textContent = `Score: ${score}`; // Update score display
-                createFood(); // Creates new food and foodMesh
-                foodEaten = true;
-
-                // Create a new mesh for the new head segment
-                const geometry = new THREE.BoxGeometry(snakeBlock, snakeBlock, snakeBlock);
-                const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 }); // Green
-                const newSegmentMesh = new THREE.Mesh(geometry, material);
-                // newSegmentMesh.position.set(head.x, head.y, 0); // Position will be set in the loop below
-                scene.add(newSegmentMesh);
-                snakeMeshes.unshift(newSegmentMesh); // Add to the front of meshes array
-            } else {
-                snake.pop(); // Remove logical tail if no food eaten
-                // Remove visual tail
-                if (snakeMeshes.length > snake.length) { // Ensure meshes match logical snake
-                    const tailMesh = snakeMeshes.pop();
-                    scene.remove(tailMesh);
-                }
-            }
-
-            // Update positions of all snake segment meshes
-            for (let i = 0; i < snake.length; i++) {
-                if (snakeMeshes[i]) {
-                    snakeMeshes[i].position.set(snake[i].x, snake[i].y, 0);
-                } else {
-                    // This case should ideally not happen if logic is correct,
-                    // but good for initial setup of the very first segment if init didn't cover it.
-                    // For now, we assume init handles the first segment.
-                    // If a mismatch occurs here, it's a bug.
-                    console.error("Mismatch between snake logical array and snakeMeshes array", i, snake, snakeMeshes);
-                }
-            }
-
-            // Check for self-collision
-            for (let i = 1; i < snake.length; i++) {
-                if (head.x === snake[i].x && head.y === snake[i].y) {
-                    gameOver = true;
-                    return;
-                }
-            }
-        }
-
-        function gameLoop() {
-            if (gameOver) {
-                finalScoreDisplay.textContent = `Score: ${score}`;
-                gameOverScreen.style.visibility = 'visible';
-                scoreDisplay.style.visibility = 'hidden';
-                // console.log("Game Over screen disabled for 3D setup."); // Remove this
-                return;
-            }
-
-            if (!gamePaused) {
-                moveSnake();
-            }
-            // Pause message visibility is handled by spacebar listener
-            
-            // Render the 3D scene
-            if (renderer && scene && camera) {
-                renderer.render(scene, camera);
-            }
-
-            setTimeout(() => {
-                requestAnimationFrame(gameLoop);
-            }, 1000 / difficulty);
-        }
-
-        document.addEventListener('keydown', (e) => {
-            switch(e.key) {
-                case 'ArrowUp': 
-                    if (!gamePaused && direction !== 'DOWN' && difficultyMenu.style.visibility === 'hidden' && gameOverScreen.style.visibility === 'hidden') direction = 'UP'; 
-                    break;
-                case 'ArrowDown': 
-                    if (!gamePaused && direction !== 'UP' && difficultyMenu.style.visibility === 'hidden' && gameOverScreen.style.visibility === 'hidden') direction = 'DOWN'; 
-                    break;
-                case 'ArrowLeft': 
-                    if (!gamePaused && direction !== 'RIGHT' && difficultyMenu.style.visibility === 'hidden' && gameOverScreen.style.visibility === 'hidden') direction = 'LEFT'; 
-                    break;
-                case 'ArrowRight': 
-                    if (!gamePaused && direction !== 'LEFT' && difficultyMenu.style.visibility === 'hidden' && gameOverScreen.style.visibility === 'hidden') direction = 'RIGHT'; 
-                    break;
-                case ' ':
-                    if (gameOverScreen.style.visibility === 'visible') {
-                        gameOver = false; // Reset game over state
-                        init(); // This will hide gameOverScreen and call chooseDifficulty
-                    } else if (difficultyMenu.style.visibility === 'hidden') { // Only toggle pause if not in difficulty menu
-                        gamePaused = !gamePaused;
-                        pauseMessage.style.visibility = gamePaused ? 'visible' : 'hidden';
-                        if (gamePaused) scoreDisplay.style.visibility = 'hidden'; // Hide score when paused
-                        else scoreDisplay.style.visibility = 'visible'; // Show score when unpaused
-                    }
-                    break;
-            }
-        });
-
-        init(); // Start the game initialization process
-    </script>
 </body>
 </html>
