@@ -11,6 +11,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **npm-tutorial.html** - NPM 教程页面
 - **opencode-system-architecture.html** - OpenCode 系统架构文档
 - **opencode-tools-manual.html** - OpenCode 工具手册
+- **vllm-tutorial.html** - vLLM 高性能大语言模型推理教程
+- **vllm-k8s-tutorial.html** - vLLM + Kubernetes 部署教程
 
 ## 技术栈
 
@@ -35,7 +37,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ├── snake-game.html                      # 贪吃蛇游戏
 ├── npm-tutorial.html                    # NPM教程
 ├── opencode-system-architecture.html    # 系统架构文档
-└── opencode-tools-manual.html          # 工具手册
+├── opencode-tools-manual.html          # 工具手册
+├── vllm-tutorial.html                  # vLLM教程
+└── vllm-k8s-tutorial.html              # vLLM+K8s教程
 ```
 
 ### 贪吃蛇游戏架构 (snake-game.html)

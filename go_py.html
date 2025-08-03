@@ -1,0 +1,3010 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go 到 Python Web 开发教程</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Prism.js 代码高亮 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css">
+    <!-- Font Awesome 图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <h1>Go 到 Python Web 开发教程</h1>
+            <p>为 Go 开发者设计的 Python Web 开发学习指南</p>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <div class="container">
+            <ul>
+                <li><a href="#intro">简介</a></li>
+                <li><a href="#basics">基础语法对比</a></li>
+                <li><a href="#web-basics">Web 开发基础</a></li>
+                <li><a href="#frameworks">框架学习</a></li>
+                <li><a href="#projects">实践项目</a></li>
+                <li><a href="#best-practices">最佳实践</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section id="intro">
+            <h2>简介</h2>
+            <p>本教程专为熟悉 Go 语言的开发者设计，通过对比 Go 和 Python 的语法和 Web 开发模式，帮助你快速掌握 Python Web
+                开发技能。教程采用循序渐进的方式，从基础语法到框架应用，最后通过实践项目巩固所学知识。</p>
+
+            <div class="toc">
+                <h3>目录</h3>
+                <ul>
+                    <li><a href="#basics">基础语法对比</a>
+                        <ul>
+                            <li><a href="#variables">变量和类型系统</a></li>
+                            <li><a href="#functions">函数和方法</a></li>
+                            <li><a href="#error-handling">错误处理机制</a></li>
+                            <li><a href="#packages">包和模块系统</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#web-basics">Web 开发基础</a>
+                        <ul>
+                            <li><a href="#http-servers">HTTP 服务器基础</a></li>
+                            <li><a href="#routing">路由处理</a></li>
+                            <li><a href="#middleware">中间件概念</a></li>
+                            <li><a href="#request-response">请求响应处理</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#frameworks">框架学习</a>
+                        <ul>
+                            <li><a href="#flask-basics">Flask 基础入门</a></li>
+                            <li><a href="#fastapi-gin">FastAPI vs Gin 对比</a></li>
+                            <li><a href="#framework-choice">框架选择指南</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#projects">实践项目</a>
+                        <ul>
+                            <li><a href="#rest-api">简单 REST API</a></li>
+                            <li><a href="#auth-system">用户认证系统</a></li>
+                            <li><a href="#database">数据库集成项目</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#best-practices">最佳实践</a>
+                        <ul>
+                            <li><a href="#project-structure">项目结构对比</a></li>
+                            <li><a href="#testing">测试策略</a></li>
+                            <li><a href="#deployment">部署方案</a></li>
+                            <li><a href="#performance">性能优化</a></li>
+                            <li><a href="#security">安全最佳实践</a></li>
+                            <li><a href="#resources">学习资源</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="basics">
+            <h2>基础语法对比</h2>
+            <p>本章节将对比 Go 和 Python 的基础语法，帮助你快速理解两种语言的异同。</p>
+
+            <h3 id="variables">变量和类型系统</h3>
+            <p>Go 和 Python 在变量声明和类型系统上有很大的不同。Go 是静态类型语言，而 Python 是动态类型语言。</p>
+
+            <div class="code-comparison">
+                <div class="code-block">
+                    <div class="code-title">Go</div>
+                    <pre><code class="language-go">// 显式类型声明
+var name string = "Go开发者"
+var age int = 30
+var isActive bool = true
+
+// 短变量声明（类型推断）
+name := "Go开发者"
+age := 30
+isActive := true
+
+// 常量声明
+const PI = 3.14159
+const (
+    StatusOK = 200
+    StatusNotFound = 404
+)
+
+// 多变量声明
+var (
+    username string = "admin"
+    password string = "secret"
+)
+
+// 基本类型
+var i int = 10          // 整数
+var f float64 = 3.14    // 浮点数
+var s string = "hello"  // 字符串
+var b bool = true       // 布尔值
+
+// 复合类型
+var arr [5]int = [5]int{1, 2, 3, 4, 5}  // 数组
+var slice []int = []int{1, 2, 3}        // 切片
+var m map[string]int = map[string]int{  // 映射
+    "one": 1,
+    "two": 2,
+}
+
+// 结构体
+type Person struct {
+    Name string
+    Age  int
+}
+p := Person{Name: "张三", Age: 30}</code></pre>
+                </div>
+                <div class="code-block">
+                    <div class="code-title">Python</div>
+                    <pre><code class="language-python"># 变量声明（无需指定类型）
+name = "Python开发者"
+age = 30
+is_active = True
+
+# 类型注解（Python 3.6+）
+name: str = "Python开发者"
+age: int = 30
+is_active: bool = True
+
+# 常量（Python没有真正的常量）
+PI = 3.14159  # 约定俗成用大写表示常量
+STATUS_OK = 200
+STATUS_NOT_FOUND = 404
+
+# 多变量赋值
+username, password = "admin", "secret"
+
+# 基本类型
+i = 10           # 整数
+f = 3.14         # 浮点数
+s = "hello"      # 字符串
+b = True         # 布尔值
+
+# 复合类型
+arr = [1, 2, 3, 4, 5]  # 列表（可变）
+tup = (1, 2, 3)        # 元组（不可变）
+m = {                  # 字典
+    "one": 1,
+    "two": 2
+}
+
+# 类（相当于Go的结构体）
+class Person:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+p = Person("张三", 30)</code></pre>
+                </div>
+            </div>
+
+            <h4>主要区别</h4>
+            <ul>
+                <li>Go 是静态类型语言，变量类型在编译时确定；Python 是动态类型语言，变量类型在运行时确定</li>
+                <li>Go 有明确的类型声明语法；Python 变量无需声明类型，但可以使用类型注解</li>
+                <li>Go 有真正的常量；Python 只有约定俗成的常量（实际上是变量）</li>
+                <li>Go 使用结构体；Python 使用类</li>
+                <li>Go 的数组长度固定，切片长度可变；Python 的列表长度可变</li>
+            </ul>
+
+            <h3 id="functions">函数和方法</h3>
+            <p>Go 和 Python 在函数定义和方法调用上有一些语法差异，但概念上相似。</p>
+
+            <div class="code-comparison">
+                <div class="code-block">
+                    <div class="code-title">Go</div>
+                    <pre><code class="language-go">// 基本函数定义
+func greet(name string) string {
+    return "Hello, " + name
+}
+
+// 多返回值
+func divide(a, b float64) (float64, error) {
+    if b == 0 {
+        return 0, errors.New("除数不能为零")
+    }
+    return a / b, nil
+}
+
+// 命名返回值
+func calculate(a, b int) (sum, diff int) {
+    sum = a + b
+    diff = a - b
+    return // 隐式返回命名变量
+}
+
+// 可变参数
+func sum(nums ...int) int {
+    total := 0
+    for _, num := range nums {
+        total += num
+    }
+    return total
+}
+
+// 函数作为参数
+func process(data []int, f func(int) int) []int {
+    var result []int
+    for _, v := range data {
+        result = append(result, f(v))
+    }
+    return result
+}
+
+// 方法（绑定到结构体）
+type Rectangle struct {
+    Width, Height float64
+}
+
+func (r Rectangle) Area() float64 {
+    return r.Width * r.Height
+}
+
+// 指针接收者方法（可修改结构体）
+func (r *Rectangle) Scale(factor float64) {
+    r.Width *= factor
+    r.Height *= factor
+}</code></pre>
+                </div>
+                <div class="code-block">
+                    <div class="code-title">Python</div>
+                    <pre><code class="language-python"># 基本函数定义
+def greet(name):
+    return f"Hello, {name}"
+
+# 多返回值（通过元组）
+def divide(a, b):
+    if b == 0:
+        return 0, "除数不能为零"
+    return a / b, None
+
+# 带默认参数的函数
+def calculate(a, b, operation="add"):
+    if operation == "add":
+        return a + b
+    elif operation == "subtract":
+        return a - b
+    return None
+
+# 可变参数
+def sum(*nums):
+    total = 0
+    for num in nums:
+        total += num
+    return total
+
+# 关键字参数
+def build_profile(first, last, **user_info):
+    profile = {"first_name": first, "last_name": last}
+    profile.update(user_info)
+    return profile
+
+# 函数作为参数
+def process(data, f):
+    return [f(x) for x in data]
+
+# 方法（绑定到类）
+class Rectangle:
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+    
+    def area(self):
+        return self.width * self.height
+    
+    def scale(self, factor):
+        self.width *= factor
+        self.height *= factor
+
+# 装饰器（Python特有）
+def timer(func):
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        print(f"函数执行时间: {time.time() - start}秒")
+        return result
+    return wrapper
+
+@timer
+def slow_function():
+    time.sleep(1)
+    return "完成"</code></pre>
+                </div>
+            </div>
+
+            <h4>主要区别</h4>
+            <ul>
+                <li>Go 函数参数和返回值需要明确类型；Python 不需要</li>
+                <li>Go 支持命名返回值；Python 没有此概念</li>
+                <li>Python 支持默认参数值；Go 不支持</li>
+                <li>Python 有装饰器语法；Go 没有直接等价物</li>
+                <li>Go 区分值接收者和指针接收者方法；Python 方法总是操作对象实例</li>
+                <li>Python 支持关键字参数；Go 不支持</li>
+            </ul>
+
+            <h3 id="error-handling">错误处理机制</h3>
+            <p>Go 和 Python 在错误处理上采用了完全不同的方法。Go 使用显式的错误返回值，而 Python 使用异常机制。</p>
+
+            <div class="code-comparison">
+                <div class="code-block">
+                    <div class="code-title">Go</div>
+                    <pre><code class="language-go">// 基本错误处理
+func readFile(path string) ([]byte, error) {
+    data, err := ioutil.ReadFile(path)
+    if err != nil {
+        return nil, err
+    }
+    return data, nil
+}
+
+// 调用带错误返回的函数
+func processFile(path string) {
+    data, err := readFile(path)
+    if err != nil {
+        fmt.Printf("读取文件错误: %v\n", err)
+        return
+    }
+    // 处理数据...
+}
+
+// 自定义错误
+type ValidationError struct {
+    Field string
+    Message string
+}
+
+func (e ValidationError) Error() string {
+    return fmt.Sprintf("%s: %s", e.Field, e.Message)
+}
+
+// 错误包装
+func validateUser(user User) error {
+    if user.Name == "" {
+        return ValidationError{Field: "name", Message: "不能为空"}
+    }
+    if user.Age < 0 {
+        return ValidationError{Field: "age", Message: "不能为负数"}
+    }
+    return nil
+}
+
+// 使用 panic 和 recover（不推荐常规错误处理）
+func doSomethingRisky() {
+    defer func() {
+        if r := recover(); r != nil {
+            fmt.Println("从 panic 恢复:", r)
+        }
+    }()
+    
+    // 可能导致 panic 的代码
+    panic("发生了严重错误")
+}</code></pre>
+                </div>
+                <div class="code-block">
+                    <div class="code-title">Python</div>
+                    <pre><code class="language-python"># 基本异常处理
+def read_file(path):
+    try:
+        with open(path, 'r') as file:
+            return file.read()
+    except FileNotFoundError:
+        print(f"文件 {path} 不存在")
+        return None
+    except PermissionError:
+        print(f"没有权限读取文件 {path}")
+        return None
+
+# try-except-else-finally 结构
+def process_file(path):
+    try:
+        data = read_file(path)
+    except Exception as e:
+        print(f"处理文件时出错: {e}")
+    else:
+        # 只有在没有异常时执行
+        print("文件处理成功")
+    finally:
+        # 无论是否有异常都执行
+        print("清理资源")
+
+# 自定义异常
+class ValidationError(Exception):
+    def __init__(self, field, message):
+        self.field = field
+        self.message = message
+        super().__init__(f"{field}: {message}")
+
+# 抛出异常
+def validate_user(user):
+    if not user.name:
+        raise ValidationError("name", "不能为空")
+    if user.age < 0:
+        raise ValidationError("age", "不能为负数")
+
+# 上下文管理器（with语句）
+def process_data():
+    try:
+        with open("data.txt", "r") as file:
+            data = file.read()
+        # 文件会自动关闭
+    except Exception as e:
+        print(f"处理数据时出错: {e}")
+
+# 异常链和传播
+def outer_function():
+    try:
+        inner_function()
+    except ValueError as e:
+        raise RuntimeError("外部处理失败") from e
+
+def inner_function():
+    raise ValueError("内部错误")</code></pre>
+                </div>
+            </div>
+
+            <h4>主要区别</h4>
+            <ul>
+                <li>Go 使用显式的错误返回值和检查；Python 使用 try-except 异常处理</li>
+                <li>Go 的错误是值；Python 的异常是对象</li>
+                <li>Go 倾向于立即处理错误；Python 可以让异常向上传播</li>
+                <li>Python 有 finally 块确保资源清理；Go 使用 defer 语句</li>
+                <li>Go 的 panic/recover 类似于 Python 的异常，但不推荐用于常规错误处理</li>
+                <li>Python 有上下文管理器（with语句）简化资源管理；Go 通常使用 defer</li>
+            </ul>
+
+            <h3 id="packages">包和模块系统</h3>
+            <p>Go 和 Python 都有模块化系统，但实现方式不同。</p>
+
+            <div class="code-comparison">
+                <div class="code-block">
+                    <div class="code-title">Go</div>
+                    <pre><code class="language-go">// 包声明
+package main
+
+// 导入包
+import (
+    "fmt"
+    "strings"
+    "time"
+)
+
+// 导入并重命名
+import (
+    "encoding/json"
+    str "strings"  // 重命名为 str
+)
+
+// 导入但不使用（仅执行初始化）
+import _ "image/png"
+
+// 导出标识符（首字母大写）
+func ExportedFunction() {
+    // 可被其他包访问
+}
+
+func unexportedFunction() {
+    // 仅包内可访问
+}
+
+// Go Modules (go.mod)
+// module example.com/myproject
+// go 1.16
+// require (
+//     github.com/gin-gonic/gin v1.7.4
+//     golang.org/x/text v0.3.7
+// )
+
+// 初始化函数
+func init() {
+    // 包加载时自动执行
+}
+
+// 主函数（仅在 main 包中）
+func main() {
+    // 程序入口点
+}</code></pre>
+                </div>
+                <div class="code-block">
+                    <div class="code-title">Python</div>
+                    <pre><code class="language-python"># 导入模块
+import os
+import sys
+import time
+
+# 导入特定函数或类
+from math import sqrt, pi
+from datetime import datetime
+
+# 导入并重命名
+import numpy as np
+import pandas as pd
+
+# 导入所有（不推荐）
+from math import *
+
+# 相对导入（在包内）
+from . import utils
+from ..models import User
+
+# 创建包（需要 __init__.py 文件）
+# mypackage/
+# ├── __init__.py
+# ├── module1.py
+# └── module2.py
+
+# __init__.py 内容
+# from .module1 import function1
+# from .module2 import function2
+
+# 私有标识符（下划线前缀）
+def _private_function():
+    # 约定俗成不应被直接导入
+    pass
+
+# requirements.txt
+# flask==2.0.1
+# requests==2.26.0
+
+# 或使用 Poetry (pyproject.toml)
+# [tool.poetry.dependencies]
+# python = "^3.9"
+# flask = "^2.0.1"
+# requests = "^2.26.0"
+
+# 模块级代码（导入时执行）
+print("模块被导入")
+
+# 主程序检查
+if __name__ == "__main__":
+    # 作为脚本运行时执行
+    print("作为主程序运行")</code></pre>
+                </div>
+            </div>
+
+            <h4>主要区别</h4>
+            <ul>
+                <li>Go 使用 package 关键字声明包；Python 使用目录结构和 __init__.py 文件</li>
+                <li>Go 通过首字母大小写控制可见性；Python 使用下划线前缀作为约定</li>
+                <li>Go 使用 go.mod 管理依赖；Python 使用 requirements.txt、Pipfile 或 pyproject.toml</li>
+                <li>Go 有显式的 init() 函数；Python 模块级代码在导入时执行</li>
+                <li>Go 强制一个目录只能有一个包；Python 允许包含子包</li>
+                <li>Python 支持相对导入；Go 不支持</li>
+            </ul>
+        </section>
+
+        <section id="web-basics">
+            <h2>Web 开发基础</h2>
+            <p>本章节将对比 Go 和 Python 的 Web 开发基础知识，包括 HTTP 服务器、路由处理、中间件和请求响应处理。</p>
+
+            <h3 id="http-servers">HTTP 服务器基础</h3>
+            <p>Go 和 Python 都内置了创建 HTTP 服务器的能力，但实现方式不同。</p>
+
+            <div class="code-comparison">
+                <div class="code-block">
+                    <div class="code-title">Go (net/http)</div>
+                    <pre><code class="language-go">package main
+
+import (
+    "fmt"
+    "log"
+    "net/http"
+)
+
+// 处理函数
+func helloHandler(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintf(w, "Hello, Web!")
+}
+
+func main() {
+    // 注册路由处理函数
+    http.HandleFunc("/hello", helloHandler)
+    
+    // 静态文件服务
+    fs := http.FileServer(http.Dir("static"))
+    http.Handle("/static/", http.StripPrefix("/static/", fs))
+    
+    // 启动服务器
+    fmt.Println("服务器启动在 http://localhost:8080")
+    log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+// 自定义服务器配置
+func customServer() {
+    server := &http.Server{
+        Addr:         ":8080",
+        Handler:      nil, // 默认使用 DefaultServeMux
+        ReadTimeout:  10 * time.Second,
+        WriteTimeout: 10 * time.Second,
+        IdleTimeout:  120 * time.Second,
+    }
+    log.Fatal(server.ListenAndServe())
+}</code></pre>
+                </div>
+                <div class="code-block">
+                    <div class="code-title">Python (http.server)</div>
+                    <pre><code class="language-python">from http.server import HTTPServer, BaseHTTPRequestHandler
+import time
+
+# 处理器类
+class HelloHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == '/hello':
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            self.wfile.write(b"Hello, Web!")
+        else:
+            self.send_response(404)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            self.wfile.write(b"404 Not Found")
+
+# 启动服务器
+def run_server(server_class=HTTPServer, handler_class=HelloHandler):
+    server_address = ('', 8000)
+    httpd = server_class(server_address, handler_class)
+    print("服务器启动在 http://localhost:8000")
+    httpd.serve_forever()
+
+if __name__ == '__main__':
+    run_server()
+
+# 使用 socketserver.ThreadingMixIn 实现多线程
+from http.server import HTTPServer
+from socketserver import ThreadingMixIn
+
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    """处理请求的线程化版本"""
+    pass
+
+# 使用线程化服务器
+httpd = ThreadedHTTPServer(('', 8000), HelloHandler)
+httpd.serve_forever()</code></pre>
+                </div>
+            </div>
+
+            <h4>主要区别</h4>
+            <ul>
+                <li>Go 的 net/http 包提供了更高级的 API，而 Python 的 http.server 更底层</li>
+                <li>Go 默认支持并发处理请求；Python 的 http.server 默认是单线程的</li>
+                <li>Go 的处理函数接收 ResponseWriter 和 Request；Python 使用处理器类的方法</li>
+                <li>Go 的路由基于路径前缀匹配；Python 需要在处理器中手动检查路径</li>
+                <li>Go 内置了静态文件服务；Python 需要额外实现</li>
+            </ul>
+
+            <div class="note">
+                <p><strong>注意：</strong> Python 的 http.server 主要用于开发和测试，不推荐用于生产环境。生产环境通常使用 WSGI 服务器如 Gunicorn 或 uWSGI。
+                </p>
+            </div>
+
+            <h3 id="routing">路由处理</h3>
+            <p>路由是 Web 应用的核心部分，负责将请求映射到相应的处理函数。</p>
+
+            <div class="code-comparison">
+                <div class="code-block">
+                    <div class="code-title">Go</div>
+                    <pre><code class="language-go">package main
+
+import (
+    "fmt"
+    "net/http"
+    "regexp"
+)
+
+// 基本路由
+func basicRouting() {
+    http.HandleFunc("/", homeHandler)
+    http.HandleFunc("/about", aboutHandler)
+    http.HandleFunc("/users", usersHandler)
+    
+    http.ListenAndServe(":8080", nil)
+}
+
+// 带参数的路由
+func paramRouting() {
+    // 使用闭包捕获路由参数
+    http.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
+        // 从路径中提取用户ID
+        userID := r.URL.Path[len("/users/"):]
+        fmt.Fprintf(w, "用户ID: %s", userID)
+    })
+}
+
+// 使用正则表达式的路由
+type route struct {
+    pattern *regexp.Regexp
+    handler http.Handler
+}
+
+type regexpHandler struct {
+    routes []*route
+}
+
+func (h *regexpHandler) HandleFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
+    regex := regexp.MustCompile(pattern)
+    h.routes = append(h.routes, &route{regex, http.HandlerFunc(handler)})
+}
+
+func (h *regexpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+    for _, route := range h.routes {
+        if route.pattern.MatchString(r.URL.Path) {
+            route.handler.ServeHTTP(w, r)
+            return
+        }
+    }
+    http.NotFound(w, r)
+}
+
+// 使用自定义路由器
+func customRouter() {
+    h := &regexpHandler{}
+    h.HandleFunc("^/users/([0-9]+)$", func(w http.ResponseWriter, r *http.Request) {
+        matches := h.routes[0].pattern.FindStringSubmatch(r.URL.Path)
+        userID := matches[1]
+        fmt.Fprintf(w, "用户ID: %s", userID)
+    })
+    
+    http.ListenAndServe(":8080", h)
+}</code></pre>
+                </div>
+                <div class="code-block">
+                    <div class="code-title">Python</div>
+                    <pre><code class="language-python">from http.server import HTTPServer, BaseHTTPRequestHandler
+import re
+from urllib.parse import parse_qs
+
+# 基本路由
+class SimpleRouter:
+    def __init__(self):
+        self.routes = {}
+    
+    def add_route(self, path, handler):
+        self.routes[path] = handler
+    
+    def get_handler(self, path):
+        return self.routes.get(path)
+
+class RouterHandler(BaseHTTPRequestHandler):
+    router = SimpleRouter()
+    
+    @classmethod
+    def register(cls, path, handler):
+        cls.router.add_route(path, handler)
+    
+    def do_GET(self):
+        handler = self.router.get_handler(self.path)
+        if handler:
+            handler(self)
+        else:
+            self.send_response(404)
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(b"404 Not Found")
+
+# 注册路由
+def home_handler(request):
+    request.send_response(200)
+    request.send_header('Content-type', 'text/plain')
+    request.end_headers()
+    request.wfile.write(b"Home Page")
+
+def about_handler(request):
+    request.send_response(200)
+    request.send_header('Content-type', 'text/plain')
+    request.end_headers()
+    request.wfile.write(b"About Page")
+
+RouterHandler.register("/", home_handler)
+RouterHandler.register("/about", about_handler)
+
+# 带参数的路由
+class RegexRouter:
+    def __init__(self):
+        self.routes = []
+    
+    def add_route(self, pattern, handler):
+        self.routes.append((re.compile(pattern), handler))
+    
+    def get_handler_and_params(self, path):
+        for pattern, handler in self.routes:
+            match = pattern.match(path)
+            if match:
+                return handler, match.groups()
+        return None, None
+
+class AdvancedRouterHandler(BaseHTTPRequestHandler):
+    router = RegexRouter()
+    
+    @classmethod
+    def register(cls, pattern, handler):
+        cls.router.add_route(pattern, handler)
+    
+    def do_GET(self):
+        handler, params = self.router.get_handler_and_params(self.path)
+        if handler:
+            handler(self, *params)
+        else:
+            self.send_response(404)
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(b"404 Not Found")
+
+# 注册正则路由
+def user_handler(request, user_id):
+    request.send_response(200)
+    request.send_header('Content-type', 'text/plain')
+    request.end_headers()
+    request.wfile.write(f"用户ID: {user_id}".encode())
+
+AdvancedRouterHandler.register(r"^/users/(\d+)$", user_handler)
+
+# 启动服务器
+server = HTTPServer(('', 8000), AdvancedRouterHandler)
+server.serve_forever()</code></pre>
+                </div>
+            </div>
+
+            <h4>主要区别</h4>
+            <ul>
+                <li>Go 的 net/http 包提供了简单的路由功能；Python 的 http.server 需要自己实现路由</li>
+                <li>Go 的路由基于前缀匹配；Python 需要手动实现精确匹配</li>
+                <li>两种语言都需要额外工作来实现参数化路由</li>
+                <li>实际开发中，两种语言都通常使用框架来简化路由处理</li>
+            </ul>
+
+            <h3 id="middleware">中间件概念</h3>
+            <p>中间件是处理 HTTP 请求和响应的可重用组件，可以在请求处理前后执行额外的逻辑。</p>
+
+            <div class="code-comparison">
+                <div class="code-block">
+                    <div class="code-title">Go</div>
+                    <pre><code class="language-go">package main
+
+import (
+    "fmt"
+    "log"
+    "net/http"
+    "time"
+)
+
+// 中间件函数类型
+type Middleware func(http.HandlerFunc) http.HandlerFunc
+
+// 日志中间件
+func LoggingMiddleware(next http.HandlerFunc) http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+        start := time.Now()
+        log.Printf("开始处理 %s %s", r.Method, r.URL.Path)
+        
+        next(w, r)
+        
+        log.Printf("完成处理 %s %s，耗时 %v", r.Method, r.URL.Path, time.Since(start))
+    }
+}
+
+// 认证中间件
+func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+        token := r.Header.Get("Authorization")
+        if token == "" {
+            http.Error(w, "未授权", http.StatusUnauthorized)
+            return
+        }
+        
+        // 验证 token...
+        
+        next(w, r)
+    }
+}
+
+// 应用多个中间件
+func Chain(f http.HandlerFunc, middlewares ...Middleware) http.HandlerFunc {
+    for _, m := range middlewares {
+        f = m(f)
+    }
+    return f
+}
+
+func main() {
+    // 应用中间件
+    http.HandleFunc("/api", Chain(
+        apiHandler,
+        LoggingMiddleware,
+        AuthMiddleware,
+    ))
+    
+    http.ListenAndServe(":8080", nil)
+}
+
+func apiHandler(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintf(w, "API 响应")
+}</code></pre>
+                </div>
+                <div class="code-block">
+                    <div class="code-title">Python</div>
+                    <pre><code class="language-python">import time
+import functools
+from http.server import HTTPServer, BaseHTTPRequestHandler
+
+# 中间件装饰器
+def logging_middleware(handler):
+    @functools.wraps(handler)
+    def wrapper(request, *args, **kwargs):
+        start = time.time()
+        print(f"开始处理 {request.command} {request.path}")
+        
+        result = handler(request, *args, **kwargs)
+        
+        print(f"完成处理 {request.command} {request.path}，耗时 {time.time() - start:.4f}秒")
+        return result
+    return wrapper
+
+def auth_middleware(handler):
+    @functools.wraps(handler)
+    def wrapper(request, *args, **kwargs):
+        token = request.headers.get('Authorization')
+        if not token:
+            request.send_response(401)
+            request.send_header('Content-type', 'text/plain')
+            request.end_headers()
+            request.wfile.write(b"未授权")
+            return None
+        
+        # 验证 token...
+        
+        return handler(request, *args, **kwargs)
+    return wrapper
+
+# 应用中间件
+class MiddlewareHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == '/api':
+            self.api_handler()
+        else:
+            self.send_response(404)
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(b"404 Not Found")
+    
+    @logging_middleware
+    @auth_middleware
+    def api_handler(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/plain')
+        self.end_headers()
+        self.wfile.write(b"API 响应")
+
+# 启动服务器
+server = HTTPServer(('', 8000), MiddlewareHandler)
+server.serve_forever()
+
+# 使用类实现中间件（WSGI风格）
+class LoggingMiddleware:
+    def __init__(self, app):
+        self.app = app
+    
+    def __call__(self, environ, start_response):
+        start = time.time()
+        print(f"开始处理 {environ['REQUEST_METHOD']} {environ['PATH_INFO']}")
+        
+        response = self.app(environ, start_response)
+        
+        print(f"完成处理 {environ['REQUEST_METHOD']} {environ['PATH_INFO']}，耗时 {time.time() - start:.4f}秒")
+        return response
+
+# WSGI应用示例
+def application(environ, start_response):
+    start_response('200 OK', [('Content-Type', 'text/plain')])
+    return [b'Hello, World!']
+
+# 应用中间件
+app = LoggingMiddleware(application)</code></pre>
+                </div>
+            </div>
+
+            <h4>主要区别</h4>
+            <ul>
+                <li>Go 使用函数包装实现中间件；Python 可以使用装饰器或类</li>
+                <li>Go 的中间件通常是函数链；Python 可以使用装饰器堆叠</li>
+                <li>Python 的 WSGI 规范提供了标准化的中间件接口；Go 没有类似标准</li>
+                <li>两种语言的中间件概念相似，但实现方式不同</li>
+            </ul>
+
+            <h3 id="request-response">请求响应处理</h3>
+            <p>处理 HTTP 请求和生成响应是 Web 开发的核心。</p>
+
+            <div class="code-comparison">
+                <div class="code-block">
+                    <div class="code-title">Go</div>
+                    <pre><code class="language-go">package main
+
+import (
+    "encoding/json"
+    "fmt"
+    "io/ioutil"
+    "net/http"
+    "strconv"
+)
+
+// 处理查询参数
+func queryParamsHandler(w http.ResponseWriter, r *http.Request) {
+    // 获取查询参数
+    query := r.URL.Query()
+    name := query.Get("name")
+    ageStr := query.Get("age")
+    
+    age, err := strconv.Atoi(ageStr)
+    if err != nil {
+        age = 0
+    }
+    
+    fmt.Fprintf(w, "Name: %s, Age: %d", name, age)
+}
+
+// 处理表单数据
+func formHandler(w http.ResponseWriter, r *http.Request) {
+    // 解析表单
+    err := r.ParseForm()
+    if err != nil {
+        http.Error(w, "解析表单失败", http.StatusBadRequest)
+        return
+    }
+    
+    // 获取表单字段
+    username := r.FormValue("username")
+    password := r.FormValue("password")
+    
+    fmt.Fprintf(w, "Username: %s, Password: %s", username, password)
+}
+
+// 处理 JSON 请求
+type User struct {
+    Name  string `json:"name"`
+    Email string `json:"email"`
+    Age   int    `json:"age"`
+}
+
+func jsonHandler(w http.ResponseWriter, r *http.Request) {
+    // 检查方法
+    if r.Method != http.MethodPost {
+        http.Error(w, "只支持 POST 方法", http.StatusMethodNotAllowed)
+        return
+    }
+    
+    // 读取请求体
+    body, err := ioutil.ReadAll(r.Body)
+    if err != nil {
+        http.Error(w, "读取请求体失败", http.StatusBadRequest)
+        return
+    }
+    defer r.Body.Close()
+    
+    // 解析 JSON
+    var user User
+    err = json.Unmarshal(body, &user)
+    if err != nil {
+        http.Error(w, "解析 JSON 失败", http.StatusBadRequest)
+        return
+    }
+    
+    // 返回 JSON 响应
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(http.StatusCreated)
+    
+    response := map[string]interface{}{
+        "message": "用户创建成功",
+        "user": user,
+    }
+    
+    json.NewEncoder(w).Encode(response)
+}
+
+// 处理文件上传
+func uploadHandler(w http.ResponseWriter, r *http.Request) {
+    // 解析多部分表单
+    err := r.ParseMultipartForm(10 << 20) // 10 MB
+    if err != nil {
+        http.Error(w, "解析表单失败", http.StatusBadRequest)
+        return
+    }
+    
+    // 获取上传的文件
+    file, handler, err := r.FormFile("file")
+    if err != nil {
+        http.Error(w, "获取文件失败", http.StatusBadRequest)
+        return
+    }
+    defer file.Close()
+    
+    // 保存文件
+    fileBytes, err := ioutil.ReadAll(file)
+    if err != nil {
+        http.Error(w, "读取文件失败", http.StatusInternalServerError)
+        return
+    }
+    
+    err = ioutil.WriteFile("uploads/"+handler.Filename, fileBytes, 0644)
+    if err != nil {
+        http.Error(w, "保存文件失败", http.StatusInternalServerError)
+        return
+    }
+    
+    fmt.Fprintf(w, "文件上传成功: %s, 大小: %d bytes", handler.Filename, handler.Size)
+}</code></pre>
+                </div>
+                <div class="code-block">
+                    <div class="code-title">Python</div>
+                    <pre><code class="language-python">from http.server import HTTPServer, BaseHTTPRequestHandler
+import json
+import cgi
+import os
+from urllib.parse import parse_qs
+
+# 处理查询参数
+def query_params_handler(request):
+    # 解析查询字符串
+    query = parse_qs(request.path.split('?')[1]) if '?' in request.path else {}
+    
+    name = query.get('name', [''])[0]
+    age = query.get('age', ['0'])[0]
+    
+    try:
+        age = int(age)
+    except ValueError:
+        age = 0
+    
+    request.send_response(200)
+    request.send_header('Content-type', 'text/plain')
+    request.end_headers()
+    request.wfile.write(f"Name: {name}, Age: {age}".encode())
+
+# 处理表单数据
+def form_handler(request):
+    content_type = request.headers.get('Content-Type', '')
+    
+    if 'application/x-www-form-urlencoded' in content_type:
+        content_length = int(request.headers.get('Content-Length', 0))
+        form_data = request.rfile.read(content_length).decode('utf-8')
+        form = parse_qs(form_data)
+        
+        username = form.get('username', [''])[0]
+        password = form.get('password', [''])[0]
+        
+        request.send_response(200)
+        request.send_header('Content-type', 'text/plain')
+        request.end_headers()
+        request.wfile.write(f"Username: {username}, Password: {password}".encode())
+    else:
+        request.send_response(400)
+        request.send_header('Content-type', 'text/plain')
+        request.end_headers()
+        request.wfile.write(b"不支持的内容类型")
+
+# 处理 JSON 请求
+def json_handler(request):
+    if request.command != 'POST':
+        request.send_response(405)
+        request.send_header('Content-type', 'text/plain')
+        request.end_headers()
+        request.wfile.write(b"只支持 POST 方法")
+        return
+    
+    content_length = int(request.headers.get('Content-Length', 0))
+    body = request.rfile.read(content_length).decode('utf-8')
+    
+    try:
+        user = json.loads(body)
+        
+        response = {
+            "message": "用户创建成功",
+            "user": user
+        }
+        
+        request.send_response(201)
+        request.send_header('Content-type', 'application/json')
+        request.end_headers()
+        request.wfile.write(json.dumps(response).encode())
+    except json.JSONDecodeError:
+        request.send_response(400)
+        request.send_header('Content-type', 'text/plain')
+        request.end_headers()
+        request.wfile.write(b"解析 JSON 失败")
+
+# 处理文件上传
+def upload_handler(request):
+    if request.command != 'POST':
+        request.send_response(405)
+        request.send_header('Content-type', 'text/plain')
+        request.end_headers()
+        request.wfile.write(b"只支持 POST 方法")
+        return
+    
+    content_type = request.headers.get('Content-Type', '')
+    
+    if not content_type.startswith('multipart/form-data'):
+        request.send_response(400)
+        request.send_header('Content-type', 'text/plain')
+        request.end_headers()
+        request.wfile.write(b"不支持的内容类型")
+        return
+    
+    form = cgi.FieldStorage(
+        fp=request.rfile,
+        headers=request.headers,
+        environ={'REQUEST_METHOD': 'POST'}
+    )
+    
+    if 'file' not in form:
+        request.send_response(400)
+        request.send_header('Content-type', 'text/plain')
+        request.end_headers()
+        request.wfile.write(b"没有找到文件")
+        return
+    
+    file_item = form['file']
+    
+    # 确保上传目录存在
+    os.makedirs('uploads', exist_ok=True)
+    
+    # 保存文件
+    file_path = os.path.join('uploads', os.path.basename(file_item.filename))
+    with open(file_path, 'wb') as f:
+        f.write(file_item.file.read())
+    
+    request.send_response(200)
+    request.send_header('Content-type', 'text/plain')
+    request.end_headers()
+    request.wfile.write(f"文件上传成功: {file_item.filename}, 大小: {len(file_item.value)} bytes".encode())
+
+# 路由处理器
+class RequestHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        if self.path.startswith('/query'):
+            query_params_handler(self)
+        else:
+            self.send_response(404)
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(b"404 Not Found")
+    
+    def do_POST(self):
+        if self.path == '/form':
+            form_handler(self)
+        elif self.path == '/json':
+            json_handler(self)
+        elif self.path == '/upload':
+            upload_handler(self)
+        else:
+            self.send_response(404)
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(b"404 Not Found")
+
+# 启动服务器
+server = HTTPServer(('', 8000), RequestHandler)
+server.serve_forever()</code></pre>
+                </div>
+            </div>
+
+            <h4>主要区别</h4>
+            <ul>
+                <li>Go 的 http 包提供了更高级的 API 处理请求和响应；Python 的 http.server 更底层</li>
+                <li>Go 有内置的表单解析功能；Python 需要手动解析或使用 cgi 模块</li>
+                <li>Go 的 JSON 处理使用结构体标签；Python 直接使用字典</li>
+                <li>两种语言处理文件上传的方式类似，但 Go 的 API 更简洁</li>
+                <li>实际开发中，两种语言都通常使用框架来简化请求响应处理</li>
+            </ul>
+
+            <div class="note">
+                <p><strong>注意：</strong> 上述 Python 示例使用了底层的 http.server，实际开发中通常使用更高级的框架如 Flask 或 FastAPI。</p>
+            </div>
+        </section>
+
+        <section id="frameworks">
+            <h2>框架学习</h2>
+            <p>本章节将介绍 Flask 基础入门，并对比 FastAPI 和 Gin 框架。</p>
+
+            <h3 id="flask-basics">Flask 基础入门</h3>
+            <p>Flask 是 Python 中最流行的轻量级 Web 框架之一，以其简单性和灵活性著称。</p>
+
+            <div class="code-block">
+                <div class="code-title">Flask 基础示例</div>
+                <pre><code class="language-python"># 安装 Flask
+# pip install flask
+
+from flask import Flask, request, jsonify, render_template
+
+# 创建 Flask 应用
+app = Flask(__name__)
+
+# 基本路由
+@app.route('/')
+def home():
+    return 'Hello, Flask!'
+
+# 带参数的路由
+@app.route('/users/<int:user_id>')
+def get_user(user_id):
+    return f'用户ID: {user_id}'
+
+# 支持多种 HTTP 方法
+@app.route('/api/users', methods=['GET', 'POST'])
+def users():
+    if request.method == 'GET':
+        # 返回所有用户
+        return jsonify([
+            {'id': 1, 'name': '张三'},
+            {'id': 2, 'name': '李四'}
+        ])
+    elif request.method == 'POST':
+        # 创建新用户
+        user_data = request.json
+        # 处理用户数据...
+        return jsonify({'message': '用户创建成功', 'user': user_data}), 201
+
+# 查询参数
+@app.route('/search')
+def search():
+    query = request.args.get('q', '')
+    return f'搜索: {query}'
+
+# 渲染模板
+@app.route('/hello/<name>')
+def hello(name):
+    return render_template('hello.html', name=name)
+
+# 错误处理
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+# 启动应用
+if __name__ == '__main__':
+    app.run(debug=True)</code></pre>
+            </div>
+
+            <h4>Flask 的主要特点</h4>
+            <ul>
+                <li>轻量级和简单易学</li>
+                <li>灵活性高，可以根据需要添加扩展</li>
+                <li>内置开发服务器和调试器</li>
+                <li>使用 Jinja2 模板引擎</li>
+                <li>支持 RESTful 请求调度</li>
+                <li>内置单元测试支持</li>
+                <li>与 WSGI 兼容</li>
+            </ul>
+
+            <h4>Flask 常用扩展</h4>
+            <ul>
+                <li><strong>Flask-SQLAlchemy</strong>: 数据库 ORM</li>
+                <li><strong>Flask-Migrate</strong>: 数据库迁移</li>
+                <li><strong>Flask-WTF</strong>: 表单处理</li>
+                <li><strong>Flask-Login</strong>: 用户会话管理</li>
+                <li><strong>Flask-RESTful</strong>: REST API 构建</li>
+                <li><strong>Flask-JWT-Extended</strong>: JWT 认证</li>
+            </ul>
+
+            <h3 id="fastapi-gin">FastAPI vs Gin 对比</h3>
+            <p>FastAPI 和 Gin 分别是 Python 和 Go 中现代、高性能的 Web 框架。</p>
+
+            <div class="code-comparison">
+                <div class="code-block">
+                    <div class="code-title">Gin (Go)</div>
+                    <pre><code class="language-go">package main
+
+import (
+    "net/http"
+    "github.com/gin-gonic/gin"
+)
+
+// 用户模型
+type User struct {
+    ID   int    `json:"id"`
+    Name string `json:"name"`
+    Age  int    `json:"age"`
+}
+
+func main() {
+    // 创建默认的 gin 路由器
+    r := gin.Default()
+    
+    // 基本路由
+    r.GET("/", func(c *gin.Context) {
+        c.String(http.StatusOK, "Hello, Gin!")
+    })
+    
+    // 带参数的路由
+    r.GET("/users/:id", func(c *gin.Context) {
+        id := c.Param("id")
+        c.String(http.StatusOK, "用户ID: %s", id)
+    })
+    
+    // 查询参数
+    r.GET("/search", func(c *gin.Context) {
+        query := c.DefaultQuery("q", "")
+        c.String(http.StatusOK, "搜索: %s", query)
+    })
+    
+    // JSON 响应
+    r.GET("/api/users", func(c *gin.Context) {
+        users := []User{
+            {ID: 1, Name: "张三", Age: 30},
+            {ID: 2, Name: "李四", Age: 25},
+        }
+        c.JSON(http.StatusOK, users)
+    })
+    
+    // 处理 POST 请求
+    r.POST("/api/users", func(c *gin.Context) {
+        var user User
+        if err := c.ShouldBindJSON(&user); err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            return
+        }
+        
+        // 处理用户数据...
+        
+        c.JSON(http.StatusCreated, gin.H{
+            "message": "用户创建成功",
+            "user": user,
+        })
+    })
+    
+    // 分组路由
+    api := r.Group("/api")
+    {
+        api.GET("/products", getProducts)
+        api.POST("/products", createProduct)
+    }
+    
+    // 中间件
+    authorized := r.Group("/")
+    authorized.Use(AuthMiddleware())
+    {
+        authorized.GET("/admin", adminHandler)
+    }
+    
+    // 启动服务器
+    r.Run(":8080")
+}
+
+func getProducts(c *gin.Context) {
+    // 获取产品列表
+    c.JSON(http.StatusOK, gin.H{"products": []string{"产品1", "产品2"}})
+}
+
+func createProduct(c *gin.Context) {
+    // 创建产品
+    c.JSON(http.StatusCreated, gin.H{"message": "产品创建成功"})
+}
+
+func adminHandler(c *gin.Context) {
+    c.String(http.StatusOK, "管理员页面")
+}
+
+func AuthMiddleware() gin.HandlerFunc {
+    return func(c *gin.Context) {
+        token := c.GetHeader("Authorization")
+        if token == "" {
+            c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "未授权"})
+            return
+        }
+        
+        // 验证 token...
+        
+        c.Next()
+    }
+}</code></pre>
+                </div>
+                <div class="code-block">
+                    <div class="code-title">FastAPI (Python)</div>
+                    <pre><code class="language-python"># 安装 FastAPI
+# pip install fastapi uvicorn
+
+from fastapi import FastAPI, Path, Query, Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer
+from pydantic import BaseModel
+from typing import List, Optional
+
+# 创建 FastAPI 应用
+app = FastAPI()
+
+# 用户模型
+class User(BaseModel):
+    id: int
+    name: str
+    age: int
+
+# 基本路由
+@app.get("/")
+def read_root():
+    return "Hello, FastAPI!"
+
+# 带参数的路由
+@app.get("/users/{user_id}")
+def get_user(user_id: int = Path(..., description="用户的ID")):
+    return {"user_id": user_id}
+
+# 查询参数
+@app.get("/search")
+def search(q: Optional[str] = Query(None, description="搜索查询")):
+    return {"search": q}
+
+# JSON 响应
+@app.get("/api/users", response_model=List[User])
+def get_users():
+    users = [
+        User(id=1, name="张三", age=30),
+        User(id=2, name="李四", age=25)
+    ]
+    return users
+
+# 处理 POST 请求
+@app.post("/api/users", response_model=dict, status_code=201)
+def create_user(user: User):
+    # 处理用户数据...
+    return {
+        "message": "用户创建成功",
+        "user": user
+    }
+
+# 依赖注入
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    # 验证 token...
+    if token != "valid_token":
+        raise HTTPException(
+            status_code=401,
+            detail="无效的凭证",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return {"username": "current_user"}
+
+# 使用依赖
+@app.get("/admin")
+def admin(current_user: dict = Depends(get_current_user)):
+    return {"message": "管理员页面", "user": current_user}
+
+# 路由分组
+router = APIRouter(prefix="/api/products", tags=["products"])
+
+@router.get("/")
+def get_products():
+    return {"products": ["产品1", "产品2"]}
+
+@router.post("/", status_code=201)
+def create_product():
+    return {"message": "产品创建成功"}
+
+app.include_router(router)
+
+# 启动应用
+# uvicorn main:app --reload</code></pre>
+                </div>
+            </div>
+
+            <h4>框架对比</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>特性</th>
+                        <th>Gin (Go)</th>
+                        <th>FastAPI (Python)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>性能</td>
+                        <td>非常高（Go 语言优势）</td>
+                        <td>高（基于 Starlette，异步支持）</td>
+                    </tr>
+                    <tr>
+                        <td>类型系统</td>
+                        <td>静态类型</td>
+                        <td>使用 Pydantic 进行类型验证</td>
+                    </tr>
+                    <tr>
+                        <td>API 文档</td>
+                        <td>需要第三方工具</td>
+                        <td>内置 Swagger/OpenAPI 文档</td>
+                    </tr>
+                    <tr>
+                        <td>请求验证</td>
+                        <td>手动实现或使用第三方库</td>
+                        <td>内置（基于 Pydantic）</td>
+                    </tr>
+                    <tr>
+                        <td>依赖注入</td>
+                        <td>不内置，需要手动实现</td>
+                        <td>内置强大的依赖注入系统</td>
+                    </tr>
+                    <tr>
+                        <td>异步支持</td>
+                        <td>通过 goroutine 实现并发</td>
+                        <td>原生支持 async/await</td>
+                    </tr>
+                    <tr>
+                        <td>中间件</td>
+                        <td>内置中间件系统</td>
+                        <td>内置中间件系统</td>
+                    </tr>
+                    <tr>
+                        <td>社区生态</td>
+                        <td>成熟，插件较多</td>
+                        <td>快速增长，与 Python 生态集成</td>
+                    </tr>
+                    <tr>
+                        <td>学习曲线</td>
+                        <td>中等（需要了解 Go）</td>
+                        <td>低（Python 友好，文档详尽）</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 id="framework-choice">框架选择指南</h3>
+            <p>从 Go 转向 Python 进行 Web 开发时，框架的选择取决于多种因素。</p>
+
+            <h4>何时选择 Flask</h4>
+            <ul>
+                <li>需要一个轻量级、灵活的框架</li>
+                <li>项目规模较小或中等</li>
+                <li>需要高度定制化</li>
+                <li>喜欢简单直观的 API</li>
+                <li>需要大量现成的扩展</li>
+                <li>适合初学者入门</li>
+            </ul>
+
+            <h4>何时选择 FastAPI</h4>
+            <ul>
+                <li>需要高性能</li>
+                <li>构建 API 为主要目的</li>
+                <li>重视自动生成的 API 文档</li>
+                <li>需要内置的请求验证</li>
+                <li>希望使用 Python 的现代特性（类型提示、异步）</li>
+                <li>从 Go 的 Gin 迁移过来（概念相似）</li>
+            </ul>
+
+            <h4>其他值得考虑的 Python Web 框架</h4>
+            <ul>
+                <li><strong>Django</strong>: 全功能框架，内置 ORM、管理后台等</li>
+                <li><strong>Pyramid</strong>: 灵活性和 Flask 相似，但提供更多内置功能</li>
+                <li><strong>Tornado</strong>: 专注于异步处理和 WebSockets</li>
+                <li><strong>Sanic</strong>: 类 Flask API 的异步框架</li>
+                <li><strong>Starlette</strong>: FastAPI 的底层框架，更轻量</li>
+            </ul>
+
+            <div class="note">
+                <p><strong>从 Go 到 Python 的转换建议：</strong> 如果你熟悉 Gin，FastAPI 是最自然的选择，因为它们在设计理念和 API 风格上有相似之处。两者都专注于高性能和
+                    API 开发。如果你更喜欢简单和灵活性，Flask 是一个很好的选择。</p>
+            </div>
+        </section>
+
+        <section id="projects">
+            <h2>实践项目</h2>
+            <p>本章节将提供几个实践项目，包括简单 REST API、用户认证系统和数据库集成项目。</p>
+
+            <h3 id="rest-api">项目一：简单 REST API</h3>
+            <p>这个项目展示如何创建一个简单的 REST API，用于管理待办事项（Todo）。</p>
+
+            <div class="code-comparison">
+                <div class="code-block">
+                    <div class="code-title">Go (Gin)</div>
+                    <pre><code class="language-go">package main
+
+import (
+    "net/http"
+    "strconv"
+    "github.com/gin-gonic/gin"
+)
+
+// Todo 模型
+type Todo struct {
+    ID        int    `json:"id"`
+    Title     string `json:"title"`
+    Completed bool   `json:"completed"`
+}
+
+// 内存中的 Todo 存储
+var todos = []Todo{
+    {ID: 1, Title: "学习 Go", Completed: true},
+    {ID: 2, Title: "学习 Gin", Completed: false},
+}
+
+// 获取下一个 ID
+func getNextID() int {
+    return todos[len(todos)-1].ID + 1
+}
+
+func main() {
+    r := gin.Default()
+    
+    // CORS 中间件
+    r.Use(func(c *gin.Context) {
+        c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+        c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+        c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        
+        if c.Request.Method == "OPTIONS" {
+            c.AbortWithStatus(204)
+            return
+        }
+        
+        c.Next()
+    })
+    
+    // API 路由组
+    api := r.Group("/api")
+    {
+        // 获取所有 Todo
+        api.GET("/todos", func(c *gin.Context) {
+            c.JSON(http.StatusOK, todos)
+        })
+        
+        // 获取单个 Todo
+        api.GET("/todos/:id", func(c *gin.Context) {
+            idStr := c.Param("id")
+            id, err := strconv.Atoi(idStr)
+            if err != nil {
+                c.JSON(http.StatusBadRequest, gin.H{"error": "无效的 ID"})
+                return
+            }
+            
+            for _, todo := range todos {
+                if todo.ID == id {
+                    c.JSON(http.StatusOK, todo)
+                    return
+                }
+            }
+            
+            c.JSON(http.StatusNotFound, gin.H{"error": "Todo 未找到"})
+        })
+        
+        // 创建 Todo
+        api.POST("/todos", func(c *gin.Context) {
+            var newTodo Todo
+            if err := c.ShouldBindJSON(&newTodo); err != nil {
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+            }
+            
+            newTodo.ID = getNextID()
+            todos = append(todos, newTodo)
+            
+            c.JSON(http.StatusCreated, newTodo)
+        })
+        
+        // 更新 Todo
+        api.PUT("/todos/:id", func(c *gin.Context) {
+            idStr := c.Param("id")
+            id, err := strconv.Atoi(idStr)
+            if err != nil {
+                c.JSON(http.StatusBadRequest, gin.H{"error": "无效的 ID"})
+                return
+            }
+            
+            var updatedTodo Todo
+            if err := c.ShouldBindJSON(&updatedTodo); err != nil {
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+            }
+            
+            for i, todo := range todos {
+                if todo.ID == id {
+                    updatedTodo.ID = id
+                    todos[i] = updatedTodo
+                    c.JSON(http.StatusOK, updatedTodo)
+                    return
+                }
+            }
+            
+            c.JSON(http.StatusNotFound, gin.H{"error": "Todo 未找到"})
+        })
+        
+        // 删除 Todo
+        api.DELETE("/todos/:id", func(c *gin.Context) {
+            idStr := c.Param("id")
+            id, err := strconv.Atoi(idStr)
+            if err != nil {
+                c.JSON(http.StatusBadRequest, gin.H{"error": "无效的 ID"})
+                return
+            }
+            
+            for i, todo := range todos {
+                if todo.ID == id {
+                    todos = append(todos[:i], todos[i+1:]...)
+                    c.JSON(http.StatusOK, gin.H{"message": "Todo 已删除"})
+                    return
+                }
+            }
+            
+            c.JSON(http.StatusNotFound, gin.H{"error": "Todo 未找到"})
+        })
+    }
+    
+    r.Run(":8080")
+}</code></pre>
+                </div>
+                <div class="code-block">
+                    <div class="code-title">Python (FastAPI)</div>
+                    <pre><code class="language-python">from fastapi import FastAPI, HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import List, Optional
+
+app = FastAPI()
+
+# 启用 CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Todo 模型
+class Todo(BaseModel):
+    id: Optional[int] = None
+    title: str
+    completed: bool = False
+
+# 内存中的 Todo 存储
+todos = [
+    Todo(id=1, title="学习 Python", completed=True),
+    Todo(id=2, title="学习 FastAPI", completed=False),
+]
+
+# 获取下一个 ID
+def get_next_id():
+    return todos[-1].id + 1 if todos else 1
+
+# 获取所有 Todo
+@app.get("/api/todos", response_model=List[Todo])
+def get_todos():
+    return todos
+
+# 获取单个 Todo
+@app.get("/api/todos/{todo_id}", response_model=Todo)
+def get_todo(todo_id: int):
+    for todo in todos:
+        if todo.id == todo_id:
+            return todo
+    raise HTTPException(status_code=404, detail="Todo 未找到")
+
+# 创建 Todo
+@app.post("/api/todos", response_model=Todo, status_code=201)
+def create_todo(todo: Todo):
+    new_todo = Todo(
+        id=get_next_id(),
+        title=todo.title,
+        completed=todo.completed
+    )
+    todos.append(new_todo)
+    return new_todo
+
+# 更新 Todo
+@app.put("/api/todos/{todo_id}", response_model=Todo)
+def update_todo(todo_id: int, updated_todo: Todo):
+    for i, todo in enumerate(todos):
+        if todo.id == todo_id:
+            updated_todo.id = todo_id
+            todos[i] = updated_todo
+            return updated_todo
+    raise HTTPException(status_code=404, detail="Todo 未找到")
+
+# 删除 Todo
+@app.delete("/api/todos/{todo_id}")
+def delete_todo(todo_id: int):
+    for i, todo in enumerate(todos):
+        if todo.id == todo_id:
+            todos.pop(i)
+            return {"message": "Todo 已删除"}
+    raise HTTPException(status_code=404, detail="Todo 未找到")
+
+# 启动命令: uvicorn main:app --reload</code></pre>
+                </div>
+            </div>
+
+            <h4>项目要点</h4>
+            <ul>
+                <li>两个框架都提供了简洁的路由定义方式</li>
+                <li>FastAPI 使用 Pydantic 模型进行数据验证，Gin 使用结构体标签</li>
+                <li>FastAPI 内置了 CORS 中间件，Gin 需要手动实现</li>
+                <li>FastAPI 使用异常处理错误，Gin 使用状态码和 JSON 响应</li>
+                <li>两个框架都支持路径参数和请求体解析</li>
+            </ul>
+
+            <h3 id="auth-system">项目二：用户认证系统</h3>
+            <p>这个项目展示如何实现基于 JWT 的用户认证系统。</p>
+
+            <div class="code-comparison">
+                <div class="code-block">
+                    <div class="code-title">Go (Gin + JWT)</div>
+                    <pre><code class="language-go">package main
+
+import (
+    "net/http"
+    "time"
+    "errors"
+    "github.com/gin-gonic/gin"
+    "github.com/golang-jwt/jwt/v4"
+    "golang.org/x/crypto/bcrypt"
+)
+
+// 密钥
+var jwtKey = []byte("your_secret_key")
+
+// 用户模型
+type User struct {
+    Username string `json:"username"`
+    Password string `json:"password,omitempty"`
+}
+
+// 存储用户（实际应用中应使用数据库）
+var users = map[string]string{
+    "admin": "$2a$10$rRtt0.rODUzTpRqJAUZOtuYwEQmZWO.rOQ1VcpGnYrc0iKAVoYl.m", // "password"
+}
+
+// JWT 声明
+type Claims struct {
+    Username string `json:"username"`
+    jwt.RegisteredClaims
+}
+
+// 登录请求
+type LoginRequest struct {
+    Username string `json:"username" binding:"required"`
+    Password string `json:"password" binding:"required"`
+}
+
+// 生成 JWT
+func generateToken(username string) (string, error) {
+    expirationTime := time.Now().Add(24 * time.Hour)
+    claims := &Claims{
+        Username: username,
+        RegisteredClaims: jwt.RegisteredClaims{
+            ExpiresAt: jwt.NewNumericDate(expirationTime),
+        },
+    }
+    
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+    tokenString, err := token.SignedString(jwtKey)
+    
+    return tokenString, err
+}
+
+// 验证 JWT
+func validateToken(tokenString string) (*Claims, error) {
+    claims := &Claims{}
+    
+    token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+        return jwtKey, nil
+    })
+    
+    if err != nil {
+        return nil, err
+    }
+    
+    if !token.Valid {
+        return nil, errors.New("无效的 token")
+    }
+    
+    return claims, nil
+}
+
+// 认证中间件
+func authMiddleware() gin.HandlerFunc {
+    return func(c *gin.Context) {
+        authHeader := c.GetHeader("Authorization")
+        if authHeader == "" {
+            c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "未提供认证 token"})
+            return
+        }
+        
+        // 假设格式为 "Bearer {token}"
+        tokenString := authHeader[7:]
+        
+        claims, err := validateToken(tokenString)
+        if err != nil {
+            c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "无效的 token"})
+            return
+        }
+        
+        // 将用户信息存储在上下文中
+        c.Set("username", claims.Username)
+        c.Next()
+    }
+}
+
+func main() {
+    r := gin.Default()
+    
+    // 注册路由
+    r.POST("/register", func(c *gin.Context) {
+        var user User
+        if err := c.ShouldBindJSON(&user); err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            return
+        }
+        
+        // 检查用户是否已存在
+        if _, exists := users[user.Username]; exists {
+            c.JSON(http.StatusConflict, gin.H{"error": "用户已存在"})
+            return
+        }
+        
+        // 哈希密码
+        hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+        if err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "密码哈希失败"})
+            return
+        }
+        
+        // 存储用户
+        users[user.Username] = string(hashedPassword)
+        
+        c.JSON(http.StatusCreated, gin.H{"message": "用户注册成功"})
+    })
+    
+    // 登录路由
+    r.POST("/login", func(c *gin.Context) {
+        var req LoginRequest
+        if err := c.ShouldBindJSON(&req); err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            return
+        }
+        
+        // 获取存储的密码
+        storedPassword, exists := users[req.Username]
+        if !exists {
+            c.JSON(http.StatusUnauthorized, gin.H{"error": "无效的用户名或密码"})
+            return
+        }
+        
+        // 验证密码
+        err := bcrypt.CompareHashAndPassword([]byte(storedPassword), []byte(req.Password))
+        if err != nil {
+            c.JSON(http.StatusUnauthorized, gin.H{"error": "无效的用户名或密码"})
+            return
+        }
+        
+        // 生成 token
+        token, err := generateToken(req.Username)
+        if err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "生成 token 失败"})
+            return
+        }
+        
+        c.JSON(http.StatusOK, gin.H{
+            "message": "登录成功",
+            "token": token,
+        })
+    })
+    
+    // 受保护的路由
+    protected := r.Group("/api")
+    protected.Use(authMiddleware())
+    {
+        protected.GET("/profile", func(c *gin.Context) {
+            username := c.GetString("username")
+            c.JSON(http.StatusOK, gin.H{
+                "message": "受保护的资源",
+                "username": username,
+            })
+        })
+    }
+    
+    r.Run(":8080")
+}</code></pre>
+                </div>
+                <div class="code-block">
+                    <div class="code-title">Python (FastAPI + JWT)</div>
+                    <pre><code class="language-python">from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from pydantic import BaseModel
+from passlib.context import CryptContext
+from jose import JWTError, jwt
+from datetime import datetime, timedelta
+from typing import Optional
+
+# 创建 FastAPI 应用
+app = FastAPI()
+
+# 密钥和算法
+SECRET_KEY = "your_secret_key"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 1440  # 24 小时
+
+# 密码上下文
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# OAuth2 密码 Bearer
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+# 用户模型
+class User(BaseModel):
+    username: str
+    disabled: Optional[bool] = None
+
+class UserInDB(User):
+    hashed_password: str
+
+# 令牌模型
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+# 令牌数据
+class TokenData(BaseModel):
+    username: Optional[str] = None
+
+# 用户数据库（实际应用中应使用数据库）
+users_db = {
+    "admin": {
+        "username": "admin",
+        "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",  # "password"
+        "disabled": False,
+    }
+}
+
+# 验证密码
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+# 获取密码哈希
+def get_password_hash(password):
+    return pwd_context.hash(password)
+
+# 获取用户
+def get_user(db, username: str):
+    if username in db:
+        user_dict = db[username]
+        return UserInDB(**user_dict)
+
+# 认证用户
+def authenticate_user(db, username: str, password: str):
+    user = get_user(db, username)
+    if not user:
+        return False
+    if not verify_password(password, user.hashed_password):
+        return False
+    return user
+
+# 创建访问令牌
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+# 获取当前用户
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="无效的认证凭证",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+    user = get_user(users_db, username=token_data.username)
+    if user is None:
+        raise credentials_exception
+    return user
+
+# 获取当前活跃用户
+async def get_current_active_user(current_user: User = Depends(get_current_user)):
+    if current_user.disabled:
+        raise HTTPException(status_code=400, detail="用户已禁用")
+    return current_user
+
+# 注册路由
+@app.post("/register", status_code=status.HTTP_201_CREATED)
+async def register(form_data: OAuth2PasswordRequestForm = Depends()):
+    if form_data.username in users_db:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="用户已存在"
+        )
+    
+    hashed_password = get_password_hash(form_data.password)
+    users_db[form_data.username] = {
+        "username": form_data.username,
+        "hashed_password": hashed_password,
+        "disabled": False,
+    }
+    
+    return {"message": "用户注册成功"}
+
+# 登录路由
+@app.post("/token", response_model=Token)
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = authenticate_user(users_db, form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="无效的用户名或密码",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+# 受保护的路由
+@app.get("/api/profile", response_model=dict)
+async def read_users_me(current_user: User = Depends(get_current_active_user)):
+    return {
+        "message": "受保护的资源",
+        "username": current_user.username
+    }
+
+# 启动命令: uvicorn main:app --reload</code></pre>
+                </div>
+            </div>
+
+            <h4>项目要点</h4>
+            <ul>
+                <li>两种实现都使用 JWT 进行身份验证</li>
+                <li>两种实现都使用密码哈希保护用户密码</li>
+                <li>FastAPI 提供了内置的 OAuth2 支持，Gin 需要手动实现</li>
+                <li>FastAPI 使用依赖注入系统获取当前用户，Gin 使用中间件和上下文</li>
+                <li>两种实现都有类似的路由结构：注册、登录和受保护的资源</li>
+            </ul>
+
+            <h3 id="database">项目三：数据库集成项目</h3>
+            <p>这个项目展示如何将 Web 应用与数据库集成。我们使用 SQLite 作为示例数据库。</p>
+
+            <div class="code-comparison">
+                <div class="code-block">
+                    <div class="code-title">Go (Gin + GORM)</div>
+                    <pre><code class="language-go">package main
+
+import (
+    "net/http"
+    "github.com/gin-gonic/gin"
+    "gorm.io/gorm"
+    "gorm.io/driver/sqlite"
+)
+
+// 产品模型
+type Product struct {
+    ID          uint    `json:"id" gorm:"primaryKey"`
+    Name        string  `json:"name" binding:"required"`
+    Description string  `json:"description"`
+    Price       float64 `json:"price" binding:"required"`
+    Stock       int     `json:"stock" binding:"required"`
+}
+
+// 数据库连接
+var DB *gorm.DB
+
+// 初始化数据库
+func initDB() {
+    var err error
+    DB, err = gorm.Open(sqlite.Open("products.db"), &gorm.Config{})
+    if err != nil {
+        panic("无法连接到数据库")
+    }
+    
+    // 自动迁移
+    DB.AutoMigrate(&Product{})
+    
+    // 添加一些示例数据
+    var count int64
+    DB.Model(&Product{}).Count(&count)
+    if count == 0 {
+        products := []Product{
+            {Name: "笔记本电脑", Description: "高性能笔记本", Price: 5999.99, Stock: 10},
+            {Name: "智能手机", Description: "最新款智能手机", Price: 3999.99, Stock: 20},
+        }
+        DB.Create(&products)
+    }
+}
+
+func main() {
+    // 初始化数据库
+    initDB()
+    
+    r := gin.Default()
+    
+    // 产品 API
+    api := r.Group("/api/products")
+    {
+        // 获取所有产品
+        api.GET("", func(c *gin.Context) {
+            var products []Product
+            result := DB.Find(&products)
+            if result.Error != nil {
+                c.JSON(http.StatusInternalServerError, gin.H{"error": "获取产品失败"})
+                return
+            }
+            
+            c.JSON(http.StatusOK, products)
+        })
+        
+        // 获取单个产品
+        api.GET("/:id", func(c *gin.Context) {
+            var product Product
+            result := DB.First(&product, c.Param("id"))
+            if result.Error != nil {
+                c.JSON(http.StatusNotFound, gin.H{"error": "产品未找到"})
+                return
+            }
+            
+            c.JSON(http.StatusOK, product)
+        })
+        
+        // 创建产品
+        api.POST("", func(c *gin.Context) {
+            var product Product
+            if err := c.ShouldBindJSON(&product); err != nil {
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+            }
+            
+            result := DB.Create(&product)
+            if result.Error != nil {
+                c.JSON(http.StatusInternalServerError, gin.H{"error": "创建产品失败"})
+                return
+            }
+            
+            c.JSON(http.StatusCreated, product)
+        })
+        
+        // 更新产品
+        api.PUT("/:id", func(c *gin.Context) {
+            var product Product
+            result := DB.First(&product, c.Param("id"))
+            if result.Error != nil {
+                c.JSON(http.StatusNotFound, gin.H{"error": "产品未找到"})
+                return
+            }
+            
+            if err := c.ShouldBindJSON(&product); err != nil {
+                c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+            }
+            
+            DB.Save(&product)
+            c.JSON(http.StatusOK, product)
+        })
+        
+        // 删除产品
+        api.DELETE("/:id", func(c *gin.Context) {
+            var product Product
+            result := DB.First(&product, c.Param("id"))
+            if result.Error != nil {
+                c.JSON(http.StatusNotFound, gin.H{"error": "产品未找到"})
+                return
+            }
+            
+            DB.Delete(&product)
+            c.JSON(http.StatusOK, gin.H{"message": "产品已删除"})
+        })
+    }
+    
+    r.Run(":8080")
+}</code></pre>
+                </div>
+                <div class="code-block">
+                    <div class="code-title">Python (FastAPI + SQLAlchemy)</div>
+                    <pre><code class="language-python">from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy import create_engine, Column, Integer, String, Float
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, Session
+from pydantic import BaseModel
+from typing import List, Optional
+
+# 创建 FastAPI 应用
+app = FastAPI()
+
+# 数据库配置
+SQLALCHEMY_DATABASE_URL = "sqlite:///./products.db"
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+# 产品模型 (SQLAlchemy)
+class ProductModel(Base):
+    __tablename__ = "products"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    description = Column(String)
+    price = Column(Float)
+    stock = Column(Integer)
+
+# 创建表
+Base.metadata.create_all(bind=engine)
+
+# 产品模型 (Pydantic)
+class ProductBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+    price: float
+    stock: int
+
+class ProductCreate(ProductBase):
+    pass
+
+class Product(ProductBase):
+    id: int
+    
+    class Config:
+        orm_mode = True
+
+# 依赖项
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# 添加示例数据
+def add_sample_data():
+    db = SessionLocal()
+    count = db.query(ProductModel).count()
+    if count == 0:
+        products = [
+            ProductModel(name="笔记本电脑", description="高性能笔记本", price=5999.99, stock=10),
+            ProductModel(name="智能手机", description="最新款智能手机", price=3999.99, stock=20),
+        ]
+        db.add_all(products)
+        db.commit()
+    db.close()
+
+# 添加示例数据
+add_sample_data()
+
+# 获取所有产品
+@app.get("/api/products", response_model=List[Product])
+def get_products(db: Session = Depends(get_db)):
+    products = db.query(ProductModel).all()
+    return products
+
+# 获取单个产品
+@app.get("/api/products/{product_id}", response_model=Product)
+def get_product(product_id: int, db: Session = Depends(get_db)):
+    product = db.query(ProductModel).filter(ProductModel.id == product_id).first()
+    if product is None:
+        raise HTTPException(status_code=404, detail="产品未找到")
+    return product
+
+# 创建产品
+@app.post("/api/products", response_model=Product, status_code=201)
+def create_product(product: ProductCreate, db: Session = Depends(get_db)):
+    db_product = ProductModel(**product.dict())
+    db.add(db_product)
+    db.commit()
+    db.refresh(db_product)
+    return db_product
+
+# 更新产品
+@app.put("/api/products/{product_id}", response_model=Product)
+def update_product(product_id: int, product: ProductCreate, db: Session = Depends(get_db)):
+    db_product = db.query(ProductModel).filter(ProductModel.id == product_id).first()
+    if db_product is None:
+        raise HTTPException(status_code=404, detail="产品未找到")
+    
+    for key, value in product.dict().items():
+        setattr(db_product, key, value)
+    
+    db.commit()
+    db.refresh(db_product)
+    return db_product
+
+# 删除产品
+@app.delete("/api/products/{product_id}")
+def delete_product(product_id: int, db: Session = Depends(get_db)):
+    db_product = db.query(ProductModel).filter(ProductModel.id == product_id).first()
+    if db_product is None:
+        raise HTTPException(status_code=404, detail="产品未找到")
+    
+    db.delete(db_product)
+    db.commit()
+    return {"message": "产品已删除"}
+
+# 启动命令: uvicorn main:app --reload</code></pre>
+                </div>
+            </div>
+
+            <h4>项目要点</h4>
+            <ul>
+                <li>Go 使用 GORM 作为 ORM，Python 使用 SQLAlchemy</li>
+                <li>两种实现都提供了完整的 CRUD 操作</li>
+                <li>FastAPI 使用依赖注入管理数据库会话，Gin 使用全局变量</li>
+                <li>FastAPI 使用 Pydantic 模型进行数据验证，GORM 使用结构体标签</li>
+                <li>两种实现都支持自动迁移和初始数据填充</li>
+            </ul>
+
+            <div class="note">
+                <p><strong>注意：</strong> 在实际应用中，应该使用更安全的数据库配置，包括连接池、事务管理和适当的错误处理。</p>
+            </div>
+        </section>
+
+        <section id="best-practices">
+            <h2>最佳实践</h2>
+            <p>本章节将介绍 Python Web 开发的最佳实践，包括项目结构、测试策略、性能优化和部署方案。</p>
+
+            <h3 id="project-structure">项目结构对比</h3>
+            <p>Go 和 Python 的项目结构有一些差异，但也有共通之处。</p>
+
+            <div class="code-comparison">
+                <div class="code-block">
+                    <div class="code-title">Go 项目结构</div>
+                    <pre><code class="language-text">my-go-project/
+├── cmd/                  # 应用程序入口点
+│   └── server/
+│       └── main.go       # 主程序
+├── internal/             # 私有应用程序代码
+│   ├── api/              # API 处理器
+│   ├── config/           # 配置
+│   ├── middleware/       # 中间件
+│   ├── models/           # 数据模型
+│   ├── repository/       # 数据访问层
+│   └── service/          # 业务逻辑
+├── pkg/                  # 可重用的公共库
+│   ├── auth/             # 认证相关
+│   └── utils/            # 工具函数
+├── web/                  # Web 资源
+│   ├── static/           # 静态文件
+│   └── templates/        # 模板
+├── go.mod                # 依赖管理
+├── go.sum                # 依赖校验和
+├── Makefile              # 构建脚本
+└── README.md             # 项目文档</code></pre>
+                </div>
+                <div class="code-block">
+                    <div class="code-title">Python 项目结构</div>
+                    <pre><code class="language-text">my-python-project/
+├── app/                  # 应用程序包
+│   ├── __init__.py       # 包初始化
+│   ├── api/              # API 路由
+│   │   └── __init__.py
+│   ├── config/           # 配置
+│   │   └── __init__.py
+│   ├── models/           # 数据模型
+│   │   └── __init__.py
+│   ├── services/         # 业务逻辑
+│   │   └── __init__.py
+│   └── utils/            # 工具函数
+│       └── __init__.py
+├── static/               # 静态文件
+├── templates/            # 模板
+├── tests/                # 测试
+│   └── __init__.py
+├── .env                  # 环境变量
+├── .gitignore            # Git 忽略文件
+├── main.py               # 应用入口点
+├── requirements.txt      # 依赖管理
+└── README.md             # 项目文档</code></pre>
+                </div>
+            </div>
+
+            <h4>主要区别</h4>
+            <ul>
+                <li>Go 使用 go.mod 管理依赖；Python 使用 requirements.txt 或 pyproject.toml</li>
+                <li>Go 项目通常按功能组织；Python 项目可以按功能或按类型组织</li>
+                <li>Go 使用 internal 目录表示私有代码；Python 使用下划线前缀</li>
+                <li>Python 需要 __init__.py 文件定义包；Go 不需要</li>
+                <li>Go 通常将可执行文件放在 cmd 目录；Python 通常使用 main.py 或 app.py</li>
+            </ul>
+
+            <h3 id="testing">测试策略</h3>
+            <p>测试是确保代码质量的关键部分。Go 和 Python 都有强大的测试框架。</p>
+
+            <div class="code-comparison">
+                <div class="code-block">
+                    <div class="code-title">Go 测试</div>
+                    <pre><code class="language-go">package handlers
+
+import (
+    "net/http"
+    "net/http/httptest"
+    "testing"
+    "encoding/json"
+    "bytes"
+)
+
+func TestGetUsers(t *testing.T) {
+    // 创建请求
+    req, err := http.NewRequest("GET", "/api/users", nil)
+    if err != nil {
+        t.Fatal(err)
+    }
+    
+    // 创建响应记录器
+    rr := httptest.NewRecorder()
+    handler := http.HandlerFunc(GetUsers)
+    
+    // 执行请求
+    handler.ServeHTTP(rr, req)
+    
+    // 检查状态码
+    if status := rr.Code; status != http.StatusOK {
+        t.Errorf("处理程序返回了错误的状态码: got %v want %v",
+            status, http.StatusOK)
+    }
+    
+    // 检查响应体
+    var users []User
+    err = json.Unmarshal(rr.Body.Bytes(), &users)
+    if err != nil {
+        t.Fatal(err)
+    }
+    
+    if len(users) != 2 {
+        t.Errorf("期望用户数量为 2，但得到 %d", len(users))
+    }
+}
+
+// 表格驱动测试
+func TestCalculate(t *testing.T) {
+    tests := []struct {
+        name     string
+        a, b     int
+        expected int
+    }{
+        {"正数", 2, 3, 5},
+        {"负数", -2, -3, -5},
+        {"混合", 2, -3, -1},
+    }
+    
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            result := Calculate(tt.a, tt.b)
+            if result != tt.expected {
+                t.Errorf("Calculate(%d, %d) = %d; 期望 %d",
+                    tt.a, tt.b, result, tt.expected)
+            }
+        })
+    }
+}
+
+// 运行测试: go test ./...</code></pre>
+                </div>
+                <div class="code-block">
+                    <div class="code-title">Python 测试 (pytest)</div>
+                    <pre><code class="language-python">import pytest
+from fastapi.testclient import TestClient
+from app.main import app
+
+client = TestClient(app)
+
+def test_get_users():
+    # 发送请求
+    response = client.get("/api/users")
+    
+    # 检查状态码
+    assert response.status_code == 200
+    
+    # 检查响应体
+    users = response.json()
+    assert len(users) == 2
+    assert users[0]["name"] == "张三"
+
+# 参数化测试
+@pytest.mark.parametrize("a,b,expected", [
+    (2, 3, 5),    # 正数
+    (-2, -3, -5), # 负数
+    (2, -3, -1),  # 混合
+])
+def test_calculate(a, b, expected):
+    from app.utils import calculate
+    result = calculate(a, b)
+    assert result == expected
+
+# 夹具 (Fixtures)
+@pytest.fixture
+def db_session():
+    # 设置测试数据库
+    from app.database import get_db
+    db = next(get_db())
+    
+    # 添加测试数据
+    db.execute("INSERT INTO users (name) VALUES ('测试用户')")
+    db.commit()
+    
+    yield db
+    
+    # 清理测试数据
+    db.execute("DELETE FROM users")
+    db.commit()
+
+def test_create_user(db_session):
+    response = client.post(
+        "/api/users",
+        json={"name": "新用户", "email": "user@example.com"}
+    )
+    assert response.status_code == 201
+    assert response.json()["name"] == "新用户"
+
+# 运行测试: pytest</code></pre>
+                </div>
+            </div>
+
+            <h4>主要区别</h4>
+            <ul>
+                <li>Go 使用内置的 testing 包；Python 通常使用 pytest</li>
+                <li>Python 的 pytest 提供了更丰富的断言和夹具系统</li>
+                <li>Go 倾向于表格驱动测试；Python 使用参数化测试</li>
+                <li>Python 测试通常更简洁；Go 测试更明确</li>
+                <li>两种语言都支持模拟和测试覆盖率</li>
+            </ul>
+
+            <h3 id="deployment">部署方案</h3>
+            <p>将 Web 应用部署到生产环境需要考虑多种因素。</p>
+
+            <div class="code-comparison">
+                <div class="code-block">
+                    <div class="code-title">Go 部署</div>
+                    <pre><code class="language-bash"># 构建二进制文件
+go build -o app ./cmd/server
+
+# Dockerfile
+FROM golang:1.18 AS builder
+WORKDIR /app
+COPY . .
+RUN go mod download
+RUN CGO_ENABLED=0 GOOS=linux go build -o app ./cmd/server
+
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+WORKDIR /root/
+COPY --from=builder /app/app .
+COPY --from=builder /app/web ./web
+EXPOSE 8080
+CMD ["./app"]
+
+# Docker Compose
+version: '3'
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=db
+    depends_on:
+      - db
+  db:
+    image: postgres:14
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=user
+      - POSTGRES_DB=myapp</code></pre>
+                </div>
+                <div class="code-block">
+                    <div class="code-title">Python 部署</div>
+                    <pre><code class="language-bash"># 使用 Gunicorn 运行
+pip install gunicorn
+gunicorn -w 4 -k uvicorn.workers.UvicornWorker app.main:app
+
+# Dockerfile
+FROM python:3.9-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 8000
+CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "app.main:app", "-b", "0.0.0.0:8000"]
+
+# Docker Compose
+version: '3'
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/myapp
+    depends_on:
+      - db
+  db:
+    image: postgres:14
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=user
+      - POSTGRES_DB=myapp</code></pre>
+                </div>
+            </div>
+
+            <h4>部署最佳实践</h4>
+            <ul>
+                <li><strong>容器化</strong>: 两种语言都适合使用 Docker 容器化</li>
+                <li><strong>Go 优势</strong>: 编译为单一二进制文件，部署简单，资源占用少</li>
+                <li><strong>Python 注意点</strong>: 需要 WSGI/ASGI 服务器 (Gunicorn, uWSGI) 和应用服务器 (Uvicorn)</li>
+                <li><strong>环境变量</strong>: 使用环境变量存储配置和敏感信息</li>
+                <li><strong>健康检查</strong>: 实现健康检查端点监控应用状态</li>
+                <li><strong>日志</strong>: 配置结构化日志便于监控和调试</li>
+                <li><strong>数据库迁移</strong>: Go 使用工具如 golang-migrate，Python 使用 Alembic</li>
+            </ul>
+
+            <h3 id="performance">性能优化</h3>
+            <p>性能优化是 Web 应用开发的重要方面。</p>
+
+            <h4>Go 性能优化</h4>
+            <ul>
+                <li>利用 goroutines 进行并发处理</li>
+                <li>使用连接池管理数据库连接</li>
+                <li>实现缓存减少数据库查询</li>
+                <li>使用 pprof 进行性能分析</li>
+                <li>优化 JSON 序列化/反序列化</li>
+                <li>使用适当的数据结构和算法</li>
+            </ul>
+
+            <h4>Python 性能优化</h4>
+            <ul>
+                <li>使用异步 IO (asyncio) 处理 IO 密集型任务</li>
+                <li>使用 Cython 或 Numba 优化计算密集型代码</li>
+                <li>实现缓存 (Redis, Memcached)</li>
+                <li>使用连接池和会话管理</li>
+                <li>使用 profilers (cProfile, py-spy) 分析性能瓶颈</li>
+                <li>考虑使用 PyPy 解释器提高性能</li>
+            </ul>
+
+            <div class="note">
+                <p><strong>性能对比：</strong> Go 通常在原始性能上优于 Python，特别是在计算密集型任务上。但 Python 的生态系统提供了许多优化工具和技术，可以显著提高性能。对于大多数
+                    Web 应用，瓶颈通常在 I/O 操作而非语言本身。</p>
+            </div>
+
+            <h3 id="security">安全最佳实践</h3>
+            <p>无论使用哪种语言，Web 应用安全都是至关重要的。</p>
+
+            <ul>
+                <li><strong>输入验证</strong>: 验证所有用户输入，防止注入攻击</li>
+                <li><strong>认证与授权</strong>: 实现强大的认证系统和细粒度的权限控制</li>
+                <li><strong>HTTPS</strong>: 始终使用 HTTPS 加密传输数据</li>
+                <li><strong>密码存储</strong>: 使用强哈希算法 (bcrypt, Argon2) 存储密码</li>
+                <li><strong>CSRF 保护</strong>: 实现跨站请求伪造保护</li>
+                <li><strong>XSS 防御</strong>: 转义输出，使用 CSP 防止跨站脚本攻击</li>
+                <li><strong>依赖管理</strong>: 定期更新依赖，修复安全漏洞</li>
+                <li><strong>日志与监控</strong>: 记录安全事件，实施监控和告警</li>
+            </ul>
+
+            <h3 id="resources">学习资源</h3>
+            <p>以下是一些帮助你从 Go 转向 Python Web 开发的优质学习资源。</p>
+
+            <h4>Python 基础</h4>
+            <ul>
+                <li><a href="https://docs.python.org/zh-cn/3/tutorial/" target="_blank">Python 官方教程（中文）</a></li>
+                <li><a href="https://www.runoob.com/python3/python3-tutorial.html" target="_blank">Python3 菜鸟教程</a></li>
+                <li><a href="https://www.liaoxuefeng.com/wiki/1016959663602400" target="_blank">廖雪峰的 Python 教程</a></li>
+            </ul>
+
+            <h4>Web 框架</h4>
+            <ul>
+                <li><a href="https://flask.palletsprojects.com/zh_CN/latest/" target="_blank">Flask 官方文档（中文）</a></li>
+                <li><a href="https://fastapi.tiangolo.com/zh/" target="_blank">FastAPI 官方文档（中文）</a></li>
+                <li><a href="https://www.djangoproject.com/" target="_blank">Django 官方网站</a></li>
+            </ul>
+
+            <h4>数据库</h4>
+            <ul>
+                <li><a href="https://docs.sqlalchemy.org/en/14/" target="_blank">SQLAlchemy 文档</a></li>
+                <li><a href="https://www.sqlalchemy.org/library.html#tutorials" target="_blank">SQLAlchemy 教程</a></li>
+            </ul>
+
+            <h4>测试</h4>
+            <ul>
+                <li><a href="https://docs.pytest.org/en/latest/" target="_blank">pytest 文档</a></li>
+                <li><a href="https://docs.python.org/zh-cn/3/library/unittest.html" target="_blank">unittest 文档（中文）</a>
+                </li>
+            </ul>
+
+            <h4>部署</h4>
+            <ul>
+                <li><a href="https://www.uvicorn.org/" target="_blank">Uvicorn 文档</a></li>
+                <li><a href="https://docs.gunicorn.org/en/stable/" target="_blank">Gunicorn 文档</a></li>
+                <li><a href="https://uwsgi-docs.readthedocs.io/en/latest/" target="_blank">uWSGI 文档</a></li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Go 到 Python Web 开发教程</p>
+        </div>
+    </footer>
+
+    <!-- Prism.js 代码高亮 -->
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+    <!-- 代码复制功能 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // 为每个代码块添加复制按钮
+            const codeBlocks = document.querySelectorAll('.code-block pre');
+
+            codeBlocks.forEach(function (block) {
+                const copyButton = document.createElement('button');
+                copyButton.className = 'copy-button';
+                copyButton.innerHTML = '<i class="fas fa-copy"></i> 复制';
+
+                // 创建代码标题栏
+                const codeHeader = document.createElement('div');
+                codeHeader.className = 'code-header';
+
+                // 获取语言标题
+                const codeTitle = block.previousElementSibling;
+
+                // 重新组织 DOM 结构
+                block.parentNode.insertBefore(codeHeader, codeTitle);
+                codeHeader.appendChild(codeTitle);
+                codeHeader.appendChild(copyButton);
+
+                // 添加复制功能
+                copyButton.addEventListener('click', function () {
+                    const code = block.querySelector('code').innerText;
+                    navigator.clipboard.writeText(code).then(function () {
+                        copyButton.innerHTML = '<i class="fas fa-check"></i> 已复制';
+                        setTimeout(function () {
+                            copyButton.innerHTML = '<i class="fas fa-copy"></i> 复制';
+                        }, 2000);
+                    }).catch(function (err) {
+                        console.error('复制失败:', err);
+                        copyButton.innerHTML = '<i class="fas fa-times"></i> 复制失败';
+                        setTimeout(function () {
+                            copyButton.innerHTML = '<i class="fas fa-copy"></i> 复制';
+                        }, 2000);
+                    });
+                });
+            });
+
+            // 添加平滑滚动
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            // 添加返回顶部按钮
+            const backToTopButton = document.createElement('button');
+            backToTopButton.id = 'back-to-top';
+            backToTopButton.innerHTML = '<i class="fas fa-arrow-up"></i>';
+            document.body.appendChild(backToTopButton);
+
+            // 显示/隐藏返回顶部按钮
+            window.addEventListener('scroll', function () {
+                if (window.pageYOffset > 300) {
+                    backToTopButton.classList.add('show');
+                } else {
+                    backToTopButton.classList.remove('show');
+                }
+            });
+
+            // 返回顶部功能
+            backToTopButton.addEventListener('click', function () {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
