@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java 线程池入门指南</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.7;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #eef2f3 0%, #d9e4f5 100%);
+            color: #2c3e50;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #1b4f72;
+            margin-bottom: 10px;
+        }
+        h1 span {
+            font-size: 1.2rem;
+        }
+        p.lead {
+            text-align: center;
+            font-size: 1.1rem;
+            color: #5d6d7e;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #2874a6;
+            margin-top: 40px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #aed6f1;
+        }
+        h3 {
+            color: #1f618d;
+            margin-top: 25px;
+        }
+        ul, ol {
+            padding-left: 1.5rem;
+        }
+        li {
+            margin-bottom: 0.5rem;
+        }
+        code {
+            background-color: #f4f6f6;
+            color: #c0392b;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        pre {
+            background-color: #1b2631;
+            color: #f8f9f9;
+            padding: 18px;
+            border-radius: 10px;
+            overflow-x: auto;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+        .tip {
+            background: #ebf5fb;
+            border-left: 4px solid #3498db;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 20px 0;
+            color: #21618c;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            border: 1px solid #d6eaf8;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background: #3498db;
+            color: white;
+        }
+        tbody tr:nth-child(even) {
+            background: #f7fbff;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #85929e;
+            font-size: 0.9rem;
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>☕ Java 线程池入门 <span>(Executor 框架快速上手)</span></h1>
+        <p class="lead">理解线程池的核心概念、参数与最佳实践，帮助你写出更高效、更稳定的并发程序。</p>
+
+        <h2>1. 为什么需要线程池？</h2>
+        <p>频繁创建与销毁线程的开销巨大，线程数量不受控制还可能耗尽系统资源。线程池通过重用已创建的线程、统一调度任务、限制并发度，为程序提供了更优的性能和可控性。</p>
+        <div class="tip">
+            <strong>使用线程池的好处：</strong>
+            <ul>
+                <li>减少频繁创建线程带来的资源消耗。</li>
+                <li>通过队列和拒绝策略控制任务并发量。</li>
+                <li>统一配置线程名称、优先级、守护属性等。</li>
+                <li>为监控与故障排查提供统一入口。</li>
+            </ul>
+        </div>
+
+        <h2>2. Executor 框架概览</h2>
+        <p>JDK 5 之后引入了 <code>java.util.concurrent</code> 包，<code>Executor</code>、<code>ExecutorService</code> 和 <code>ThreadPoolExecutor</code> 构成了线程池的核心。</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>核心接口 / 类</th>
+                    <th>作用</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>Executor</code></td>
+                    <td>最基础的任务执行接口，定义了 <code>execute(Runnable)</code> 方法。</td>
+                </tr>
+                <tr>
+                    <td><code>ExecutorService</code></td>
+                    <td>扩展了任务提交、返回结果、关闭线程池等能力（如 <code>submit</code>、<code>shutdown</code>）。</td>
+                </tr>
+                <tr>
+                    <td><code>ThreadPoolExecutor</code></td>
+                    <td>线程池的核心实现类，提供丰富的构造参数与行为定制。</td>
+                </tr>
+                <tr>
+                    <td><code>Executors</code></td>
+                    <td>线程池工厂工具类，提供常见线程池的快捷创建方法。</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>3. 常见线程池类型</h2>
+        <p><code>Executors</code> 提供了一系列静态方法快速创建线程池，适合作为入门示例：</p>
+        <ul>
+            <li><code>Executors.newFixedThreadPool(n)</code>：固定线程数，适合控制并发数量的 CPU 密集型任务。</li>
+            <li><code>Executors.newCachedThreadPool()</code>：按需创建，适合大量短生命周期、轻量级任务。</li>
+            <li><code>Executors.newSingleThreadExecutor()</code>：单线程顺序执行，常用于串行任务或日志处理。</li>
+            <li><code>Executors.newScheduledThreadPool(n)</code>：支持延迟与周期性任务调度。</li>
+        </ul>
+        <div class="tip">
+            <strong>生产环境建议：</strong> 虽然 <code>Executors</code> 快捷方法使用方便，但它们通常使用无界队列或最大线程数，可能带来 OOM 风险。建议直接使用 <code>ThreadPoolExecutor</code> 并明确配置参数。
+        </div>
+
+        <h2>4. ThreadPoolExecutor 关键参数</h2>
+        <p><code>ThreadPoolExecutor</code> 的常用构造方法如下：</p>
+        <pre><code>public ThreadPoolExecutor(int corePoolSize,
+                          int maximumPoolSize,
+                          long keepAliveTime,
+                          TimeUnit unit,
+                          BlockingQueue&lt;Runnable&gt; workQueue,
+                          ThreadFactory threadFactory,
+                          RejectedExecutionHandler handler)</code></pre>
+        <h3>参数说明</h3>
+        <ul>
+            <li><strong>corePoolSize</strong>：核心线程数，线程池会尽量保持这些线程存活。</li>
+            <li><strong>maximumPoolSize</strong>：最大线程数，当队列满时会创建新线程直到达到上限。</li>
+            <li><strong>keepAliveTime + unit</strong>：非核心线程的空闲存活时间。</li>
+            <li><strong>workQueue</strong>：任务队列，用于缓存待执行的任务。</li>
+            <li><strong>threadFactory</strong>：定义线程创建方式（命名、优先级、是否守护线程等）。</li>
+            <li><strong>handler</strong>：拒绝策略，在任务无法被执行时触发。</li>
+        </ul>
+
+        <h2>5. 线程池的执行流程</h2>
+        <ol>
+            <li>线程池未达到 <code>corePoolSize</code> 时直接创建新线程处理任务。</li>
+            <li>达到核心线程数后，新任务会进入阻塞队列等待。</li>
+            <li>队列满且线程数未达到 <code>maximumPoolSize</code> 时，会继续创建线程。</li>
+            <li>若超过 <code>maximumPoolSize</code> 且队列也满，则触发拒绝策略。</li>
+        </ol>
+
+        <h2>6. 常见拒绝策略</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>策略</th>
+                    <th>行为</th>
+                    <th>适用场景</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>AbortPolicy</code></td>
+                    <td>抛出 <code>RejectedExecutionException</code>。</td>
+                    <td>默认策略，适合不允许丢任务的场景，配合调用方异常处理。</td>
+                </tr>
+                <tr>
+                    <td><code>CallerRunsPolicy</code></td>
+                    <td>由提交任务的线程直接执行任务。</td>
+                    <td>节流效果，常用于削峰，避免过载。</td>
+                </tr>
+                <tr>
+                    <td><code>DiscardPolicy</code></td>
+                    <td>静默丢弃任务。</td>
+                    <td>允许少量任务丢失的场景。</td>
+                </tr>
+                <tr>
+                    <td><code>DiscardOldestPolicy</code></td>
+                    <td>丢弃队列头部最旧的任务，然后尝试执行新任务。</td>
+                    <td>适用于对最新任务实时性要求更高的业务。</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>7. 创建一个自定义线程池</h2>
+        <pre><code>AtomicInteger threadNumber = new AtomicInteger(1);
+ThreadFactory threadFactory = runnable -&gt; {
+    Thread thread = new Thread(runnable);
+    thread.setName("worker-" + threadNumber.getAndIncrement());
+    thread.setDaemon(false);
+    return thread;
+};
+
+ThreadPoolExecutor executor = new ThreadPoolExecutor(
+        4,                       // 核心线程数
+        8,                       // 最大线程数
+        60L, TimeUnit.SECONDS,   // 空闲线程存活时间
+        new ArrayBlockingQueue&lt;&gt;(100),  // 有界队列
+        threadFactory,
+        new ThreadPoolExecutor.CallerRunsPolicy()  // 拒绝策略
+);
+</code></pre>
+        <p>通过自定义 <code>ThreadFactory</code>，可以统一线程命名与属性配置，方便定位日志或执行监控。示例中需引入 <code>java.util.concurrent.*</code> 与 <code>java.util.concurrent.atomic.AtomicInteger</code>。</p>
+
+        <h2>8. 提交任务与关闭线程池</h2>
+        <pre><code>ExecutorService pool = Executors.newFixedThreadPool(4);
+
+for (int i = 0; i &lt; 10; i++) {
+    final int taskId = i;
+    pool.submit(() -&gt; {
+        System.out.println(Thread.currentThread().getName() + " 执行任务 " + taskId);
+        try {
+            Thread.sleep(1000L);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    });
+}
+
+pool.shutdown();
+if (!pool.awaitTermination(30, TimeUnit.SECONDS)) {
+    pool.shutdownNow();
+}</code></pre>
+        <p class="tip">务必在业务结束后调用 <code>shutdown()</code> 或 <code>shutdownNow()</code>，否则 JVM 可能因线程未退出而无法停止。</p>
+
+        <h2>9. 监控与调优建议</h2>
+        <ul>
+            <li>通过 <code>ThreadPoolExecutor#getActiveCount()</code>、<code>getQueue().size()</code> 等方法实时观察运行状态。</li>
+            <li>在指标系统中采集任务耗时、队列长度、拒绝次数等指标。</li>
+            <li>根据任务性质（CPU 密集 / IO 密集）设置合理的核心线程数。</li>
+            <li>结合实际压测结果动态调整线程池参数，避免盲目套用固定配置。</li>
+        </ul>
+
+        <div class="footer">
+            最后更新：2024 年 —— 愿你写出稳定高效的并发程序！
+        </div>
+    </div>
+</body>
+</html>
+
