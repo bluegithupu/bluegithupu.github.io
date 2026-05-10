@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Superpowers 框架学习指南</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a24;
+            --bg-card-hover: #22222e;
+            --text-primary: #f0f0f5;
+            --text-secondary: #a0a0b0;
+            --text-muted: #6a6a7a;
+            --accent-purple: #a78bfa;
+            --accent-purple-dim: #7c5fcb;
+            --accent-blue: #60a5fa;
+            --accent-green: #34d399;
+            --accent-yellow: #fbbf24;
+            --accent-red: #f87171;
+            --accent-orange: #fb923c;
+            --border-color: #2a2a3a;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 80px 0 60px;
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 400px;
+            background: radial-gradient(ellipse, rgba(167, 139, 250, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .hero-badge span {
+            color: var(--accent-purple);
+        }
+
+        h1 {
+            font-size: 56px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+        }
+
+        .hero-subtitle {
+            font-size: 20px;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto 40px;
+        }
+
+        .hero-links {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .hero-links a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .hero-links a.primary {
+            background: var(--accent-purple);
+            color: white;
+        }
+
+        .hero-links a.primary:hover {
+            background: var(--accent-purple-dim);
+            transform: translateY(-2px);
+        }
+
+        .hero-links a.secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .hero-links a.secondary:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-purple);
+        }
+
+        /* Stats */
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin: 60px 0;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--accent-purple);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Philosophy Section */
+        .philosophy {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 48px;
+            margin: 40px 0;
+        }
+
+        .philosophy h2 {
+            font-size: 28px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .philosophy h2::before {
+            content: '◆';
+            color: var(--accent-purple);
+        }
+
+        .philosophy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .philosophy-item {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .philosophy-item:hover {
+            border-color: var(--accent-purple-dim);
+            transform: translateY(-2px);
+        }
+
+        .philosophy-item h3 {
+            font-size: 18px;
+            color: var(--accent-purple);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .philosophy-item p {
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+
+        /* Supported Agents */
+        .agents {
+            margin: 40px 0;
+        }
+
+        .agents h2 {
+            font-size: 28px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .agents h2::before {
+            content: '◆';
+            color: var(--accent-blue);
+        }
+
+        .agent-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .agent-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            font-size: 15px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .agent-item:hover {
+            border-color: var(--accent-blue);
+            color: var(--text-primary);
+        }
+
+        .agent-item::before {
+            content: '●';
+            color: var(--accent-green);
+            font-size: 10px;
+        }
+
+        /* Main Workflow */
+        .workflow {
+            margin: 60px 0;
+        }
+
+        .workflow h2 {
+            font-size: 28px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .workflow h2::before {
+            content: '◆';
+            color: var(--accent-green);
+        }
+
+        .workflow-steps {
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .workflow-steps::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--accent-purple), var(--accent-blue), var(--accent-green));
+        }
+
+        .workflow-step {
+            position: relative;
+            margin-bottom: 32px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 24px 28px;
+            transition: all 0.2s ease;
+        }
+
+        .workflow-step:hover {
+            border-color: var(--accent-purple-dim);
+        }
+
+        .workflow-step::before {
+            content: '';
+            position: absolute;
+            left: -33px;
+            top: 28px;
+            width: 16px;
+            height: 16px;
+            background: var(--bg-primary);
+            border: 3px solid var(--accent-purple);
+            border-radius: 50%;
+        }
+
+        .workflow-step:nth-child(2)::before { border-color: var(--accent-blue); }
+        .workflow-step:nth-child(3)::before { border-color: var(--accent-green); }
+        .workflow-step:nth-child(4)::before { border-color: var(--accent-yellow); }
+        .workflow-step:nth-child(5)::before { border-color: var(--accent-orange); }
+        .workflow-step:nth-child(6)::before { border-color: var(--accent-red); }
+        .workflow-step:nth-child(7)::before { border-color: var(--text-muted); }
+
+        .workflow-step h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .workflow-step h3 .step-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--accent-purple);
+            background: rgba(167, 139, 250, 0.1);
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+
+        .workflow-step p {
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+
+        .workflow-step .skill-link {
+            display: inline-block;
+            margin-top: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--accent-blue);
+            background: rgba(96, 165, 250, 0.1);
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .workflow-step .skill-link:hover {
+            background: rgba(96, 165, 250, 0.2);
+        }
+
+        /* Skills Grid */
+        .skills-section {
+            margin: 60px 0;
+        }
+
+        .skills-section > h2 {
+            font-size: 28px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .skills-section > h2::before {
+            content: '◆';
+            color: var(--accent-yellow);
+        }
+
+        .skill-category {
+            margin-bottom: 40px;
+        }
+
+        .skill-category h3 {
+            font-size: 20px;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .skill-category h3 .count {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .skill-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .skill-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            transition: all 0.2s ease;
+        }
+
+        .skill-card:hover {
+            border-color: var(--accent-purple-dim);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .skill-card h4 {
+            font-size: 17px;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .skill-card h4 code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--accent-purple);
+            background: rgba(167, 139, 250, 0.1);
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+        }
+
+        .skill-card p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .skill-card .key-point {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+            font-size: 13px;
+            color: var(--accent-green);
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .skill-card .key-point::before {
+            content: '✓';
+            flex-shrink: 0;
+        }
+
+        /* Architecture Diagram */
+        .architecture {
+            margin: 60px 0;
+        }
+
+        .architecture h2 {
+            font-size: 28px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .architecture h2::before {
+            content: '◆';
+            color: var(--accent-red);
+        }
+
+        .flow-diagram {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            overflow-x: auto;
+        }
+
+        .flow-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            min-width: 900px;
+        }
+
+        .flow-node {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px 24px;
+            text-align: center;
+            min-width: 140px;
+            transition: all 0.2s ease;
+        }
+
+        .flow-node:hover {
+            border-color: var(--accent-purple);
+            transform: translateY(-2px);
+        }
+
+        .flow-node.start {
+            border-color: var(--accent-purple);
+            background: rgba(167, 139, 250, 0.1);
+        }
+
+        .flow-node.end {
+            border-color: var(--accent-green);
+            background: rgba(52, 211, 153, 0.1);
+        }
+
+        .flow-node h5 {
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .flow-node span {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .flow-arrow {
+            color: var(--text-muted);
+            font-size: 20px;
+        }
+
+        /* Skill Relations */
+        .relations {
+            margin: 60px 0;
+        }
+
+        .relations h2 {
+            font-size: 28px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .relations h2::before {
+            content: '◆';
+            color: var(--accent-orange);
+        }
+
+        .relation-groups {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+        }
+
+        .relation-group {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 24px;
+        }
+
+        .relation-group h4 {
+            font-size: 16px;
+            color: var(--accent-blue);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .relation-list {
+            list-style: none;
+        }
+
+        .relation-list li {
+            padding: 8px 0;
+            color: var(--text-secondary);
+            font-size: 14px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .relation-list li:last-child {
+            border-bottom: none;
+        }
+
+        .relation-list li::before {
+            content: '→';
+            color: var(--accent-purple);
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 80px;
+            padding: 40px 0;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .footer a {
+            color: var(--accent-purple);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 36px;
+            }
+
+            .hero-subtitle {
+                font-size: 16px;
+            }
+
+            .stats {
+                gap: 30px;
+            }
+
+            .philosophy {
+                padding: 32px 24px;
+            }
+
+            .flow-container {
+                flex-direction: column;
+            }
+
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+
+            .relation-groups {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Code blocks */
+        pre, code {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .code-block {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            margin: 16px 0;
+            overflow-x: auto;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .code-block .keyword {
+            color: var(--accent-purple);
+        }
+
+        .code-block .string {
+            color: var(--accent-green);
+        }
+
+        .code-block .comment {
+            color: var(--text-muted);
+        }
+
+        /* Table */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 24px 0;
+        }
+
+        .info-table th,
+        .info-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+
+        .info-table th {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .info-table td {
+            color: var(--text-secondary);
+        }
+
+        .info-table tr:hover td {
+            background: var(--bg-card-hover);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-badge">
+                <span>★</span> Agentic Skills Framework
+            </div>
+            <h1>Superpowers</h1>
+            <p class="hero-subtitle">
+                一套赋能 AI 编码智能体的技能框架与软件开发方法论。
+                通过 TDD、系统化流程和证据优先的原则，让 AI 智能体成为更可靠的开发伙伴。
+            </p>
+            <div class="hero-links">
+                <a href="https://github.com/obra/superpowers" class="primary" target="_blank">
+                    <span>⚡</span> GitHub
+                </a>
+                <a href="https://github.com/obra/superpowers#readme" class="secondary" target="_blank">
+                    文档
+                </a>
+            </div>
+        </section>
+
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value">14</div>
+                <div class="stat-label">技能数量</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">7</div>
+                <div class="stat-label">核心流程</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">8</div>
+                <div class="stat-label">支持的平台</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">MIT</div>
+                <div class="stat-label">开源协议</div>
+            </div>
+        </div>
+
+        <!-- Philosophy -->
+        <section class="philosophy">
+            <h2>核心理念</h2>
+            <div class="philosophy-grid">
+                <div class="philosophy-item">
+                    <h3>TDD 测试驱动开发</h3>
+                    <p>先写测试，先看失败。测试写在代码之前才能证明它真正测试了正确的东西。</p>
+                </div>
+                <div class="philosophy-item">
+                    <h3>系统化方法优先</h3>
+                    <p>临时方案会累积技术债。系统化的方法确保每个问题都得到彻底的解决。</p>
+                </div>
+                <div class="philosophy-item">
+                    <h3>降低复杂度</h3>
+                    <p>小而bounded的单元更容易推理和测试。避免过度设计。</p>
+                </div>
+                <div class="philosophy-item">
+                    <h3>证据优先于声称</h3>
+                    <p>「完成」「修复」「通过」这些词必须建立在实际运行验证命令的基础上。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Supported Agents -->
+        <section class="agents">
+            <h2>支持的 AI 平台</h2>
+            <div class="agent-grid">
+                <div class="agent-item">Claude Code</div>
+                <div class="agent-item">Codex CLI</div>
+                <div class="agent-item">Codex App</div>
+                <div class="agent-item">Factory Droid</div>
+                <div class="agent-item">Gemini CLI</div>
+                <div class="agent-item">OpenCode</div>
+                <div class="agent-item">Cursor</div>
+                <div class="agent-item">GitHub Copilot CLI</div>
+            </div>
+        </section>
+
+        <!-- Main Workflow -->
+        <section class="workflow">
+            <h2>七步核心工作流</h2>
+            <div class="workflow-steps">
+                <div class="workflow-step">
+                    <h3><span class="step-num">01</span> 头脑风暴 brainstorming</h3>
+                    <p>编码前必须激活。对需求进行梳理和设计验证，所有项目都要经过这个硬性关卡。</p>
+                    <a href="#brainstorming" class="skill-link">查看详情 →</a>
+                </div>
+                <div class="workflow-step">
+                    <h3><span class="step-num">02</span> 创建隔离工作空间 using-git-worktrees</h3>
+                    <p>设计批准后，创建隔离的 Git 工作树，避免在主分支上直接工作。</p>
+                    <a href="#using-git-worktrees" class="skill-link">查看详情 →</a>
+                </div>
+                <div class="workflow-step">
+                    <h3><span class="step-num">03</span> 编写计划 writing-plans</h3>
+                    <p>将工作分解为 2-5 分钟的小任务，每个任务都有具体的文件和命令。</p>
+                    <a href="#writing-plans" class="skill-link">查看详情 →</a>
+                </div>
+                <div class="workflow-step">
+                    <h3><span class="step-num">04</span> 子智能体驱动开发 subagent-driven-development</h3>
+                    <p>每个任务分发独立的子智能体执行，实行双阶段审查。</p>
+                    <a href="#subagent-driven-development" class="skill-link">查看详情 →</a>
+                </div>
+                <div class="workflow-step">
+                    <h3><span class="step-num">05</span> 测试驱动开发 test-driven-development</h3>
+                    <p>RED-GREEN-REFACTOR 循环：先写失败的测试，再写最小代码通过测试，最后重构。</p>
+                    <a href="#test-driven-development" class="skill-link">查看详情 →</a>
+                </div>
+                <div class="workflow-step">
+                    <h3><span class="step-num">06</span> 请求代码审查 requesting-code-review</h3>
+                    <p>任务之间按严重程度报告问题，及早发现问题防止问题累积。</p>
+                    <a href="#requesting-code-review" class="skill-link">查看详情 →</a>
+                </div>
+                <div class="workflow-step">
+                    <h3><span class="step-num">07</span> 完成开发分支 finishing-a-development-branch</h3>
+                    <p>验证测试通过，提供多种合并选项供用户选择。</p>
+                    <a href="#finishing-a-development-branch" class="skill-link">查看详情 →</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Skills Detailed Section -->
+        <section class="skills-section">
+            <h2>技能库详解</h2>
+
+            <!-- Collaboration Skills -->
+            <div class="skill-category">
+                <h3>🤝 协作流程 <span class="count">9 个技能</span></h3>
+                <div class="skill-cards">
+                    <div class="skill-card" id="brainstorming">
+                        <h4><code>brainstorming</code> 头脑风暴</h4>
+                        <p>
+                            任何创意工作（功能、组件、行为修改）之前必须激活的技能。
+                            提供硬性关卡，确保设计得到用户批准后再开始实现。
+                        </p>
+                        <p style="margin-top:12px;color:var(--text-muted);font-size:13px;">
+                            流程：探索上下文 → 澄清问题 → 提出方案 → 展示设计 → 写设计文档
+                        </p>
+                        <div class="key-point">
+                            硬性规则：未经用户批准的设计，不得开始任何编码工作
+                        </div>
+                    </div>
+
+                    <div class="skill-card" id="writing-plans">
+                        <h4><code>writing-plans</code> 编写计划</h4>
+                        <p>
+                            将复杂任务分解为可执行计划。每个任务 2-5 分钟，包含具体文件和命令。
+                            使用 TDD 流程：失败测试 → 最小代码 → 通过测试。
+                        </p>
+                        <div class="key-point">
+                            核心原则：每个步骤必须有实际代码和命令，不允许占位符
+                        </div>
+                    </div>
+
+                    <div class="skill-card" id="executing-plans">
+                        <h4><code>executing-plans</code> 执行计划</h4>
+                        <p>
+                            按照预写的计划进行实现。三步流程：加载审核 → 执行任务 → 完成开发。
+                            遇到阻塞立即停止并寻求帮助。
+                        </p>
+                        <div class="key-point">
+                            关键要求：严格遵循计划步骤，不跳过验证，遇到障碍立即求助
+                        </div>
+                    </div>
+
+                    <div class="skill-card" id="subagent-driven-development">
+                        <h4><code>subagent-driven-development</code> 子智能体驱动开发</h4>
+                        <p>
+                            每个任务分发独立的fresh子智能体，双阶段审查（规范合规性 → 代码质量）。
+                            一次只运行一个子智能体避免冲突。
+                        </p>
+                        <p style="margin-top:12px;color:var(--text-muted);font-size:13px;">
+                            子智能体状态：DONE / DONE_WITH_CONCERNS / NEEDS_CONTEXT / BLOCKED
+                        </p>
+                        <div class="key-point">
+                            模型选择：机械任务用廉价模型，架构设计用最强模型
+                        </div>
+                    </div>
+
+                    <div class="skill-card" id="using-git-worktrees">
+                        <h4><code>using-git-worktrees</code> 使用 Git 工作树</h4>
+                        <p>
+                            创建隔离的开发空间。首先检测现有隔离状态，优先使用平台原生工具，
+                            Git 作为最后的备选方案。
+                        </p>
+                        <div class="key-point">
+                            安全规则：验证项目目录已gitignore后再创建工作树
+                        </div>
+                    </div>
+
+                    <div class="skill-card" id="finishing-a-development-branch">
+                        <h4><code>finishing-a-development-branch</code> 完成开发分支</h4>
+                        <p>
+                            开发完成后的验证和清理工作。验证测试 → 检测环境 → 展示选项 →
+                            执行选择 → 清理工作空间（仅在适当时机）。
+                        </p>
+                        <div class="key-point">
+                            选项1和4才会清理工作树，永远不删除用户需要的工作空间
+                        </div>
+                    </div>
+
+                    <div class="skill-card" id="requesting-code-review">
+                        <h4><code>requesting-code-review</code> 请求代码审查</h4>
+                        <p>
+                            「及早审查，频繁审查」原则。任务后强制审查，主要功能后强制审查，
+                            合并前强制审查。
+                        </p>
+                        <p style="margin-top:12px;color:var(--text-muted);font-size:13px;">
+                            严重程度：Critical立即修复 → Important前进前修复 → Minor记录后续处理
+                        </p>
+                        <div class="key-point">
+                            反馈处理：审查者发现问题 → 实现者修复 → 再次审查
+                        </div>
+                    </div>
+
+                    <div class="skill-card" id="receiving-code-review">
+                        <h4><code>receiving-code-review</code> 接收代码审查反馈</h4>
+                        <p>
+                            以技术严谨性而非情绪化表演来接收反馈。验证后再实现，有疑问就提问，
+                            建议错误时用技术推理反驳。
+                        </p>
+                        <div class="key-point">
+                            核心态度：外部反馈是建议而非命令，验证后再实施
+                        </div>
+                    </div>
+
+                    <div class="skill-card" id="dispatching-parallel-agents">
+                        <h4><code>dispatching-parallel-agents</code> 并行分发智能体</h4>
+                        <p>
+                            多个独立问题可以同时调查时使用。将不同问题分发给不同子智能体并行处理，
+                            大幅节省时间。
+                        </p>
+                        <p style="margin-top:12px;color:var(--text-muted);font-size:13px;">
+                            前提条件：问题必须独立、可并行执行、自包含
+                        </p>
+                        <div class="key-point">
+                            价值所在：三 个独立问题可在一个问题的时间内解决
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Testing Skills -->
+            <div class="skill-category">
+                <h3>🧪 测试驱动 <span class="count">1 个技能</span></h3>
+                <div class="skill-cards">
+                    <div class="skill-card" id="test-driven-development">
+                        <h4><code>test-driven-development</code> 测试驱动开发</h4>
+                        <p>
+                            TDD 铁律：没有失败的测试就不能写生产代码。
+                            RED（写失败测试）→ GREEN（写最小代码通过）→ REFACTOR（重构）
+                        </p>
+                        <p style="margin-top:12px;color:var(--text-muted);font-size:13px;">
+                            为什么顺序重要：代码后写的测试会立即通过，什么也证明不了。
+                        </p>
+                        <div class="key-point">
+                            好测试：最小化（只测一件事）、清晰的名字、使用真实代码而非mock
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Debugging Skills -->
+            <div class="skill-category">
+                <h3>🔧 调试与验证 <span class="count">2 个技能</span></h3>
+                <div class="skill-cards">
+                    <div class="skill-card" id="systematic-debugging">
+                        <h4><code>systematic-debugging</code> 系统化调试</h4>
+                        <p>
+                            找到根本原因后再尝试修复。四阶段：根因调查 → 模式分析 → 假设验证 →
+                            实施修复。
+                        </p>
+                        <p style="margin-top:12px;color:var(--text-muted);font-size:13px;">
+                            铁律：未经根因调查，禁止提出修复方案
+                        </p>
+                        <div class="key-point">
+                            警告信号：尝试3次以上修复失败？质疑架构而非症状
+                        </div>
+                    </div>
+
+                    <div class="skill-card" id="verification-before-completion">
+                        <h4><code>verification-before-completion</code> 完成前验证</h4>
+                        <p>
+                            在声明工作「完成」「修复」「通过」之前，必须实际运行验证命令并检查输出。
+                            测试通过≠代码编译，智能体报告成功≠更改正确。
+                        </p>
+                        <div class="key-point">
+                            铁律：运行命令，读取输出，然后才报告结果。无例外，无捷径。
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Meta Skills -->
+            <div class="skill-category">
+                <h3>⚙️ 元技能 <span class="count">2 个技能</span></h3>
+                <div class="skill-cards">
+                    <div class="skill-card" id="using-superpowers">
+                        <h4><code>using-superpowers</code> 使用技能框架</h4>
+                        <p>
+                            关于如何有效使用其他技能的元框架。核心原则：任何响应前先检查技能，
+                            即便只有1%的可能性也要激活。
+                        </p>
+                        <p style="margin-top:12px;color:var(--text-muted);font-size:13px;">
+                            优先级：用户指令 > 技能 > 系统默认
+                        </p>
+                        <div class="key-point">
+                            流程技能（头脑风暴、调试）优先于实现技能
+                        </div>
+                    </div>
+
+                    <div class="skill-card" id="writing-skills">
+                        <h4><code>writing-skills</code> 编写技能</h4>
+                        <p>
+                            用 TDD 的方法编写技能文档。RED（无技能时运行，文档化理性化）→
+                            GREEN（编写最小技能）→ REFACTOR（添加反制措施）。
+                        </p>
+                        <p style="margin-top:12px;color:var(--text-muted);font-size:13px;">
+                            铁律：「没有失败的测试就没有技能」
+                        </p>
+                        <div class="key-point">
+                            技能结构：技能名/SKILL.md + 支持文件（仅在需要时）
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Architecture Flow -->
+        <section class="architecture">
+            <h2>架构流程图</h2>
+            <div class="flow-diagram">
+                <div class="flow-container">
+                    <div class="flow-node start">
+                        <h5>用户请求</h5>
+                        <span>开始任务</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-node">
+                        <h5>brainstorming</h5>
+                        <span>探索与设计</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-node">
+                        <h5>writing-plans</h5>
+                        <span>制定计划</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-node">
+                        <h5>using-git-worktrees</h5>
+                        <span>创建隔离环境</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-node">
+                        <h5>subagent-driven</h5>
+                        <span>分发子智能体</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-node">
+                        <h5>TDD 循环</h5>
+                        <span>RED-GREEN-REFACTOR</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-node">
+                        <h5>requesting-code-review</h5>
+                        <span>代码审查</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-node end">
+                        <h5>finishing</h5>
+                        <span>验证并完成</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Skill Relations -->
+        <section class="relations">
+            <h2>技能调用关系</h2>
+            <div class="relation-groups">
+                <div class="relation-group">
+                    <h4>📍 触发入口</h4>
+                    <ul class="relation-list">
+                        <li>用户发起创意任务 → brainstorming 自动触发</li>
+                        <li>用户发起实现任务 → writing-plans 自动触发</li>
+                        <li>任何响应前 → using-superpowers 检查</li>
+                    </ul>
+                </div>
+                <div class="relation-group">
+                    <h4>🔗 串联关系</h4>
+                    <ul class="relation-list">
+                        <li>brainstorming → writing-plans → executing-plans</li>
+                        <li>executing-plans → subagent-driven-development</li>
+                        <li>subagent-driven-development → requesting-code-review</li>
+                        <li>requesting-code-review → receiving-code-review</li>
+                        <li>executing-plans → finishing-a-development-branch</li>
+                    </ul>
+                </div>
+                <div class="relation-group">
+                    <h4>🔧 支撑技能</h4>
+                    <ul class="relation-list">
+                        <li>systematic-debugging → 任何调试场景</li>
+                        <li>verification-before-completion → 任何完成声明前</li>
+                        <li>using-git-worktrees → 执行计划前创建隔离环境</li>
+                        <li>dispatching-parallel-agents → 多个独立问题时</li>
+                    </ul>
+                </div>
+                <div class="relation-group">
+                    <h4>⚙️ 元框架</h4>
+                    <ul class="relation-list">
+                        <li>using-superpowers → 管理所有技能使用规则</li>
+                        <li>writing-skills → 定义如何编写新技能</li>
+                        <li>所有技能 → 遵循 TDD 理念</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Skill Table -->
+        <section class="skills-section">
+            <h2>技能速查表</h2>
+            <table class="info-table">
+                <thead>
+                    <tr>
+                        <th>技能名称</th>
+                        <th>类别</th>
+                        <th>触发场景</th>
+                        <th>核心价值</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>brainstorming</code></td>
+                        <td>协作流程</td>
+                        <td>任何创意工作前</td>
+                        <td>确保设计获批后再编码</td>
+                    </tr>
+                    <tr>
+                        <td><code>writing-plans</code></td>
+                        <td>协作流程</td>
+                        <td>复杂任务分解</td>
+                        <td>2-5分钟可执行任务</td>
+                    </tr>
+                    <tr>
+                        <td><code>executing-plans</code></td>
+                        <td>协作流程</td>
+                        <td>执行预写计划</td>
+                        <td>严格按计划执行</td>
+                    </tr>
+                    <tr>
+                        <td><code>subagent-driven-development</code></td>
+                        <td>协作流程</td>
+                        <td>多任务实现</td>
+                        <td>隔离上下文，双阶段审查</td>
+                    </tr>
+                    <tr>
+                        <td><code>using-git-worktrees</code></td>
+                        <td>协作流程</td>
+                        <td>创建隔离工作空间</td>
+                        <td>避免主分支污染</td>
+                    </tr>
+                    <tr>
+                        <td><code>finishing-a-development-branch</code></td>
+                        <td>协作流程</td>
+                        <td>开发完成验证</td>
+                        <td>多种合并选项</td>
+                    </tr>
+                    <tr>
+                        <td><code>requesting-code-review</code></td>
+                        <td>协作流程</td>
+                        <td>任务后、主要功能后</td>
+                        <td>及早发现问题</td>
+                    </tr>
+                    <tr>
+                        <td><code>receiving-code-review</code></td>
+                        <td>协作流程</td>
+                        <td>接收审查反馈</td>
+                        <td>技术验证，非情绪化</td>
+                    </tr>
+                    <tr>
+                        <td><code>dispatching-parallel-agents</code></td>
+                        <td>协作流程</td>
+                        <td>多个独立问题</td>
+                        <td>并行调查节省时间</td>
+                    </tr>
+                    <tr>
+                        <td><code>test-driven-development</code></td>
+                        <td>测试驱动</td>
+                        <td>任何代码编写前</td>
+                        <td>RED-GREEN-REFACTOR</td>
+                    </tr>
+                    <tr>
+                        <td><code>systematic-debugging</code></td>
+                        <td>调试验证</td>
+                        <td>Bug、测试失败</td>
+                        <td>根因分析优先</td>
+                    </tr>
+                    <tr>
+                        <td><code>verification-before-completion</code></td>
+                        <td>调试验证</td>
+                        <td>声明完成前</td>
+                        <td>证据优先于声称</td>
+                    </tr>
+                    <tr>
+                        <td><code>using-superpowers</code></td>
+                        <td>元技能</td>
+                        <td>任何响应前</td>
+                        <td>技能调用规则</td>
+                    </tr>
+                    <tr>
+                        <td><code>writing-skills</code></td>
+                        <td>元技能</td>
+                        <td>编写新技能</td>
+                        <td>TDD方法写技能</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>
+                <a href="https://github.com/obra/superpowers" target="_blank">Superpowers</a> —
+                由 <a href="https://github.com/obra" target="_blank">Jesse Vincent</a> 构建
+            </p>
+            <p style="margin-top:8px;">基于 MIT 协议开源 · 2024</p>
+        </footer>
+    </div>
+</body>
+</html>
