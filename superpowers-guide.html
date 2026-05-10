@@ -1,1251 +1,1739 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Superpowers 框架学习指南</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-primary: #0a0a0f;
-            --bg-secondary: #12121a;
-            --bg-card: #1a1a24;
-            --bg-card-hover: #22222e;
-            --text-primary: #f0f0f5;
-            --text-secondary: #a0a0b0;
-            --text-muted: #6a6a7a;
-            --accent-purple: #a78bfa;
-            --accent-purple-dim: #7c5fcb;
-            --accent-blue: #60a5fa;
-            --accent-green: #34d399;
-            --accent-yellow: #fbbf24;
-            --accent-red: #f87171;
-            --accent-orange: #fb923c;
-            --border-color: #2a2a3a;
-            --radius-sm: 6px;
-            --radius-md: 10px;
-            --radius-lg: 16px;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.7;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 40px 24px;
-        }
-
-        /* Hero Section */
-        .hero {
-            text-align: center;
-            padding: 80px 0 60px;
-            position: relative;
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 600px;
-            height: 400px;
-            background: radial-gradient(ellipse, rgba(167, 139, 250, 0.15) 0%, transparent 70%);
-            pointer-events: none;
-        }
-
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            padding: 8px 16px;
-            border-radius: 50px;
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-bottom: 24px;
-        }
-
-        .hero-badge span {
-            color: var(--accent-purple);
-        }
-
-        h1 {
-            font-size: 56px;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-purple) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 20px;
-            letter-spacing: -2px;
-        }
-
-        .hero-subtitle {
-            font-size: 20px;
-            color: var(--text-secondary);
-            max-width: 700px;
-            margin: 0 auto 40px;
-        }
-
-        .hero-links {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .hero-links a {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 24px;
-            border-radius: var(--radius-md);
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-
-        .hero-links a.primary {
-            background: var(--accent-purple);
-            color: white;
-        }
-
-        .hero-links a.primary:hover {
-            background: var(--accent-purple-dim);
-            transform: translateY(-2px);
-        }
-
-        .hero-links a.secondary {
-            background: var(--bg-card);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-        }
-
-        .hero-links a.secondary:hover {
-            background: var(--bg-card-hover);
-            border-color: var(--accent-purple);
-        }
-
-        /* Stats */
-        .stats {
-            display: flex;
-            justify-content: center;
-            gap: 60px;
-            margin: 60px 0;
-            flex-wrap: wrap;
-        }
-
-        .stat {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 36px;
-            font-weight: 700;
-            color: var(--accent-purple);
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .stat-label {
-            font-size: 14px;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-
-        /* Philosophy Section */
-        .philosophy {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            padding: 48px;
-            margin: 40px 0;
-        }
-
-        .philosophy h2 {
-            font-size: 28px;
-            margin-bottom: 32px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .philosophy h2::before {
-            content: '◆';
-            color: var(--accent-purple);
-        }
-
-        .philosophy-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-        }
-
-        .philosophy-item {
-            background: var(--bg-card);
-            border-radius: var(--radius-md);
-            padding: 24px;
-            border: 1px solid var(--border-color);
-            transition: all 0.2s ease;
-        }
-
-        .philosophy-item:hover {
-            border-color: var(--accent-purple-dim);
-            transform: translateY(-2px);
-        }
-
-        .philosophy-item h3 {
-            font-size: 18px;
-            color: var(--accent-purple);
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .philosophy-item p {
-            color: var(--text-secondary);
-            font-size: 15px;
-        }
-
-        /* Supported Agents */
-        .agents {
-            margin: 40px 0;
-        }
-
-        .agents h2 {
-            font-size: 28px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .agents h2::before {
-            content: '◆';
-            color: var(--accent-blue);
-        }
-
-        .agent-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-        }
-
-        .agent-item {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 16px 20px;
-            font-size: 15px;
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: all 0.2s ease;
-        }
-
-        .agent-item:hover {
-            border-color: var(--accent-blue);
-            color: var(--text-primary);
-        }
-
-        .agent-item::before {
-            content: '●';
-            color: var(--accent-green);
-            font-size: 10px;
-        }
-
-        /* Main Workflow */
-        .workflow {
-            margin: 60px 0;
-        }
-
-        .workflow h2 {
-            font-size: 28px;
-            margin-bottom: 32px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .workflow h2::before {
-            content: '◆';
-            color: var(--accent-green);
-        }
-
-        .workflow-steps {
-            position: relative;
-            padding-left: 40px;
-        }
-
-        .workflow-steps::before {
-            content: '';
-            position: absolute;
-            left: 15px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: linear-gradient(to bottom, var(--accent-purple), var(--accent-blue), var(--accent-green));
-        }
-
-        .workflow-step {
-            position: relative;
-            margin-bottom: 32px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 24px 28px;
-            transition: all 0.2s ease;
-        }
-
-        .workflow-step:hover {
-            border-color: var(--accent-purple-dim);
-        }
-
-        .workflow-step::before {
-            content: '';
-            position: absolute;
-            left: -33px;
-            top: 28px;
-            width: 16px;
-            height: 16px;
-            background: var(--bg-primary);
-            border: 3px solid var(--accent-purple);
-            border-radius: 50%;
-        }
-
-        .workflow-step:nth-child(2)::before { border-color: var(--accent-blue); }
-        .workflow-step:nth-child(3)::before { border-color: var(--accent-green); }
-        .workflow-step:nth-child(4)::before { border-color: var(--accent-yellow); }
-        .workflow-step:nth-child(5)::before { border-color: var(--accent-orange); }
-        .workflow-step:nth-child(6)::before { border-color: var(--accent-red); }
-        .workflow-step:nth-child(7)::before { border-color: var(--text-muted); }
-
-        .workflow-step h3 {
-            font-size: 18px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .workflow-step h3 .step-num {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
-            color: var(--accent-purple);
-            background: rgba(167, 139, 250, 0.1);
-            padding: 4px 10px;
-            border-radius: 4px;
-        }
-
-        .workflow-step p {
-            color: var(--text-secondary);
-            font-size: 15px;
-        }
-
-        .workflow-step .skill-link {
-            display: inline-block;
-            margin-top: 12px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
-            color: var(--accent-blue);
-            background: rgba(96, 165, 250, 0.1);
-            padding: 6px 12px;
-            border-radius: var(--radius-sm);
-            text-decoration: none;
-            transition: all 0.2s ease;
-        }
-
-        .workflow-step .skill-link:hover {
-            background: rgba(96, 165, 250, 0.2);
-        }
-
-        /* Skills Grid */
-        .skills-section {
-            margin: 60px 0;
-        }
-
-        .skills-section > h2 {
-            font-size: 28px;
-            margin-bottom: 32px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .skills-section > h2::before {
-            content: '◆';
-            color: var(--accent-yellow);
-        }
-
-        .skill-category {
-            margin-bottom: 40px;
-        }
-
-        .skill-category h3 {
-            font-size: 20px;
-            color: var(--text-primary);
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .skill-category h3 .count {
-            font-size: 14px;
-            color: var(--text-muted);
-            font-weight: 400;
-        }
-
-        .skill-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 20px;
-        }
-
-        .skill-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 24px;
-            transition: all 0.2s ease;
-        }
-
-        .skill-card:hover {
-            border-color: var(--accent-purple-dim);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .skill-card h4 {
-            font-size: 17px;
-            color: var(--text-primary);
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .skill-card h4 code {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
-            color: var(--accent-purple);
-            background: rgba(167, 139, 250, 0.1);
-            padding: 4px 10px;
-            border-radius: var(--radius-sm);
-        }
-
-        .skill-card p {
-            color: var(--text-secondary);
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        .skill-card .key-point {
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid var(--border-color);
-            font-size: 13px;
-            color: var(--accent-green);
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-        }
-
-        .skill-card .key-point::before {
-            content: '✓';
-            flex-shrink: 0;
-        }
-
-        /* Architecture Diagram */
-        .architecture {
-            margin: 60px 0;
-        }
-
-        .architecture h2 {
-            font-size: 28px;
-            margin-bottom: 32px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .architecture h2::before {
-            content: '◆';
-            color: var(--accent-red);
-        }
-
-        .flow-diagram {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            padding: 40px;
-            overflow-x: auto;
-        }
-
-        .flow-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-            flex-wrap: wrap;
-            min-width: 900px;
-        }
-
-        .flow-node {
-            background: var(--bg-card);
-            border: 2px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 16px 24px;
-            text-align: center;
-            min-width: 140px;
-            transition: all 0.2s ease;
-        }
-
-        .flow-node:hover {
-            border-color: var(--accent-purple);
-            transform: translateY(-2px);
-        }
-
-        .flow-node.start {
-            border-color: var(--accent-purple);
-            background: rgba(167, 139, 250, 0.1);
-        }
-
-        .flow-node.end {
-            border-color: var(--accent-green);
-            background: rgba(52, 211, 153, 0.1);
-        }
-
-        .flow-node h5 {
-            font-size: 14px;
-            margin-bottom: 4px;
-        }
-
-        .flow-node span {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        .flow-arrow {
-            color: var(--text-muted);
-            font-size: 20px;
-        }
-
-        /* Skill Relations */
-        .relations {
-            margin: 60px 0;
-        }
-
-        .relations h2 {
-            font-size: 28px;
-            margin-bottom: 32px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .relations h2::before {
-            content: '◆';
-            color: var(--accent-orange);
-        }
-
-        .relation-groups {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 24px;
-        }
-
-        .relation-group {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 24px;
-        }
-
-        .relation-group h4 {
-            font-size: 16px;
-            color: var(--accent-blue);
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .relation-list {
-            list-style: none;
-        }
-
-        .relation-list li {
-            padding: 8px 0;
-            color: var(--text-secondary);
-            font-size: 14px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .relation-list li:last-child {
-            border-bottom: none;
-        }
-
-        .relation-list li::before {
-            content: '→';
-            color: var(--accent-purple);
-        }
-
-        /* Footer */
-        .footer {
-            margin-top: 80px;
-            padding: 40px 0;
-            border-top: 1px solid var(--border-color);
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-
-        .footer a {
-            color: var(--accent-purple);
-            text-decoration: none;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 36px;
-            }
-
-            .hero-subtitle {
-                font-size: 16px;
-            }
-
-            .stats {
-                gap: 30px;
-            }
-
-            .philosophy {
-                padding: 32px 24px;
-            }
-
-            .flow-container {
-                flex-direction: column;
-            }
-
-            .flow-arrow {
-                transform: rotate(90deg);
-            }
-
-            .relation-groups {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Code blocks */
-        pre, code {
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .code-block {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-sm);
-            padding: 16px;
-            margin: 16px 0;
-            overflow-x: auto;
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        .code-block .keyword {
-            color: var(--accent-purple);
-        }
-
-        .code-block .string {
-            color: var(--accent-green);
-        }
-
-        .code-block .comment {
-            color: var(--text-muted);
-        }
-
-        /* Table */
-        .info-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 24px 0;
-        }
-
-        .info-table th,
-        .info-table td {
-            padding: 12px 16px;
-            text-align: left;
-            border: 1px solid var(--border-color);
-        }
-
-        .info-table th {
-            background: var(--bg-card);
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-
-        .info-table td {
-            color: var(--text-secondary);
-        }
-
-        .info-table tr:hover td {
-            background: var(--bg-card-hover);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Superpowers 技能体系 — 完整学习指南</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2333;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text2: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --yellow: #d29922;
+    --orange: #db6d28;
+    --red: #f85149;
+    --purple: #bc8cff;
+    --cyan: #39d2c0;
+    --pink: #f778ba;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', sans-serif;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #1c2333 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 24px 32px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 50%, rgba(88,166,255,0.08) 0%, transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(63,185,80,0.06) 0%, transparent 50%);
+    animation: headerGlow 8s ease-in-out infinite alternate;
+  }
+  @keyframes headerGlow {
+    0% { transform: translateX(-20px); }
+    100% { transform: translateX(20px); }
+  }
+  .header h1 {
+    font-size: 2.4rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: relative;
+    z-index: 1;
+  }
+  .header .subtitle {
+    color: var(--text2);
+    font-size: 1rem;
+    margin-top: 8px;
+    position: relative;
+    z-index: 1;
+  }
+  .header .badge-row {
+    margin-top: 16px;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+  }
+  .badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text2);
+  }
+  .badge.blue { border-color: rgba(88,166,255,0.3); color: var(--accent); }
+  .badge.green { border-color: rgba(63,185,80,0.3); color: var(--green); }
+  .badge.purple { border-color: rgba(188,140,255,0.3); color: var(--purple); }
+  .badge.orange { border-color: rgba(219,109,40,0.3); color: var(--orange); }
+
+  /* Layout */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+  }
+
+  /* Section */
+  .section {
+    margin-bottom: 48px;
+  }
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title .icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+  }
+
+  /* Architecture Diagram */
+  .arch-diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    overflow-x: auto;
+  }
+  .arch-diagram svg {
+    width: 100%;
+    max-width: 1100px;
+    height: auto;
+  }
+
+  /* Skill Cards Grid */
+  .skill-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+  }
+
+  /* Skill Card */
+  .skill-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.2s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .skill-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(88,166,255,0.1);
+  }
+  .skill-card .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .skill-card .card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  .skill-card .card-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+  .skill-card .card-tag {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+    margin-left: auto;
+  }
+  .skill-card .card-desc {
+    font-size: 0.85rem;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+  .skill-card .card-rel {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-size: 0.78rem;
+    color: var(--text2);
+  }
+  .skill-card .card-rel strong {
+    color: var(--accent);
+  }
+
+  /* Tag colors */
+  .tag-process { background: rgba(88,166,255,0.15); color: var(--accent); }
+  .tag-impl { background: rgba(63,185,80,0.15); color: var(--green); }
+  .tag-quality { background: rgba(210,153,34,0.15); color: var(--yellow); }
+  .tag-debug { background: rgba(219,109,40,0.15); color: var(--orange); }
+  .tag-meta { background: rgba(188,140,255,0.15); color: var(--purple); }
+
+  /* Detail Panel */
+  .detail-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 0;
+    overflow: hidden;
+    margin-bottom: 32px;
+  }
+  .detail-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .detail-tab {
+    padding: 12px 20px;
+    font-size: 0.85rem;
+    color: var(--text2);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .detail-tab:hover { color: var(--text); }
+  .detail-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .detail-content {
+    padding: 24px;
+  }
+  .detail-section {
+    display: none;
+  }
+  .detail-section.active {
+    display: block;
+  }
+
+  /* Flow Diagram */
+  .flow-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 32px;
+    overflow-x: auto;
+  }
+  .flow-container svg {
+    width: 100%;
+    height: auto;
+  }
+
+  /* Principle Cards */
+  .principle-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+  }
+  .principle-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .principle-card .p-icon {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+  }
+  .principle-card .p-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .principle-card .p-desc {
+    font-size: 0.82rem;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+
+  /* Table */
+  .table-wrap {
+    overflow-x: auto;
+    margin-top: 16px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  th {
+    background: var(--surface2);
+    color: var(--text);
+    font-weight: 600;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+    vertical-align: top;
+  }
+  tr:hover td {
+    background: rgba(88,166,255,0.03);
+  }
+  td strong { color: var(--text); }
+
+  /* Phase stepper */
+  .phase-stepper {
+    display: flex;
+    gap: 0;
+    margin: 20px 0;
+    overflow-x: auto;
+  }
+  .phase-step {
+    flex: 1;
+    min-width: 140px;
+    text-align: center;
+    padding: 16px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    position: relative;
+  }
+  .phase-step:not(:last-child)::after {
+    content: '→';
+    position: absolute;
+    right: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text2);
+    font-size: 1.2rem;
+    z-index: 1;
+  }
+  .phase-step:first-child { border-radius: 8px 0 0 8px; }
+  .phase-step:last-child { border-radius: 0 8px 8px 0; }
+  .phase-step .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .phase-step .step-name {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--text);
+  }
+  .phase-step .step-desc {
+    font-size: 0.75rem;
+    color: var(--text2);
+    margin-top: 4px;
+  }
+
+  /* Iron Law box */
+  .iron-law {
+    background: rgba(248,81,73,0.08);
+    border: 1px solid rgba(248,81,73,0.3);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 16px 0;
+    text-align: center;
+  }
+  .iron-law .law-text {
+    font-family: 'Courier New', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--red);
+    letter-spacing: 1px;
+  }
+  .iron-law .law-note {
+    font-size: 0.82rem;
+    color: var(--text2);
+    margin-top: 8px;
+  }
+
+  /* Relationship lines */
+  .rel-map {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+  }
+  .rel-node {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin: 4px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .rel-node.process { border-color: var(--accent); color: var(--accent); }
+  .rel-node.impl { border-color: var(--green); color: var(--green); }
+  .rel-node.quality { border-color: var(--yellow); color: var(--yellow); }
+  .rel-node.debug { border-color: var(--orange); color: var(--orange); }
+  .rel-node.meta { border-color: var(--purple); color: var(--purple); }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .header h1 { font-size: 1.6rem; }
+    .skill-grid { grid-template-columns: 1fr; }
+    .phase-stepper { flex-direction: column; }
+    .phase-step:not(:last-child)::after { display: none; }
+    .phase-step { border-radius: 8px !important; margin-bottom: 4px; }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
 </head>
 <body>
-    <div class="container">
-        <!-- Hero Section -->
-        <section class="hero">
-            <div class="hero-badge">
-                <span>★</span> Agentic Skills Framework
-            </div>
-            <h1>Superpowers</h1>
-            <p class="hero-subtitle">
-                一套赋能 AI 编码智能体的技能框架与软件开发方法论。
-                通过 TDD、系统化流程和证据优先的原则，让 AI 智能体成为更可靠的开发伙伴。
-            </p>
-            <div class="hero-links">
-                <a href="https://github.com/obra/superpowers" class="primary" target="_blank">
-                    <span>⚡</span> GitHub
-                </a>
-                <a href="https://github.com/obra/superpowers#readme" class="secondary" target="_blank">
-                    文档
-                </a>
-            </div>
-        </section>
 
-        <!-- Stats -->
-        <div class="stats">
-            <div class="stat">
-                <div class="stat-value">14</div>
-                <div class="stat-label">技能数量</div>
-            </div>
-            <div class="stat">
-                <div class="stat-value">7</div>
-                <div class="stat-label">核心流程</div>
-            </div>
-            <div class="stat">
-                <div class="stat-value">8</div>
-                <div class="stat-label">支持的平台</div>
-            </div>
-            <div class="stat">
-                <div class="stat-value">MIT</div>
-                <div class="stat-label">开源协议</div>
-            </div>
-        </div>
+<!-- ==================== HEADER ==================== -->
+<div class="header">
+  <h1>⚡ Superpowers 技能体系</h1>
+  <p class="subtitle">为编码智能体（Coding Agent）打造的完整软件开发方法论 — 14个可组合技能的深度解析</p>
+  <div class="badge-row">
+    <span class="badge blue">🧠 流程类 5个</span>
+    <span class="badge green">⚙️ 执行类 3个</span>
+    <span class="badge yellow">🔍 质量类 4个</span>
+    <span class="badge orange">🐛 调试类 1个</span>
+    <span class="badge purple">🛠️ 元技能 2个</span>
+  </div>
+</div>
 
-        <!-- Philosophy -->
-        <section class="philosophy">
-            <h2>核心理念</h2>
-            <div class="philosophy-grid">
-                <div class="philosophy-item">
-                    <h3>TDD 测试驱动开发</h3>
-                    <p>先写测试，先看失败。测试写在代码之前才能证明它真正测试了正确的东西。</p>
-                </div>
-                <div class="philosophy-item">
-                    <h3>系统化方法优先</h3>
-                    <p>临时方案会累积技术债。系统化的方法确保每个问题都得到彻底的解决。</p>
-                </div>
-                <div class="philosophy-item">
-                    <h3>降低复杂度</h3>
-                    <p>小而bounded的单元更容易推理和测试。避免过度设计。</p>
-                </div>
-                <div class="philosophy-item">
-                    <h3>证据优先于声称</h3>
-                    <p>「完成」「修复」「通过」这些词必须建立在实际运行验证命令的基础上。</p>
-                </div>
-            </div>
-        </section>
+<div class="container">
 
-        <!-- Supported Agents -->
-        <section class="agents">
-            <h2>支持的 AI 平台</h2>
-            <div class="agent-grid">
-                <div class="agent-item">Claude Code</div>
-                <div class="agent-item">Codex CLI</div>
-                <div class="agent-item">Codex App</div>
-                <div class="agent-item">Factory Droid</div>
-                <div class="agent-item">Gemini CLI</div>
-                <div class="agent-item">OpenCode</div>
-                <div class="agent-item">Cursor</div>
-                <div class="agent-item">GitHub Copilot CLI</div>
-            </div>
-        </section>
+<!-- ==================== SECTION 1: 架构总览 ==================== -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(88,166,255,0.15);color:var(--accent);">🗺️</div>
+    核心工作流架构
+  </div>
+  <div class="arch-diagram">
+    <svg viewBox="0 0 1100 520" xmlns="http://www.w3.org/2000/svg" style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;">
+      <!-- Title -->
+      <text x="550" y="30" text-anchor="middle" fill="#e6edf3" font-size="16" font-weight="700">Superpowers 主工作流</text>
 
-        <!-- Main Workflow -->
-        <section class="workflow">
-            <h2>七步核心工作流</h2>
-            <div class="workflow-steps">
-                <div class="workflow-step">
-                    <h3><span class="step-num">01</span> 头脑风暴 brainstorming</h3>
-                    <p>编码前必须激活。对需求进行梳理和设计验证，所有项目都要经过这个硬性关卡。</p>
-                    <a href="#brainstorming" class="skill-link">查看详情 →</a>
-                </div>
-                <div class="workflow-step">
-                    <h3><span class="step-num">02</span> 创建隔离工作空间 using-git-worktrees</h3>
-                    <p>设计批准后，创建隔离的 Git 工作树，避免在主分支上直接工作。</p>
-                    <a href="#using-git-worktrees" class="skill-link">查看详情 →</a>
-                </div>
-                <div class="workflow-step">
-                    <h3><span class="step-num">03</span> 编写计划 writing-plans</h3>
-                    <p>将工作分解为 2-5 分钟的小任务，每个任务都有具体的文件和命令。</p>
-                    <a href="#writing-plans" class="skill-link">查看详情 →</a>
-                </div>
-                <div class="workflow-step">
-                    <h3><span class="step-num">04</span> 子智能体驱动开发 subagent-driven-development</h3>
-                    <p>每个任务分发独立的子智能体执行，实行双阶段审查。</p>
-                    <a href="#subagent-driven-development" class="skill-link">查看详情 →</a>
-                </div>
-                <div class="workflow-step">
-                    <h3><span class="step-num">05</span> 测试驱动开发 test-driven-development</h3>
-                    <p>RED-GREEN-REFACTOR 循环：先写失败的测试，再写最小代码通过测试，最后重构。</p>
-                    <a href="#test-driven-development" class="skill-link">查看详情 →</a>
-                </div>
-                <div class="workflow-step">
-                    <h3><span class="step-num">06</span> 请求代码审查 requesting-code-review</h3>
-                    <p>任务之间按严重程度报告问题，及早发现问题防止问题累积。</p>
-                    <a href="#requesting-code-review" class="skill-link">查看详情 →</a>
-                </div>
-                <div class="workflow-step">
-                    <h3><span class="step-num">07</span> 完成开发分支 finishing-a-development-branch</h3>
-                    <p>验证测试通过，提供多种合并选项供用户选择。</p>
-                    <a href="#finishing-a-development-branch" class="skill-link">查看详情 →</a>
-                </div>
-            </div>
-        </section>
+      <!-- Phase 0: Entry -->
+      <rect x="420" y="55" width="260" height="48" rx="10" fill="#1c2333" stroke="#58a6ff" stroke-width="2"/>
+      <text x="550" y="80" text-anchor="middle" fill="#58a6ff" font-size="13" font-weight="700">🚀 using-superpowers</text>
+      <text x="550" y="98" text-anchor="middle" fill="#8b949e" font-size="11">入口技能 · 检测适用技能</text>
 
-        <!-- Skills Detailed Section -->
-        <section class="skills-section">
-            <h2>技能库详解</h2>
+      <!-- Arrow down -->
+      <line x1="550" y1="103" x2="550" y2="135" stroke="#30363d" stroke-width="2" marker-end="url(#arrow)"/>
 
-            <!-- Collaboration Skills -->
-            <div class="skill-category">
-                <h3>🤝 协作流程 <span class="count">9 个技能</span></h3>
-                <div class="skill-cards">
-                    <div class="skill-card" id="brainstorming">
-                        <h4><code>brainstorming</code> 头脑风暴</h4>
-                        <p>
-                            任何创意工作（功能、组件、行为修改）之前必须激活的技能。
-                            提供硬性关卡，确保设计得到用户批准后再开始实现。
-                        </p>
-                        <p style="margin-top:12px;color:var(--text-muted);font-size:13px;">
-                            流程：探索上下文 → 澄清问题 → 提出方案 → 展示设计 → 写设计文档
-                        </p>
-                        <div class="key-point">
-                            硬性规则：未经用户批准的设计，不得开始任何编码工作
-                        </div>
-                    </div>
+      <!-- Phase 1: Design -->
+      <rect x="380" y="140" width="340" height="52" rx="10" fill="#1c2333" stroke="#58a6ff" stroke-width="2"/>
+      <text x="550" y="168" text-anchor="middle" fill="#58a6ff" font-size="13" font-weight="700">🧠 brainstorming（头脑风暴）</text>
+      <text x="550" y="186" text-anchor="middle" fill="#8b949e" font-size="11">探索需求 → 提出方案 → 输出设计文档 → 审批</text>
 
-                    <div class="skill-card" id="writing-plans">
-                        <h4><code>writing-plans</code> 编写计划</h4>
-                        <p>
-                            将复杂任务分解为可执行计划。每个任务 2-5 分钟，包含具体文件和命令。
-                            使用 TDD 流程：失败测试 → 最小代码 → 通过测试。
-                        </p>
-                        <div class="key-point">
-                            核心原则：每个步骤必须有实际代码和命令，不允许占位符
-                        </div>
-                    </div>
+      <line x1="550" y1="192" x2="550" y2="225" stroke="#30363d" stroke-width="2" marker-end="url(#arrow)"/>
 
-                    <div class="skill-card" id="executing-plans">
-                        <h4><code>executing-plans</code> 执行计划</h4>
-                        <p>
-                            按照预写的计划进行实现。三步流程：加载审核 → 执行任务 → 完成开发。
-                            遇到阻塞立即停止并寻求帮助。
-                        </p>
-                        <div class="key-point">
-                            关键要求：严格遵循计划步骤，不跳过验证，遇到障碍立即求助
-                        </div>
-                    </div>
+      <!-- Phase 2: Plan -->
+      <rect x="380" y="230" width="340" height="52" rx="10" fill="#1c2333" stroke="#58a6ff" stroke-width="2"/>
+      <text x="550" y="258" text-anchor="middle" fill="#58a6ff" font-size="13" font-weight="700">📝 writing-plans（编写计划）</text>
+      <text x="550" y="276" text-anchor="middle" fill="#8b949e" font-size="11">设计文档 → 逐任务详细实施计划（TDD · 小步 · 可验证）</text>
 
-                    <div class="skill-card" id="subagent-driven-development">
-                        <h4><code>subagent-driven-development</code> 子智能体驱动开发</h4>
-                        <p>
-                            每个任务分发独立的fresh子智能体，双阶段审查（规范合规性 → 代码质量）。
-                            一次只运行一个子智能体避免冲突。
-                        </p>
-                        <p style="margin-top:12px;color:var(--text-muted);font-size:13px;">
-                            子智能体状态：DONE / DONE_WITH_CONCERNS / NEEDS_CONTEXT / BLOCKED
-                        </p>
-                        <div class="key-point">
-                            模型选择：机械任务用廉价模型，架构设计用最强模型
-                        </div>
-                    </div>
+      <line x1="550" y1="282" x2="550" y2="315" stroke="#30363d" stroke-width="2" marker-end="url(#arrow)"/>
 
-                    <div class="skill-card" id="using-git-worktrees">
-                        <h4><code>using-git-worktrees</code> 使用 Git 工作树</h4>
-                        <p>
-                            创建隔离的开发空间。首先检测现有隔离状态，优先使用平台原生工具，
-                            Git 作为最后的备选方案。
-                        </p>
-                        <div class="key-point">
-                            安全规则：验证项目目录已gitignore后再创建工作树
-                        </div>
-                    </div>
+      <!-- Phase 3: Isolation -->
+      <rect x="380" y="320" width="340" height="44" rx="10" fill="#1c2333" stroke="#39d2c0" stroke-width="2"/>
+      <text x="550" y="344" text-anchor="middle" fill="#39d2c0" font-size="13" font-weight="700">🔒 using-git-worktrees</text>
+      <text x="550" y="362" text-anchor="middle" fill="#8b949e" font-size="11">创建隔离工作区 · 保护主分支</text>
 
-                    <div class="skill-card" id="finishing-a-development-branch">
-                        <h4><code>finishing-a-development-branch</code> 完成开发分支</h4>
-                        <p>
-                            开发完成后的验证和清理工作。验证测试 → 检测环境 → 展示选项 →
-                            执行选择 → 清理工作空间（仅在适当时机）。
-                        </p>
-                        <div class="key-point">
-                            选项1和4才会清理工作树，永远不删除用户需要的工作空间
-                        </div>
-                    </div>
+      <line x1="550" y1="364" x2="550" y2="395" stroke="#30363d" stroke-width="2" marker-end="url(#arrow)"/>
 
-                    <div class="skill-card" id="requesting-code-review">
-                        <h4><code>requesting-code-review</code> 请求代码审查</h4>
-                        <p>
-                            「及早审查，频繁审查」原则。任务后强制审查，主要功能后强制审查，
-                            合并前强制审查。
-                        </p>
-                        <p style="margin-top:12px;color:var(--text-muted);font-size:13px;">
-                            严重程度：Critical立即修复 → Important前进前修复 → Minor记录后续处理
-                        </p>
-                        <div class="key-point">
-                            反馈处理：审查者发现问题 → 实现者修复 → 再次审查
-                        </div>
-                    </div>
+      <!-- Phase 4: Execution Choice -->
+      <rect x="180" y="400" width="280" height="56" rx="10" fill="#1c2333" stroke="#3fb950" stroke-width="2"/>
+      <text x="320" y="425" text-anchor="middle" fill="#3fb950" font-size="13" font-weight="700">🤖 subagent-driven-development</text>
+      <text x="320" y="443" text-anchor="middle" fill="#8b949e" font-size="11">同会话 · 每任务派发子代理</text>
+      <text x="320" y="458" text-anchor="middle" fill="#8b949e" font-size="11">两阶段审查：规范符合性 → 代码质量</text>
 
-                    <div class="skill-card" id="receiving-code-review">
-                        <h4><code>receiving-code-review</code> 接收代码审查反馈</h4>
-                        <p>
-                            以技术严谨性而非情绪化表演来接收反馈。验证后再实现，有疑问就提问，
-                            建议错误时用技术推理反驳。
-                        </p>
-                        <div class="key-point">
-                            核心态度：外部反馈是建议而非命令，验证后再实施
-                        </div>
-                    </div>
+      <rect x="520" y="400" width="280" height="56" rx="10" fill="#1c2333" stroke="#3fb950" stroke-width="2"/>
+      <text x="660" y="425" text-anchor="middle" fill="#3fb950" font-size="13" font-weight="700">⚡ executing-plans</text>
+      <text x="660" y="443" text-anchor="middle" fill="#8b949e" font-size="11">同会话 · 批量执行计划</text>
+      <text x="660" y="458" text-anchor="middle" fill="#8b949e" font-size="11">人机检查点 · 适合无子代理平台</text>
 
-                    <div class="skill-card" id="dispatching-parallel-agents">
-                        <h4><code>dispatching-parallel-agents</code> 并行分发智能体</h4>
-                        <p>
-                            多个独立问题可以同时调查时使用。将不同问题分发给不同子智能体并行处理，
-                            大幅节省时间。
-                        </p>
-                        <p style="margin-top:12px;color:var(--text-muted);font-size:13px;">
-                            前提条件：问题必须独立、可并行执行、自包含
-                        </p>
-                        <div class="key-point">
-                            价值所在：三 个独立问题可在一个问题的时间内解决
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <!-- Quality loop -->
+      <rect x="60" y="400" width="100" height="56" rx="10" fill="#1c2333" stroke="#d29922" stroke-width="2"/>
+      <text x="110" y="425" text-anchor="middle" fill="#d29922" font-size="12" font-weight="700">🔍 requesting-code-review</text>
+      <text x="110" y="443" text-anchor="middle" fill="#8b949e" font-size="10">主动请求</text>
+      <text x="110" y="458" text-anchor="middle" fill="#8b949e" font-size="10">代码审查</text>
 
-            <!-- Testing Skills -->
-            <div class="skill-category">
-                <h3>🧪 测试驱动 <span class="count">1 个技能</span></h3>
-                <div class="skill-cards">
-                    <div class="skill-card" id="test-driven-development">
-                        <h4><code>test-driven-development</code> 测试驱动开发</h4>
-                        <p>
-                            TDD 铁律：没有失败的测试就不能写生产代码。
-                            RED（写失败测试）→ GREEN（写最小代码通过）→ REFACTOR（重构）
-                        </p>
-                        <p style="margin-top:12px;color:var(--text-muted);font-size:13px;">
-                            为什么顺序重要：代码后写的测试会立即通过，什么也证明不了。
-                        </p>
-                        <div class="key-point">
-                            好测试：最小化（只测一件事）、清晰的名字、使用真实代码而非mock
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <!-- Phase 5: Finish -->
+      <rect x="380" y="480" width="340" height="44" rx="10" fill="#1c2333" stroke="#bc8cff" stroke-width="2"/>
+      <text x="550" y="504" text-anchor="middle" fill="#bc8cff" font-size="13" font-weight="700">🏁 finishing-a-development-branch</text>
+      <text x="550" y="522" text-anchor="middle" fill="#8b949e" font-size="11">合并 / 创建PR / 保留 / 丢弃</text>
 
-            <!-- Debugging Skills -->
-            <div class="skill-category">
-                <h3>🔧 调试与验证 <span class="count">2 个技能</span></h3>
-                <div class="skill-cards">
-                    <div class="skill-card" id="systematic-debugging">
-                        <h4><code>systematic-debugging</code> 系统化调试</h4>
-                        <p>
-                            找到根本原因后再尝试修复。四阶段：根因调查 → 模式分析 → 假设验证 →
-                            实施修复。
-                        </p>
-                        <p style="margin-top:12px;color:var(--text-muted);font-size:13px;">
-                            铁律：未经根因调查，禁止提出修复方案
-                        </p>
-                        <div class="key-point">
-                            警告信号：尝试3次以上修复失败？质疑架构而非症状
-                        </div>
-                    </div>
+      <!-- Curved arrows -->
+      <!-- from subagent to finish -->
+      <path d="M 460 400 L 460 470 L 520 470" stroke="#3fb950" stroke-width="1.5" fill="none" marker-end="url(#arrow-green)"/>
+      <!-- from executing to finish -->
+      <path d="M 520 400 L 520 470 L 520 470" stroke="#3fb950" stroke-width="1.5" fill="none" marker-end="url(#arrow-green)"/>
+      <!-- quality loop -->
+      <path d="M 160 400 C 160 350, 320 350, 320 400" stroke="#d29922" stroke-width="1.5" fill="none" marker-end="url(#arrow-yellow)" stroke-dasharray="4"/>
+      <text x="240" y="340" text-anchor="middle" fill="#d29922" font-size="10">每任务后审查</text>
 
-                    <div class="skill-card" id="verification-before-completion">
-                        <h4><code>verification-before-completion</code> 完成前验证</h4>
-                        <p>
-                            在声明工作「完成」「修复」「通过」之前，必须实际运行验证命令并检查输出。
-                            测试通过≠代码编译，智能体报告成功≠更改正确。
-                        </p>
-                        <div class="key-point">
-                            铁律：运行命令，读取输出，然后才报告结果。无例外，无捷径。
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <!-- TDD & Debug scattered -->
+      <rect x="840" y="140" width="180" height="40" rx="8" fill="#1c2333" stroke="#db6d28" stroke-width="1.5" opacity="0.9"/>
+      <text x="930" y="162" text-anchor="middle" fill="#db6d28" font-size="11" font-weight="700">🧪 test-driven-development</text>
+      <line x1="840" y1="160" x2="720" y2="160" stroke="#db6d28" stroke-width="1.2" stroke-dasharray="3" marker-end="url(#arrow-orange)"/>
 
-            <!-- Meta Skills -->
-            <div class="skill-category">
-                <h3>⚙️ 元技能 <span class="count">2 个技能</span></h3>
-                <div class="skill-cards">
-                    <div class="skill-card" id="using-superpowers">
-                        <h4><code>using-superpowers</code> 使用技能框架</h4>
-                        <p>
-                            关于如何有效使用其他技能的元框架。核心原则：任何响应前先检查技能，
-                            即便只有1%的可能性也要激活。
-                        </p>
-                        <p style="margin-top:12px;color:var(--text-muted);font-size:13px;">
-                            优先级：用户指令 > 技能 > 系统默认
-                        </p>
-                        <div class="key-point">
-                            流程技能（头脑风暴、调试）优先于实现技能
-                        </div>
-                    </div>
+      <rect x="840" y="200" width="180" height="40" rx="8" fill="#1c2333" stroke="#db6d28" stroke-width="1.5" opacity="0.9"/>
+      <text x="930" y="222" text-anchor="middle" fill="#db6d28" font-size="11" font-weight="700">🐛 systematic-debugging</text>
+      <line x1="840" y1="220" x2="720" y2="220" stroke="#db6d28" stroke-width="1.2" stroke-dasharray="3" marker-end="url(#arrow-orange)"/>
 
-                    <div class="skill-card" id="writing-skills">
-                        <h4><code>writing-skills</code> 编写技能</h4>
-                        <p>
-                            用 TDD 的方法编写技能文档。RED（无技能时运行，文档化理性化）→
-                            GREEN（编写最小技能）→ REFACTOR（添加反制措施）。
-                        </p>
-                        <p style="margin-top:12px;color:var(--text-muted);font-size:13px;">
-                            铁律：「没有失败的测试就没有技能」
-                        </p>
-                        <div class="key-point">
-                            技能结构：技能名/SKILL.md + 支持文件（仅在需要时）
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+      <rect x="840" y="260" width="180" height="40" rx="8" fill="#1c2333" stroke="#d29922" stroke-width="1.5" opacity="0.9"/>
+      <text x="930" y="282" text-anchor="middle" fill="#d29922" font-size="11" font-weight="700">✅ verification-before-completion</text>
+      <line x1="840" y1="280" x2="720" y2="280" stroke="#d29922" stroke-width="1.2" stroke-dasharray="3" marker-end="url(#arrow-yellow)"/>
 
-        <!-- Architecture Flow -->
-        <section class="architecture">
-            <h2>架构流程图</h2>
-            <div class="flow-diagram">
-                <div class="flow-container">
-                    <div class="flow-node start">
-                        <h5>用户请求</h5>
-                        <span>开始任务</span>
-                    </div>
-                    <span class="flow-arrow">→</span>
-                    <div class="flow-node">
-                        <h5>brainstorming</h5>
-                        <span>探索与设计</span>
-                    </div>
-                    <span class="flow-arrow">→</span>
-                    <div class="flow-node">
-                        <h5>writing-plans</h5>
-                        <span>制定计划</span>
-                    </div>
-                    <span class="flow-arrow">→</span>
-                    <div class="flow-node">
-                        <h5>using-git-worktrees</h5>
-                        <span>创建隔离环境</span>
-                    </div>
-                    <span class="flow-arrow">→</span>
-                    <div class="flow-node">
-                        <h5>subagent-driven</h5>
-                        <span>分发子智能体</span>
-                    </div>
-                    <span class="flow-arrow">→</span>
-                    <div class="flow-node">
-                        <h5>TDD 循环</h5>
-                        <span>RED-GREEN-REFACTOR</span>
-                    </div>
-                    <span class="flow-arrow">→</span>
-                    <div class="flow-node">
-                        <h5>requesting-code-review</h5>
-                        <span>代码审查</span>
-                    </div>
-                    <span class="flow-arrow">→</span>
-                    <div class="flow-node end">
-                        <h5>finishing</h5>
-                        <span>验证并完成</span>
-                    </div>
-                </div>
-            </div>
-        </section>
+      <rect x="40" y="140" width="180" height="40" rx="8" fill="#1c2333" stroke="#d29922" stroke-width="1.5" opacity="0.9"/>
+      <text x="130" y="162" text-anchor="middle" fill="#d29922" font-size="11" font-weight="700">📬 receiving-code-review</text>
+      <line x1="220" y1="160" x2="380" y2="160" stroke="#d29922" stroke-width="1.2" stroke-dasharray="3" marker-end="url(#arrow-yellow)"/>
 
-        <!-- Skill Relations -->
-        <section class="relations">
-            <h2>技能调用关系</h2>
-            <div class="relation-groups">
-                <div class="relation-group">
-                    <h4>📍 触发入口</h4>
-                    <ul class="relation-list">
-                        <li>用户发起创意任务 → brainstorming 自动触发</li>
-                        <li>用户发起实现任务 → writing-plans 自动触发</li>
-                        <li>任何响应前 → using-superpowers 检查</li>
-                    </ul>
-                </div>
-                <div class="relation-group">
-                    <h4>🔗 串联关系</h4>
-                    <ul class="relation-list">
-                        <li>brainstorming → writing-plans → executing-plans</li>
-                        <li>executing-plans → subagent-driven-development</li>
-                        <li>subagent-driven-development → requesting-code-review</li>
-                        <li>requesting-code-review → receiving-code-review</li>
-                        <li>executing-plans → finishing-a-development-branch</li>
-                    </ul>
-                </div>
-                <div class="relation-group">
-                    <h4>🔧 支撑技能</h4>
-                    <ul class="relation-list">
-                        <li>systematic-debugging → 任何调试场景</li>
-                        <li>verification-before-completion → 任何完成声明前</li>
-                        <li>using-git-worktrees → 执行计划前创建隔离环境</li>
-                        <li>dispatching-parallel-agents → 多个独立问题时</li>
-                    </ul>
-                </div>
-                <div class="relation-group">
-                    <h4>⚙️ 元框架</h4>
-                    <ul class="relation-list">
-                        <li>using-superpowers → 管理所有技能使用规则</li>
-                        <li>writing-skills → 定义如何编写新技能</li>
-                        <li>所有技能 → 遵循 TDD 理念</li>
-                    </ul>
-                </div>
-            </div>
-        </section>
+      <rect x="40" y="200" width="180" height="40" rx="8" fill="#1c2333" stroke="#58a6ff" stroke-width="1.5" opacity="0.9"/>
+      <text x="130" y="222" text-anchor="middle" fill="#58a6ff" font-size="11" font-weight="700">📡 dispatching-parallel-agents</text>
+      <line x1="220" y1="220" x2="380" y2="220" stroke="#58a6ff" stroke-width="1.2" stroke-dasharray="3" marker-end="url(#arrow)"/>
 
-        <!-- Skill Table -->
-        <section class="skills-section">
-            <h2>技能速查表</h2>
-            <table class="info-table">
-                <thead>
-                    <tr>
-                        <th>技能名称</th>
-                        <th>类别</th>
-                        <th>触发场景</th>
-                        <th>核心价值</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><code>brainstorming</code></td>
-                        <td>协作流程</td>
-                        <td>任何创意工作前</td>
-                        <td>确保设计获批后再编码</td>
-                    </tr>
-                    <tr>
-                        <td><code>writing-plans</code></td>
-                        <td>协作流程</td>
-                        <td>复杂任务分解</td>
-                        <td>2-5分钟可执行任务</td>
-                    </tr>
-                    <tr>
-                        <td><code>executing-plans</code></td>
-                        <td>协作流程</td>
-                        <td>执行预写计划</td>
-                        <td>严格按计划执行</td>
-                    </tr>
-                    <tr>
-                        <td><code>subagent-driven-development</code></td>
-                        <td>协作流程</td>
-                        <td>多任务实现</td>
-                        <td>隔离上下文，双阶段审查</td>
-                    </tr>
-                    <tr>
-                        <td><code>using-git-worktrees</code></td>
-                        <td>协作流程</td>
-                        <td>创建隔离工作空间</td>
-                        <td>避免主分支污染</td>
-                    </tr>
-                    <tr>
-                        <td><code>finishing-a-development-branch</code></td>
-                        <td>协作流程</td>
-                        <td>开发完成验证</td>
-                        <td>多种合并选项</td>
-                    </tr>
-                    <tr>
-                        <td><code>requesting-code-review</code></td>
-                        <td>协作流程</td>
-                        <td>任务后、主要功能后</td>
-                        <td>及早发现问题</td>
-                    </tr>
-                    <tr>
-                        <td><code>receiving-code-review</code></td>
-                        <td>协作流程</td>
-                        <td>接收审查反馈</td>
-                        <td>技术验证，非情绪化</td>
-                    </tr>
-                    <tr>
-                        <td><code>dispatching-parallel-agents</code></td>
-                        <td>协作流程</td>
-                        <td>多个独立问题</td>
-                        <td>并行调查节省时间</td>
-                    </tr>
-                    <tr>
-                        <td><code>test-driven-development</code></td>
-                        <td>测试驱动</td>
-                        <td>任何代码编写前</td>
-                        <td>RED-GREEN-REFACTOR</td>
-                    </tr>
-                    <tr>
-                        <td><code>systematic-debugging</code></td>
-                        <td>调试验证</td>
-                        <td>Bug、测试失败</td>
-                        <td>根因分析优先</td>
-                    </tr>
-                    <tr>
-                        <td><code>verification-before-completion</code></td>
-                        <td>调试验证</td>
-                        <td>声明完成前</td>
-                        <td>证据优先于声称</td>
-                    </tr>
-                    <tr>
-                        <td><code>using-superpowers</code></td>
-                        <td>元技能</td>
-                        <td>任何响应前</td>
-                        <td>技能调用规则</td>
-                    </tr>
-                    <tr>
-                        <td><code>writing-skills</code></td>
-                        <td>元技能</td>
-                        <td>编写新技能</td>
-                        <td>TDD方法写技能</td>
-                    </tr>
-                </tbody>
-            </table>
-        </section>
+      <!-- Arrow markers -->
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#30363d"/>
+        </marker>
+        <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#3fb950"/>
+        </marker>
+        <marker id="arrow-yellow" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#d29922"/>
+        </marker>
+        <marker id="arrow-orange" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#db6d28"/>
+        </marker>
+      </defs>
 
-        <!-- Footer -->
-        <footer class="footer">
-            <p>
-                <a href="https://github.com/obra/superpowers" target="_blank">Superpowers</a> —
-                由 <a href="https://github.com/obra" target="_blank">Jesse Vincent</a> 构建
-            </p>
-            <p style="margin-top:8px;">基于 MIT 协议开源 · 2024</p>
-        </footer>
+      <!-- Legend -->
+      <rect x="880" y="320" width="200" height="170" rx="8" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+      <text x="900" y="342" fill="#8b949e" font-size="11" font-weight="700">图例</text>
+      <rect x="900" y="352" width="12" height="12" rx="3" fill="none" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="918" y="364" fill="#8b949e" font-size="10">流程类（蓝色）</text>
+      <rect x="900" y="370" width="12" height="12" rx="3" fill="none" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="918" y="382" fill="#8b949e" font-size="10">执行类（绿色）</text>
+      <rect x="900" y="388" width="12" height="12" rx="3" fill="none" stroke="#d29922" stroke-width="1.5"/>
+      <text x="918" y="400" fill="#8b949e" font-size="10">质量类（黄色）</text>
+      <rect x="900" y="406" width="12" height="12" rx="3" fill="none" stroke="#db6d28" stroke-width="1.5"/>
+      <text x="918" y="418" fill="#8b949e" font-size="10">调试类（橙色）</text>
+      <rect x="900" y="424" width="12" height="12" rx="3" fill="none" stroke="#bc8cff" stroke-width="1.5"/>
+      <text x="918" y="436" fill="#8b949e" font-size="10">元技能（紫色）</text>
+      <line x1="900" y1="445" x2="930" y2="445" stroke="#d29922" stroke-width="1.5" stroke-dasharray="3"/>
+      <text x="938" y="450" fill="#8b949e" font-size="10">虚线 = 辅助关系</text>
+    </svg>
+  </div>
+</div>
+
+<!-- ==================== SECTION 2: 14技能卡片 ==================== -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(63,185,80,0.15);color:var(--green);">📦</div>
+    14 个技能全览
+  </div>
+  <div class="skill-grid">
+
+    <!-- 1 -->
+    <div class="skill-card" onclick="scrollToDetail('s1')">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(88,166,255,0.15);">🚀</div>
+        <div class="card-title">using-superpowers</div>
+        <span class="card-tag tag-process">流程</span>
+      </div>
+      <div class="card-desc">入口技能。在每个对话开始时触发，检测哪些技能适用于当前任务，并按优先级调度它们。</div>
+      <div class="card-rel">🔗 触发 → <strong>所有其他技能</strong></div>
     </div>
+
+    <!-- 2 -->
+    <div class="skill-card" onclick="scrollToDetail('s2')">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(88,166,255,0.15);">🧠</div>
+        <div class="card-title">brainstorming</div>
+        <span class="card-tag tag-process">流程</span>
+      </div>
+      <div class="card-desc">设计前必经流程。通过苏格拉底式对话探索需求，逐段呈现设计，获取用户审批后输出设计文档。</div>
+      <div class="card-rel">🔗 输出设计文档 → <strong>writing-plans</strong></div>
+    </div>
+
+    <!-- 3 -->
+    <div class="skill-card" onclick="scrollToDetail('s3')">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(88,166,255,0.15);">📝</div>
+        <div class="card-title">writing-plans</div>
+        <span class="card-tag tag-process">流程</span>
+      </div>
+      <div class="card-desc">将设计文档转化为逐任务、逐步骤的详细实施计划。每步 2-5 分钟，含完整代码和验证命令。</div>
+      <div class="card-rel">🔗 输出计划 → <strong>subagent-driven-development</strong> 或 <strong>executing-plans</strong></div>
+    </div>
+
+    <!-- 4 -->
+    <div class="skill-card" onclick="scrollToDetail('s4')">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(88,166,255,0.15);">🔒</div>
+        <div class="card-title">using-git-worktrees</div>
+        <span class="card-tag tag-process">流程</span>
+      </div>
+      <div class="card-desc">为开发任务创建隔离工作区。优先使用平台原生工具，否则用 git worktree 兜底。</div>
+      <div class="card-rel">🔗 被 <strong>subagent-driven-development</strong> 和 <strong>executing-plans</strong> 调用</div>
+    </div>
+
+    <!-- 5 -->
+    <div class="skill-card" onclick="scrollToDetail('s5')">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(88,166,255,0.15);">🤖</div>
+        <div class="card-title">subagent-driven-development</div>
+        <span class="card-tag tag-process">流程</span>
+      </div>
+      <div class="card-desc">同会话执行计划。每任务派发一个全新子代理，完成后进行两阶段审查：规范符合性 → 代码质量。</div>
+      <div class="card-rel">🔗 调用 <strong>test-driven-development</strong> · 结束后触发 <strong>finishing</strong></div>
+    </div>
+
+    <!-- 6 -->
+    <div class="skill-card" onclick="scrollToDetail('s6')">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(63,185,80,0.15);">⚡</div>
+        <div class="card-title">executing-plans</div>
+        <span class="card-tag tag-impl">执行</span>
+      </div>
+      <div class="card-desc">在单独会话中执行实施计划（含审查检查点）。适合不支持子代理的平台。</div>
+      <div class="card-rel">🔗 替代 <strong>subagent-driven-development</strong> 用于无子代理环境</div>
+    </div>
+
+    <!-- 7 -->
+    <div class="skill-card" onclick="scrollToDetail('s7')">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(63,185,80,0.15);">📡</div>
+        <div class="card-title">dispatching-parallel-agents</div>
+        <span class="card-tag tag-impl">执行</span>
+      </div>
+      <div class="card-desc">将独立任务并行派发给多个专用子代理。每个代理获得精确裁剪的指令和上下文，互不干扰。</div>
+      <div class="card-rel">🔗 用于 <strong>subagent-driven-development</strong> 中的并行任务</div>
+    </div>
+
+    <!-- 8 -->
+    <div class="skill-card" onclick="scrollToDetail('s8')">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(63,185,80,0.15);">🏁</div>
+        <div class="card-title">finishing-a-development-branch</div>
+        <span class="card-tag tag-impl">执行</span>
+      </div>
+      <div class="card-desc">实施完成后的收尾工作。验证测试 → 检测环境 → 呈现选项（合并/PR/保留/丢弃）→ 执行清理。</div>
+      <div class="card-rel">🔗 由 <strong>subagent-driven-development</strong> 或 <strong>executing-plans</strong> 触发</div>
+    </div>
+
+    <!-- 9 -->
+    <div class="skill-card" onclick="scrollToDetail('s9')">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(210,153,34,0.15);">🧪</div>
+        <div class="card-title">test-driven-development</div>
+        <span class="card-tag tag-quality">质量</span>
+      </div>
+      <div class="card-desc">铁律：先写失败测试，观察它失败，再写最少代码让它通过。红-绿-重构循环。删除测试前写的代码。</div>
+      <div class="card-rel">🔗 被所有实施类技能调用 · 调试时必用</div>
+    </div>
+
+    <!-- 10 -->
+    <div class="skill-card" onclick="scrollToDetail('s10')">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(210,153,34,0.15);">🔍</div>
+        <div class="card-title">requesting-code-review</div>
+        <span class="card-tag tag-quality">质量</span>
+      </div>
+      <div class="card-desc">主动派发代码审查子代理，在问题级联前捕获它们。每个任务完成后审查，防止问题累积。</div>
+      <div class="card-rel">🔗 在 <strong>subagent-driven-development</strong> 两阶段审查中使用</div>
+    </div>
+
+    <!-- 11 -->
+    <div class="skill-card" onclick="scrollToDetail('s11')">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(210,153,34,0.15);">📬</div>
+        <div class="card-title">receiving-code-review</div>
+        <span class="card-tag tag-quality">质量</span>
+      </div>
+      <div class="card-desc">接收外部代码审查反馈时的应对策略。需要技术严谨性和验证，而非表演性同意或盲目实施。</div>
+      <div class="card-rel">🔗 配合 <strong>requesting-code-review</strong> 形成完整审查闭环</div>
+    </div>
+
+    <!-- 12 -->
+    <div class="skill-card" onclick="scrollToDetail('s12')">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(210,153,34,0.15);">✅</div>
+        <div class="card-title">verification-before-completion</div>
+        <span class="card-tag tag-quality">质量</span>
+      </div>
+      <div class="card-desc">铁律：声明完成前必须先运行验证命令并确认输出。证据先于断言，永远。</div>
+      <div class="card-rel">🔗 每个任务完成时使用 · 配合 <strong>test-driven-development</strong></div>
+    </div>
+
+    <!-- 13 -->
+    <div class="skill-card" onclick="scrollToDetail('s13')">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(219,109,40,0.15);">🐛</div>
+        <div class="card-title">systematic-debugging</div>
+        <span class="card-tag tag-debug">调试</span>
+      </div>
+      <div class="card-desc">四阶段系统化调试：根因调查 → 模式分析 → 假设检验 → 实施修复。先找根因，再谈修复。</div>
+      <div class="card-rel">🔗 修复阶段调用 <strong>test-driven-development</strong> 写失败测试</div>
+    </div>
+
+    <!-- 14 -->
+    <div class="skill-card" onclick="scrollToDetail('s14')">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(188,140,255,0.15);">🛠️</div>
+        <div class="card-title">writing-skills</div>
+        <span class="card-tag tag-meta">元技能</span>
+      </div>
+      <div class="card-desc">创建新技能的技能。将 TDD 应用于流程文档：写压力测试场景 → 观察失败 → 写技能文档 → 验证通过。</div>
+      <div class="card-rel">🔗 元技能 · 用于创建/更新所有其他技能</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ==================== SECTION 3: 详细解析 ==================== -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(188,140,255,0.15);color:var(--purple);">📖</div>
+    技能详细解析
+  </div>
+
+  <!-- Detail 1: using-superpowers -->
+  <div class="detail-panel" id="detail-s1">
+    <div class="detail-tabs">
+      <div class="detail-tab active" onclick="switchTab(this, 's1-t1')">概述</div>
+      <div class="detail-tab" onclick="switchTab(this, 's1-t2')">技能优先级</div>
+      <div class="detail-tab" onclick="switchTab(this, 's1-t3')">触发规则</div>
+    </div>
+    <div class="detail-content">
+      <div class="detail-section active" id="s1-t1">
+        <p style="color:var(--text2);font-size:0.9rem;line-height:1.8;">
+          <strong style="color:var(--accent);">using-superpowers</strong> 是整个技能体系的入口点。它在每个对话开始时触发，决定哪些技能适用于当前任务。<br><br>
+          <strong style="color:var(--text);">核心原则：</strong>如果你认为某个技能有 1% 的可能性适用于你正在做的事情，你<strong>必须</strong>调用该技能。这不是可选的，不可协商，你也不能用合理化理由规避。<br><br>
+          <strong style="color:var(--text);">指令优先级：</strong>用户明确指令 > Superpowers 技能 > 默认系统提示词。当 CLAUDE.md 与技能冲突时，遵循用户的指令。
+        </p>
+      </div>
+      <div class="detail-section" id="s1-t2">
+        <div class="table-wrap">
+          <table>
+            <tr><th>优先级</th><th>技能类型</th><th>示例</th><th>说明</th></tr>
+            <tr><td><strong>1（最高）</strong></td><td>流程技能</td><td>brainstorming, systematic-debugging</td><td>决定<strong>如何</strong>处理任务</td></tr>
+            <tr><td><strong>2</strong></td><td>实施技能</td><td>各种领域专用技能</td><td>指导执行细节</td></tr>
+          </table>
+        </div>
+        <p style="color:var(--text2);font-size:0.85rem;margin-top:12px;">💡 "让我构建 X" → 先 brainstorming，再实施技能。"修复这个 bug" → 先 debugging，再领域技能。</p>
+      </div>
+      <div class="detail-section" id="s1-t3">
+        <div class="iron-law">
+          <div class="law-text">NO SKILL INVOCATION SKIPPED WHEN 1% CHANCE</div>
+          <div class="law-note">如果你认为有 1% 的可能性某个技能适用 → 必须调用它来检查</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <tr><th>❌ 危险想法</th><th>✅ 正确做法</th></tr>
+            <tr><td>"这只是个简单问题"</td><td>问题也是任务，先检查技能</td></tr>
+            <tr><td>"我需要先更多上下文"</td><td>技能检查在澄清问题<strong>之前</strong></td></tr>
+            <tr><td>"我记得这个技能"</td><td>技能会演进，读取当前版本</td></tr>
+            <tr><td>"这个不算任务吧"</td><td>行动 = 任务，先检查技能</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail 2: brainstorming -->
+  <div class="detail-panel" id="detail-s2">
+    <div class="detail-tabs">
+      <div class="detail-tab active" onclick="switchTab(this, 's2-t1')">概述</div>
+      <div class="detail-tab" onclick="switchTab(this, 's2-t2')">工作流程</div>
+      <div class="detail-tab" onclick="switchTab(this, 's2-t3')">硬门控</div>
+    </div>
+    <div class="detail-content">
+      <div class="detail-section active" id="s2-t1">
+        <p style="color:var(--text2);font-size:0.9rem;line-height:1.8;">
+          <strong style="color:var(--accent);">brainstorming</strong> 是任何创造性工作前的<strong>强制</strong>流程。它通过与用户的苏格拉底式对话，将模糊想法转化为完整设计文档。<br><br>
+          <strong style="color:var(--text);">核心原则：</strong>在呈现设计并获用户批准之前，<strong>禁止</strong>调用任何实施技能、编写任何代码、搭建任何项目或采取任何实施行动。这适用于<strong>每个</strong>项目，无论看起来多么简单。
+        </p>
+        <div class="iron-law" style="margin-top:16px;">
+          <div class="law-text">DO NOT IMPLEMENT WITHOUT DESIGN APPROVAL</div>
+          <div class="law-note">即使是一个待办列表、单个函数工具、配置更改 — 都要经过此流程</div>
+        </div>
+      </div>
+      <div class="detail-section" id="s2-t2">
+        <div class="phase-stepper">
+          <div class="phase-step">
+            <div class="step-num">1</div>
+            <div class="step-name">探索上下文</div>
+            <div class="step-desc">检查文件、文档、最近提交</div>
+          </div>
+          <div class="phase-step">
+            <div class="step-num">2</div>
+            <div class="step-name">提供可视化伴侣</div>
+            <div class="step-desc">如涉及视觉问题（独立消息）</div>
+          </div>
+          <div class="phase-step">
+            <div class="step-num">3</div>
+            <div class="step-name">逐题澄清</div>
+            <div class="step-desc">一次一个问题，理解目的/约束</div>
+          </div>
+          <div class="phase-step">
+            <div class="step-num">4</div>
+            <div class="step-name">提出 2-3 个方案</div>
+            <div class="step-desc">含权衡分析和推荐</div>
+          </div>
+          <div class="phase-step">
+            <div class="step-num">5</div>
+            <div class="step-name">呈现设计</div>
+            <div class="step-desc">逐段展示，每段后获取审批</div>
+          </div>
+          <div class="phase-step">
+            <div class="step-num">6</div>
+            <div class="step-name">写设计文档</div>
+            <div class="step-desc">保存到 docs/superpowers/specs/</div>
+          </div>
+          <div class="phase-step">
+            <div class="step-num">7</div>
+            <div class="step-name">调用 writing-plans</div>
+            <div class="step-desc">进入实施计划阶段</div>
+          </div>
+        </div>
+      </div>
+      <div class="detail-section" id="s2-t3">
+        <div style="background:rgba(248,81,73,0.08);border:1px solid rgba(248,81,73,0.3);border-radius:12px;padding:20px;margin:12px 0;">
+          <p style="color:var(--red);font-weight:700;font-size:0.95rem;margin-bottom:10px;">⛔ HARD-GATE（硬门控）</p>
+          <p style="color:var(--text2);font-size:0.85rem;line-height:1.7;">
+            在呈现设计且用户批准之前，<strong>禁止</strong>：<br>
+            • 调用任何实施技能<br>
+            • 编写任何代码<br>
+            • 搭建任何项目脚手架<br>
+            • 采取任何实施行动<br><br>
+            这适用于 EVERY 项目，无论感知到的简单程度。<br>
+            "这个项目太简单了不需要设计" → 这是<strong>反模式</strong>。
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail 3: writing-plans -->
+  <div class="detail-panel" id="detail-s3">
+    <div class="detail-tabs">
+      <div class="detail-tab active" onclick="switchTab(this, 's3-t1')">概述</div>
+      <div class="detail-tab" onclick="switchTab(this, 's3-t2')">计划结构</div>
+      <div class="detail-tab" onclick="switchTab(this, 's3-t3')">无占位符原则</div>
+    </div>
+    <div class="detail-content">
+      <div class="detail-section active" id="s3-t1">
+        <p style="color:var(--text2);font-size:0.9rem;line-height:1.8;">
+          <strong style="color:var(--accent);">writing-plans</strong> 将设计文档转化为详细到"热情但缺乏品味、没有判断力、没有项目上下文、讨厌测试的初级工程师"都能遵循的实施计划。<br><br>
+          <strong style="color:var(--text);">计划保存位置：</strong> <code style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:0.85rem;">docs/superpowers/plans/YYYY-MM-DD-&lt;feature-name&gt;.md</code><br><br>
+          <strong style="color:var(--text);">每个步骤粒度：</strong>一个动作（2-5 分钟）。含完整代码、精确文件路径、验证步骤。
+        </p>
+      </div>
+      <div class="detail-section" id="s3-t2">
+        <p style="color:var(--text);font-weight:700;font-size:0.9rem;margin-bottom:12px;">计划文档结构</p>
+        <div style="background:var(--surface2);border-radius:8px;padding:16px;font-size:0.82rem;color:var(--text2);line-height:1.8;font-family:monospace;white-space:pre-wrap;">
+# [功能名称] 实施计划
+
+> **对于代理工作者：** 必须使用 superpowers:subagent-driven-development（推荐）或 superpowers:executing-plans 来逐任务执行此计划。
+
+**目标：** [一句话描述构建内容]
+**架构：** [2-3 句话描述方法]
+**技术栈：** [关键技术/库]
+
+---
+
+### 任务 N：[组件名称]
+
+**文件：**
+- 创建：`exact/path/to/file.py`
+- 修改：`exact/path/to/existing.py:123-145`
+- 测试：`tests/exact/path/to/test.py`
+
+- [ ] **步骤 1：编写失败测试**
+```python
+def test_specific_behavior():
+    result = function(input)
+    assert result == expected
+```
+
+- [ ] **步骤 2：运行测试验证它失败**
+运行：`pytest tests/path/test.py::test_name -v`
+预期：FAIL with "function not defined"
+
+- [ ] **步骤 3：编写最少实现让测试通过**
+- [ ] **步骤 4：运行测试验证它通过**
+- [ ] **步骤 5：提交**</div>
+      </div>
+      <div class="detail-section" id="s3-t3">
+        <div class="iron-law">
+          <div class="law-text">NO PLACEHOLDERS IN PLAN</div>
+          <div class="law-note">每个步骤必须包含工程师需要的实际内容</div>
+        </div>
+        <div class="table-wrap" style="margin-top:16px;">
+          <table>
+            <tr><th>❌ 计划失败（禁止写入）</th><th>✅ 正确做法</th></tr>
+            <tr><td>"TBD", "TODO", "implement later"</td><td>写入实际代码内容</td></tr>
+            <tr><td>"Add appropriate error handling"</td><td>展示具体错误处理代码</td></tr>
+            <tr><td>"Write tests for the above"（无实际测试代码）</td><td>写入完整测试代码</td></tr>
+            <tr><td>"Similar to Task N"（让工程师自己推断）</td><td>重复代码 — 工程师可能乱序读取任务</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail 4: using-git-worktrees -->
+  <div class="detail-panel" id="detail-s4">
+    <div class="detail-tabs">
+      <div class="detail-tab active" onclick="switchTab(this, 's4-t1')">概述</div>
+      <div class="detail-tab" onclick="switchTab(this, 's4-t2')">工作流程</div>
+      <div class="detail-tab" onclick="switchTab(this, 's4-t3')">目录优先级</div>
+    </div>
+    <div class="detail-content">
+      <div class="detail-section active" id="s4-t1">
+        <p style="color:var(--text2);font-size:0.9rem;line-height:1.8;">
+          <strong style="color:var(--accent);">using-git-worktrees</strong> 确保开发工作在隔离工作区中进行，保护主分支不被意外更改。<br><br>
+          <strong style="color:var(--text);">核心原则：</strong>先检测现有隔离 → 然后使用原生工具 → 最后回退到 git worktree。永远不要与宿主环境对抗。<br><br>
+          <strong style="color:var(--text);">检测顺序：</strong>Step 0 检测是否已在隔离工作区中。如果是，直接跳到项目设置（Step 3）。
+        </p>
+      </div>
+      <div class="detail-section" id="s4-t2">
+        <div class="phase-stepper">
+          <div class="phase-step">
+            <div class="step-num">0</div>
+            <div class="step-name">检测现有隔离</div>
+            <div class="step-desc">GIT_DIR != GIT_COMMON？</div>
+          </div>
+          <div class="phase-step">
+            <div class="step-num">1a</div>
+            <div class="step-name">原生工具</div>
+            <div class="step-desc">优先使用平台原生 worktree 工具</div>
+          </div>
+          <div class="phase-step">
+            <div class="step-num">1b</div>
+            <div class="step-name">Git Worktree 兜底</div>
+            <div class="step-desc">无原生工具时使用 git worktree add</div>
+          </div>
+          <div class="phase-step">
+            <div class="step-num">3</div>
+            <div class="step-name">项目设置</div>
+            <div class="step-desc">自动检测并运行 npm install / cargo build 等</div>
+          </div>
+          <div class="phase-step">
+            <div class="step-num">4</div>
+            <div class="step-name">验证干净基线</div>
+            <div class="step-desc">运行测试，确保工作区起始状态干净</div>
+          </div>
+        </div>
+      </div>
+      <div class="detail-section" id="s4-t3">
+        <p style="color:var(--text);font-weight:700;font-size:0.9rem;margin-bottom:12px;">Worktree 目录选择优先级</p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>优先级</th><th>位置</th><th>说明</th></tr>
+            <tr><td><strong>1</strong></td><td>指令文件中的声明</td><td>用户已指定，直接使用（不询问）</td></tr>
+            <tr><td><strong>2</strong></td><td><code>.worktrees/</code>（首选）</td><td>项目本地，隐藏目录</td></tr>
+            <tr><td><strong>3</strong></td><td><code>worktrees/</code></td><td>项目本地，备选</td></tr>
+            <tr><td><strong>4</strong></td><td><code>~/.config/superpowers/worktrees/</code></td><td>全局路径（向后兼容）</td></tr>
+            <tr><td><strong>5</strong></td><td><code>.worktrees/</code>（默认）</td><td>无其他指引时的默认选择</td></tr>
+          </table>
+        </div>
+        <p style="color:var(--text2);font-size:0.82rem;margin-top:10px;">⚠️ 项目本地目录<strong>必须</strong>先验证是否被 git ignore，否则 worktree 内容会被意外提交到仓库。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail 5: subagent-driven-development -->
+  <div class="detail-panel" id="detail-s5">
+    <div class="detail-tabs">
+      <div class="detail-tab active" onclick="switchTab(this, 's5-t1')">概述</div>
+      <div class="detail-tab" onclick="switchTab(this, 's5-t2')">两阶段审查</div>
+      <div class="detail-tab" onclick="switchTab(this, 's5-t3')">子代理状态处理</div>
+    </div>
+    <div class="detail-content">
+      <div class="detail-section active" id="s5-t1">
+        <p style="color:var(--text2);font-size:0.9rem;line-height:1.8;">
+          <strong style="color:var(--accent);">subagent-driven-development</strong> 是整个体系的核心执行引擎。它在同一会话中逐任务派发全新的子代理，每个子代理完成后进行<strong>两阶段审查</strong>。<br><br>
+          <strong style="color:var(--text);">核心原则：</strong>每任务一个全新子代理 + 两阶段审查（规范符合性 → 代码质量）= 高质量、快速迭代。<br><br>
+          <strong style="color:var(--text);">连续执行：</strong>任务之间<strong>不要</strong>暂停与用户确认。除非遇到无法解决的阻塞、阻碍进度的歧义、或所有任务完成。"我应该继续吗？"的提示和进度摘要是在浪费用户时间。
+        </p>
+      </div>
+      <div class="detail-section" id="s5-t2">
+        <p style="color:var(--text);font-weight:700;font-size:0.9rem;margin-bottom:16px;">每任务执行流程（两阶段审查）</p>
+        <div class="phase-stepper" style="flex-wrap:wrap;">
+          <div class="phase-step" style="min-width:160px;">
+            <div class="step-num">①</div>
+            <div class="step-name">派发实施子代理</div>
+            <div class="step-desc">使用 implementer-prompt.md 模板</div>
+          </div>
+          <div class="phase-step" style="min-width:160px;">
+            <div class="step-num">②</div>
+            <div class="step-name">子代理实施+自审</div>
+            <div class="step-desc">TDD 循环，提交，自检</div>
+          </div>
+          <div class="phase-step" style="min-width:160px;">
+            <div class="step-num">③</div>
+            <div class="step-name">规范符合性审查</div>
+            <div class="step-desc">派发 spec-reviewer 子代理</div>
+          </div>
+          <div class="phase-step" style="min-width:160px;">
+            <div class="step-num">④</div>
+            <div class="step-name">代码质量审查</div>
+            <div class="step-desc">派发 code-quality-reviewer 子代理</div>
+          </div>
+          <div class="phase-step" style="min-width:160px;">
+            <div class="step-num">✅</div>
+            <div class="step-name">标记任务完成</div>
+            <div class="step-desc">进入下一个任务</div>
+          </div>
+        </div>
+        <div style="background:rgba(248,81,73,0.08);border:1px solid rgba(248,81,73,0.3);border-radius:8px;padding:12px;margin-top:16px;">
+          <p style="color:var(--red);font-size:0.82rem;font-weight:700;">⚠️ 关键顺序：规范符合性审查（阶段③）必须在代码质量审查（阶段④）之前完成。不能跳过顺序或颠倒。</p>
+        </div>
+      </div>
+      <div class="detail-section" id="s5-t3">
+        <p style="color:var(--text);font-weight:700;font-size:0.9rem;margin-bottom:12px;">子代理返回的 4 种状态及处理方式</p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>状态</th><th>含义</th><th>处理方式</th></tr>
+            <tr><td><strong style="color:var(--green);">DONE</strong></td><td>任务完成</td><td>进入规范符合性审查</td></tr>
+            <tr><td><strong style="color:var(--yellow);">DONE_WITH_CONCERNS</strong></td><td>完成但标记了疑虑</td><td>先阅读疑虑，再决定是否需要处理，然后进入审查</td></tr>
+            <tr><td><strong style="color:var(--orange);">NEEDS_CONTEXT</strong></td><td>需要更多信息</td><td>提供缺失上下文，重新派发<strong>同一个</strong>子代理</td></tr>
+            <tr><td><strong style="color:var(--red);">BLOCKED</strong></td><td>无法完成任务</td><td>1. 提供更多信息重新派发；2. 换用更强模型；3. 将任务拆分为更小单元；4. 上报用户</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail 6: executing-plans -->
+  <div class="detail-panel" id="detail-s6">
+    <div class="detail-tabs">
+      <div class="detail-tab active" onclick="switchTab(this, 's6-t1')">概述</div>
+      <div class="detail-tab" onclick="switchTab(this, 's6-t2')">与 subagent 模式对比</div>
+    </div>
+    <div class="detail-content">
+      <div class="detail-section active" id="s6-t1">
+        <p style="color:var(--text2);font-size:0.9rem;line-height:1.8;">
+          <strong style="color:var(--accent);">executing-plans</strong> 在<strong>不支持子代理</strong>的平台上的替代执行方案。它加载计划、严格按步骤执行、在检查点暂停供人工审查。<br><br>
+          <strong style="color:var(--text);">使用场景：</strong>平台不支持子代理（如某些 CLI 环境）时，作为 <strong>subagent-driven-development</strong> 的替代方案。<br><br>
+          <strong style="color:var(--text);">注意：</strong>如果平台支持子代理，请使用 <strong>subagent-driven-development</strong>，质量会显著更高。
+        </p>
+      </div>
+      <div class="detail-section" id="s6-t2">
+        <div class="table-wrap">
+          <table>
+            <tr><th>对比维度</th><th>subagent-driven-development</th><th>executing-plans</th></tr>
+            <tr><td><strong>执行环境</strong></td><td>同一会话</td><td>单独会话（含审查检查点）</td></tr>
+            <tr><td><strong>子代理</strong></td><td>每任务派发全新子代理</td><td>无子代理，主代理执行</td></tr>
+            <tr><td><strong>审查机制</strong></td><td>两阶段自动审查</td><td>批量执行 + 人机检查点</td></tr>
+            <tr><td><strong>迭代速度</strong></td><td>快（任务间不暂停）</td><td>较慢（检查点暂停）</td></tr>
+            <tr><td><strong>适用平台</strong></td><td>支持子代理的平台（Claude Code 等）</td><td>不支持子代理的平台</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail 7: dispatching-parallel-agents -->
+  <div class="detail-panel" id="detail-s7">
+    <div class="detail-content" style="display:block;">
+      <p style="color:var(--text2);font-size:0.9rem;line-height:1.8;">
+        <strong style="color:var(--accent);">dispatching-parallel-agents</strong> 将独立任务并行派发给多个专用子代理。每个代理获得精确裁剪的指令和上下文，互相不干扰。<br><br>
+        <strong style="color:var(--text);">核心原则：</strong>每个独立问题域派发一个代理。让它们并发工作。<br><br>
+        <strong style="color:var(--text);">使用场景：</strong>3+ 测试文件以不同根因失败、多个子系统独立损坏、每个问题可以在不了解其他问题上下文的情况下理解。<br><br>
+        <strong style="color:var(--text);">好的代理提示词特征：</strong>① 聚焦（一个清晰的问题域）② 自包含（理解问题所需的全部上下文）③ 输出明确（代理应该返回什么）。
+      </p>
+      <div style="background:rgba(248,81,73,0.08);border:1px solid rgba(248,81,73,0.3);border-radius:8px;padding:12px;margin-top:16px;">
+        <p style="color:var(--red);font-size:0.82rem;"><strong>❌ 不要使用当：</strong>失败相关（修复一个可能修复其他）→ 先一起调查；需要完整上下文；探索性调试（还不知道哪里坏了）；共享状态（代理会互相干扰）。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail 8: finishing-a-development-branch -->
+  <div class="detail-panel" id="detail-s8">
+    <div class="detail-tabs">
+      <div class="detail-tab active" onclick="switchTab(this, 's8-t1')">概述</div>
+      <div class="detail-tab" onclick="switchTab(this, 's8-t2')">四个选项</div>
+      <div class="detail-tab" onclick="switchTab(this, 's8-t3')">环境检测</div>
+    </div>
+    <div class="detail-content">
+      <div class="detail-section active" id="s8-t1">
+        <p style="color:var(--text2);font-size:0.9rem;line-height:1.8;">
+          <strong style="color:var(--accent);">finishing-a-development-branch</strong> 在实施完成后引导收尾工作。它验证测试 → 检测环境 → 呈现结构化选项 → 执行选择 → 清理。<br><br>
+          <strong style="color:var(--text);">核心原则：</strong>验证测试 → 检测环境 → 呈现选项 → 执行选择 → 清理。永远不超过这一步。
+        </p>
+      </div>
+      <div class="detail-section" id="s8-t2">
+        <p style="color:var(--text);font-weight:700;font-size:0.9rem;margin-bottom:12px;">呈现给用户的选项（正常仓库 / 命名分支 worktree）</p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>选项</th><th>操作</th><th>合并</th><th>推送</th><th>保留 Worktree</th><th>清理分支</th></tr>
+            <tr><td><strong>1. 本地合并</strong></td><td>merge 到 base 分支</td><td>✅</td><td>-</td><td>-</td><td>✅（合并后）</td></tr>
+            <tr><td><strong>2. 推送并创建 PR</strong></td><td>push + gh pr create</td><td>-</td><td>✅</td><td>✅</td><td>-</td></tr>
+            <tr><td><strong>3. 保持原样</strong></td><td>不操作</td><td>-</td><td>-</td><td>✅</td><td>-</td></tr>
+            <tr><td><strong>4. 丢弃</strong></td><td>删除分支 + worktree</td><td>-</td><td>-</td><td>-</td><td>✅（强制）</td></tr>
+          </table>
+        </div>
+        <p style="color:var(--text2);font-size:0.82rem;margin-top:10px;">⚠️ 选项 2 和 3 <strong>不清理</strong> worktree，因为用户需要它来迭代 PR 反馈。</p>
+      </div>
+      <div class="detail-section" id="s8-t3">
+        <p style="color:var(--text);font-weight:700;font-size:0.9rem;margin-bottom:12px;">环境检测决定显示哪个菜单</p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>状态</th><th>菜单选项数</th><th>清理行为</th></tr>
+            <tr><td><code>GIT_DIR == GIT_COMMON</code>（普通仓库）</td><td>4 个标准选项</td><td>无 worktree 需清理</td></tr>
+            <tr><td><code>GIT_DIR != GIT_COMMON</code>，命名分支</td><td>4 个标准选项</td><td>基于来源决定（见 Step 6）</td></tr>
+            <tr><td><code>GIT_DIR != GIT_COMMON</code>，分离 HEAD</td><td>3 个选项（无合并）</td><td>不清理（外部管理）</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail 9: test-driven-development -->
+  <div class="detail-panel" id="detail-s9">
+    <div class="detail-tabs">
+      <div class="detail-tab active" onclick="switchTab(this, 's9-t1')">概述</div>
+      <div class="detail-tab" onclick="switchTab(this, 's9-t2')">红-绿-重构</div>
+      <div class="detail-tab" onclick="switchTab(this, 's9-t3')">铁律</div>
+    </div>
+    <div class="detail-content">
+      <div class="detail-section active" id="s9-t1">
+        <p style="color:var(--text2);font-size:0.9rem;line-height:1.8;">
+          <strong style="color:var(--accent);">test-driven-development</strong> 是整套体系的质量基石。先写测试，观察它失败，再写最少代码让它通过。<br><br>
+          <strong style="color:var(--text);">核心原则：</strong>如果你没有观察到测试失败，你就不知道它是否测试了正确的东西。<br><br>
+          <strong style="color:var(--text);">适用范围：</strong>新功能、Bug 修复、重构、行为变更。例外（需征得用户同意）：一次性原型、生成代码、配置文件。
+        </p>
+      </div>
+      <div class="detail-section" id="s9-t2">
+        <div class="phase-stepper" style="flex-wrap:wrap;">
+          <div class="phase-step" style="min-width:140px;">
+            <div class="step-num" style="background:var(--red);">🔴</div>
+            <div class="step-name">RED<br/>写失败测试</div>
+            <div class="step-desc">写一个最小化测试展示应该发生什么</div>
+          </div>
+          <div class="phase-step" style="min-width:140px;">
+            <div class="step-num" style="background:var(--red);">✓</div>
+            <div class="step-name">验证 RED</div>
+            <div class="step-desc">运行测试，确认它按预期失败了</div>
+          </div>
+          <div class="phase-step" style="min-width:140px;">
+            <div class="step-num" style="background:var(--green);">🟢</div>
+            <div class="step-name">GREEN<br/>最少代码</div>
+            <div class="step-desc">写刚好足够的代码让测试通过</div>
+          </div>
+          <div class="phase-step" style="min-width:140px;">
+            <div class="step-num" style="background:var(--green);">✓</div>
+            <div class="step-name">验证 GREEN</div>
+            <div class="step-desc">运行测试，确认它通过</div>
+          </div>
+          <div class="phase-step" style="min-width:140px;">
+            <div class="step-num" style="background:var(--purple);">🟣</div>
+            <div class="step-name">REFACTOR<br/>清理</div>
+            <div class="step-desc">移除重复，改进命名，提取辅助函数</div>
+          </div>
+        </div>
+      </div>
+      <div class="detail-section" id="s9-t3">
+        <div class="iron-law">
+          <div class="law-text">NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST</div>
+          <div class="law-note">在测试之前写了代码？删除它。从头开始。</div>
+        </div>
+        <div class="table-wrap" style="margin-top:16px;">
+          <table>
+            <tr><th>❌ 常见合理化借口</th><th>✅ 现实</th></tr>
+            <tr><td>"太简单了不需要测试"</td><td>简单的代码也会坏。测试只需 30 秒。</td></tr>
+            <tr><td>"我会在之后测试"</td><td>测试立即通过证明不了任何事。</td></tr>
+            <tr><td>"测试之后能达到同样目的"</td><td>测试-之后 = "这做什么？" 测试-之前 = "应该做什么？"</td></tr>
+            <tr><td>"已经手动测试了所有边界情况"</td><td>临时 ≠ 系统化。没有记录，无法重新运行。</td></tr>
+            <tr><td>"删除 X 小时工作是浪费"</td><td>沉没成本谬误。保留无法验证的代码 = 技术债。</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail 10: requesting-code-review -->
+  <div class="detail-panel" id="detail-s10">
+    <div class="detail-content" style="display:block;">
+      <p style="color:var(--text2);font-size:0.9rem;line-height:1.8;">
+        <strong style="color:var(--accent);">requesting-code-review</strong> 在问题级联前主动派发代码审查子代理来捕获问题。审查者获得精确裁剪的上下文进行评估 — 绝不继承你会话的历史。<br><br>
+        <strong style="color:var(--text);">核心原则：</strong>早审查，常审查。<br><br>
+        <strong style="color:var(--text);">强制审查时机：</strong>① subagent-driven-development 中每个任务后；② 完成主要功能后；③ 合并到 main 之前。<br><br>
+        <strong style="color:var(--text);">审查流程：</strong>获取 git SHAs → 派发代码审查子代理（使用 code-reviewer.md 模板）→ 根据反馈行动（Critical 立即修复，Important 继续前修复，Minor 稍后处理）。
+      </p>
+    </div>
+  </div>
+
+  <!-- Detail 11: receiving-code-review -->
+  <div class="detail-panel" id="detail-s11">
+    <div class="detail-tabs">
+      <div class="detail-tab active" onclick="switchTab(this, 's11-t1')">概述</div>
+      <div class="detail-tab" onclick="switchTab(this, 's11-t2')">禁止响应</div>
+      <div class="detail-tab" onclick="switchTab(this, 's11-t3')">何时反驳</div>
+    </div>
+    <div class="detail-content">
+      <div class="detail-section active" id="s11-t1">
+        <p style="color:var(--text2);font-size:0.9rem;line-height:1.8;">
+          <strong style="color:var(--accent);">receiving-code-review</strong> 定义了接收代码审查反馈时的行为准则。需要技术严谨性，而非情绪化表现。<br><br>
+          <strong style="color:var(--text);">核心原则：</strong>先验证，再实施。先询问，再假设。技术正确性优先于社交舒适度。<br><br>
+          <strong style="color:var(--text);">响应模式：</strong>读取完整反馈 → 用自己的话理解需求 → 对照代码库实际情况验证 → 评估对本代码库技术是否正确 → 技术确认或理由充分反驳 → 一次实施一项，每项测试。
+        </p>
+      </div>
+      <div class="detail-section" id="s11-t2">
+        <div style="background:rgba(248,81,73,0.08);border:1px solid rgba(248,81,73,0.3);border-radius:8px;padding:12px;margin-bottom:12px;">
+          <p style="color:var(--red);font-size:0.85rem;font-weight:700;margin-bottom:8px;">🚫 禁止的响应（CLAUDE.md 明确违规）</p>
+          <p style="color:var(--text2);font-size:0.82rem;line-height:1.7;">
+            ❌ "You're absolutely right!"（表演性同意）<br>
+            ❌ "Great point!" / "Excellent feedback!"（情绪化表现）<br>
+            ❌ "Let me implement that now"（未经验证）<br><br>
+            ✅ 重述技术需求<br>
+            ✅ 提出澄清问题<br>
+            ✅ 用技术推理反驳（如果错了）<br>
+            ✅ 直接开始工作（行动胜于言辞）
+          </p>
+        </div>
+        <p style="color:var(--text2);font-size:0.82rem;">💡 如果你抓住自己即将写 "Thanks" → <strong>删除它</strong>。陈述修复内容即可。为什么不要感谢？行动本身说明你听到了反馈。</p>
+      </div>
+      <div class="detail-section" id="s11-t3">
+        <p style="color:var(--text);font-weight:700;font-size:0.9rem;margin-bottom:12px;">应该反驳审查意见的情况</p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>情况</th><th>处理方式</th></tr>
+            <tr><td>建议破坏了现有功能</td><td>用技术推理反驳</td></tr>
+            <tr><td>审查者缺乏完整上下文</td><td>提出具体问题，引用工作测试/代码</td></tr>
+            <tr><td>违反 YAGNI（未使用功能）</td><td>"此端点未被调用。移除它（YAGNI）？"</td></tr>
+            <tr><td>技术上对本代码库不正确</td><td>检查兼容性，必要时反驳</td></tr>
+            <tr><td>与用户之前的决定冲突</td><td>停止，先与你的用户伙伴讨论</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail 12: verification-before-completion -->
+  <div class="detail-panel" id="detail-s12">
+    <div class="detail-tabs">
+      <div class="detail-tab active" onclick="switchTab(this, 's12-t1')">概述</div>
+      <div class="detail-tab" onclick="switchTab(this, 's12-t2')">门控函数</div>
+      <div class="detail-tab" onclick="switchTab(this, 's12-t3')">常见失败</div>
+    </div>
+    <div class="detail-content">
+      <div class="detail-section active" id="s12-t1">
+        <p style="color:var(--text2);font-size:0.9rem;line-height:1.8;">
+          <strong style="color:var(--accent);">verification-before-completion</strong> 要求在声明工作完成、修复完成或通过之前，必须先运行验证命令并确认输出。<br><br>
+          <strong style="color:var(--text);">核心原则：</strong>证据先于断言，永远。<br><br>
+          <strong style="color:var(--text);">铁律：</strong>如果在这条消息中没有运行验证命令，你不能声称它通过。
+        </p>
+        <div class="iron-law" style="margin-top:16px;">
+          <div class="law-text">NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE</div>
+          <div class="law-note">在声称任何状态或表达满意度之前 — 运行命令，读取输出，然后声称结果</div>
+        </div>
+      </div>
+      <div class="detail-section" id="s12-t2">
+        <p style="color:var(--text);font-weight:700;font-size:0.9rem;margin-bottom:12px;">门控函数（每次声明前必须执行）</p>
+        <div style="background:var(--surface2);border-radius:8px;padding:16px;font-size:0.85rem;color:var(--text2);line-height:1.8;">
+          1. <strong style="color:var(--text);">IDENTIFY</strong>：什么命令能证明这个断言？<br>
+          2. <strong style="color:var(--text);">RUN</strong>：执行<strong>完整</strong>命令（新鲜、完整）<br>
+          3. <strong style="color:var(--text);">READ</strong>：完整输出，检查退出码，统计失败数<br>
+          4. <strong style="color:var(--text);">VERIFY</strong>：输出是否确认了断言？<br>
+          &nbsp;&nbsp;• 如果 <strong>NO</strong>：陈述实际状态（附证据）<br>
+          &nbsp;&nbsp;• 如果 <strong>YES</strong>：陈述断言（<strong>附证据</strong>）<br>
+          5. <strong style="color:var(--text);">ONLY THEN</strong>：做出断言
+        </div>
+      </div>
+      <div class="detail-section" id="s12-t3">
+        <div class="table-wrap">
+          <table>
+            <tr><th>断言</th><th>需要</th><th>不充分</th></tr>
+            <tr><td>测试通过</td><td>测试命令输出：0 失败</td><td>上次运行、"应该通过"</td></tr>
+            <tr><td>Linter 干净</td><td>Linter 输出：0 错误</td><td>部分检查、外推</td></tr>
+            <tr><td>构建成功</td><td>构建命令：exit 0</td><td>Linter 通过、日志看起来不错</td></tr>
+            <tr><td>Bug 已修复</td><td>测试原始症状：通过</td><td>代码已更改，假设已修复</td></tr>
+            <tr><td>代理完成</td><td>VCS diff 显示更改</td><td>代理报告 "success"</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail 13: systematic-debugging -->
+  <div class="detail-panel" id="detail-s13">
+    <div class="detail-tabs">
+      <div class="detail-tab active" onclick="switchTab(this, 's13-t1')">概述</div>
+      <div class="detail-tab" onclick="switchTab(this, 's13-t2')">四阶段</div>
+      <div class="detail-tab" onclick="switchTab(this, 's13-t3')">铁律</div>
+    </div>
+    <div class="detail-content">
+      <div class="detail-section active" id="s13-t1">
+        <p style="color:var(--text2);font-size:0.9rem;line-height:1.8;">
+          <strong style="color:var(--accent);">systematic-debugging</strong> 提供了一套系统化的四阶段调试方法，防止随机修复浪费时间并引入新 Bug。<br><br>
+          <strong style="color:var(--text);">核心原则：</strong>永远先在根因调查之后再尝试修复。症状修复是失败。<br><br>
+          <strong style="color:var(--text);">特别适用于：</strong>时间压力下（紧急情况让人想猜测）、"只是一个快速修复"看起来很明显、你已经尝试了多种修复、之前的修复没有工作、你不完全理解问题。
+        </p>
+      </div>
+      <div class="detail-section" id="s13-t2">
+        <div class="phase-stepper" style="flex-wrap:wrap;">
+          <div class="phase-step" style="min-width:160px;">
+            <div class="step-num">1</div>
+            <div class="step-name">根因调查</div>
+            <div class="step-desc">读取错误、重现问题、检查最近更改、收集多组件系统中的证据</div>
+          </div>
+          <div class="phase-step" style="min-width:160px;">
+            <div class="step-num">2</div>
+            <div class="step-name">模式分析</div>
+            <div class="step-desc">找到工作示例、与参考对比、识别差异、理解依赖关系</div>
+          </div>
+          <div class="phase-step" style="min-width:160px;">
+            <div class="step-num">3</div>
+            <div class="step-name">假设与检验</div>
+            <div class="step-desc">形成单一假设、最小化测试、验证后再继续</div>
+          </div>
+          <div class="phase-step" style="min-width:160px;">
+            <div class="step-num">4</div>
+            <div class="step-name">实施</div>
+            <div class="step-desc">创建失败测试 → 实施单一修复 → 验证修复</div>
+          </div>
+        </div>
+        <div style="background:rgba(248,81,73,0.08);border:1px solid rgba(248,81,73,0.3);border-radius:8px;padding:12px;margin-top:16px;">
+          <p style="color:var(--red);font-size:0.82rem;font-weight:700;">⚠️ 如果 3+ 次修复都失败了 → 停止并质疑架构</p>
+          <p style="color:var(--text2);font-size:0.8rem;margin-top:6px;">
+            模式表明架构问题：每次修复在不同地方揭示新的共享状态/耦合/问题；修复需要"大规模重构"来实施；每次修复在其他地方创造新症状。<br>
+            这与失败假设不同 — 这是<strong>错误的架构</strong>。在尝试更多修复之前，先与你的用户伙伴讨论。
+          </p>
+        </div>
+      </div>
+      <div class="detail-section" id="s13-t3">
+        <div class="iron-law">
+          <div class="law-text">NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST</div>
+          <div class="law-note">如果你还没有完成阶段 1，你不能提出修复方案</div>
+        </div>
+        <div class="table-wrap" style="margin-top:16px;">
+          <table>
+            <tr><th>🚩 危险信号（立即停止并返回阶段 1）</th></tr>
+            <tr><td>"快速修复一下，稍后调查"</td></tr>
+            <tr><td>"先试试改 X，看看是否工作"</td></tr>
+            <tr><td>"一次加多个更改，运行测试"（无法隔离有效更改）</td></tr>
+            <tr><td>"跳过测试，我会手动验证"</td></tr>
+            <tr><td>"我完全不理解但这可能行"</td></tr>
+            <tr><td>"再试一次修复"（已经尝试 2+ 次后）</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail 14: writing-skills -->
+  <div class="detail-panel" id="detail-s14">
+    <div class="detail-tabs">
+      <div class="detail-tab active" onclick="switchTab(this, 's14-t1')">概述</div>
+      <div class="detail-tab" onclick="switchTab(this, 's14-t2')">TDD 映射</div>
+      <div class="detail-tab" onclick="switchTab(this, 's14-t3')">技能描述优化</div>
+    </div>
+    <div class="detail-content">
+      <div class="detail-section active" id="s14-t1">
+        <p style="color:var(--text2);font-size:0.9rem;line-height:1.8;">
+          <strong style="color:var(--accent);">writing-skills</strong> 是"元技能"——用于创建新技能的技能。它将 TDD（测试驱动开发）应用于流程文档：写压力测试场景（子代理）→ 观察失败（基线行为）→ 写技能文档 → 验证通过。<br><br>
+          <strong style="color:var(--text);">核心原则：</strong>如果你没有观察到代理在没有技能的情况下失败，你就不知道技能是否教会了正确的东西。<br><br>
+          <strong style="color:var(--text);">前置要求：</strong>必须先理解 <strong>test-driven-development</strong> 技能。此技能将 TDD 适应到文档创作。
+        </p>
+      </div>
+      <div class="detail-section" id="s14-t2">
+        <p style="color:var(--text);font-weight:700;font-size:0.9rem;margin-bottom:12px;">TDD 概念 → 技能创建映射</p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>TDD 概念</th><th>技能创建对应</th></tr>
+            <tr><td>测试用例</td><td>用子代理压力场景</td></tr>
+            <tr><td>生产代码</td><td>技能文档（SKILL.md）</td></tr>
+            <tr><td>测试失败（RED）</td><td>代理在没有技能的情况下违反规则（基线）</td></tr>
+            <tr><td>测试通过（GREEN）</td><td>代理在技能存在时遵守</td></tr>
+            <tr><td>重构</td><td>关闭漏洞（同时保持合规）</td></tr>
+            <tr><td>先写测试</td><td>在<strong>写技能之前</strong>运行基线场景</td></tr>
+            <tr><td>观察它失败</td><td>记录代理使用的确切合理化理由</td></tr>
+            <tr><td>最少代码</td><td>写解决那些特定违规的技能</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="detail-section" id="s14-t3">
+        <p style="color:var(--text);font-weight:700;font-size:0.9rem;margin-bottom:12px;">Claude 搜索优化（CSO）—— 描述字段关键规则</p>
+        <div style="background:rgba(248,81,73,0.08);border:1px solid rgba(248,81,73,0.3);border-radius:8px;padding:12px;margin-bottom:12px;">
+          <p style="color:var(--red);font-size:0.82rem;font-weight:700;">⚠️ 关键：描述 = 何时使用，而非技能做什么</p>
+          <p style="color:var(--text2);font-size:0.8rem;line-height:1.6;margin-top:6px;">
+            描述字段应该<strong>只描述触发条件</strong>。不要总结技能的工作流程。<br>
+            为什么这很重要？测试发现，当描述总结工作流程时，Claude 可能遵循描述而不是读取完整的技能内容。<br>
+            例如：描述说"代码审查 between tasks"导致 Claude 只做一次审查，尽管技能的流程图清楚地显示了两阶段审查。
+          </p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <tr><th>❌ 不好的描述</th><th>✅ 好的描述</th></tr>
+            <tr><td>"Use for TDD - write test first, watch it fail..."</td><td>"Use when implementing any feature or bugfix, before writing implementation code"</td></tr>
+            <tr><td>"Use when executing plans - dispatches subagent..."</td><td>"Use when executing implementation plans with independent tasks in the current session"</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== SECTION 4: 核心理念 ==================== -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(210,153,34,0.15);color:var(--yellow);">💡</div>
+    核心理念与哲学
+  </div>
+  <div class="principle-grid">
+    <div class="principle-card">
+      <div class="p-icon">🔴🟢🟣</div>
+      <div class="p-title">测试驱动开发（TDD）</div>
+      <div class="p-desc">先写失败测试，观察它失败，再写最少代码让它通过。如果你没有观察到测试失败，你就不知道它是否测试了正确的东西。删除测试前写的代码，从头开始。</div>
+    </div>
+    <div class="principle-card">
+      <div class="p-icon">🧠</div>
+      <div class="p-title">设计先于实施</div>
+      <div class="p-desc">任何创造性工作前，必须经过 brainstorming。探索需求，提出多个方案，呈现设计，获取审批。即使"简单"项目也不跳过。</div>
+    </div>
+    <div class="principle-card">
+      <div class="p-icon">🔍</div>
+      <div class="p-title">证据先于断言</div>
+      <div class="p-desc">在声称工作完成前，必须先运行验证命令并确认输出。永远不在没有新鲜验证证据的情况下声称完成。</div>
+    </div>
+    <div class="principle-card">
+      <div class="p-icon">🎯</div>
+      <div class="p-title">YAGNI</div>
+      <div class="p-desc">"You Aren't Gonna Need It"—— ruthless 地移除不必要功能。审查者建议"专业"功能时，先 grep 代码库确认是否实际被调用。</div>
+    </div>
+    <div class="principle-card">
+      <div class="p-icon">🏗️</div>
+      <div class="p-title">隔离与清晰</div>
+      <div class="p-desc">将系统分解为更小的单元，每个都有清晰目的、通过定义良好的接口通信、可以独立理解和测试。</div>
+    </div>
+    <div class="principle-card">
+      <div class="p-icon">🤖</div>
+      <div class="p-title">子代理驱动</div>
+      <div class="p-desc">每任务派发全新子代理，上下文无污染。两阶段审查（规范符合性 → 代码质量）确保高质量输出。</div>
+    </div>
+    <div class="principle-card">
+      <div class="p-icon">🔄</div>
+      <div class="p-title">DRY / 小步 / 常提交</div>
+      <div class="p-desc">Don't Repeat Yourself。每步 2-5 分钟。频繁提交，每个提交对应一个完整、可验证的更改。</div>
+    </div>
+    <div class="principle-card">
+      <div class="p-icon">📊</div>
+      <div class="p-title">技术严谨性优先</div>
+      <div class="p-desc">接收代码审查时，技术正确性优先于社交舒适度。验证后再实施，有理由地反驳，永远不表演性同意。</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SECTION 5: 技能关系图 ==================== -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(188,140,255,0.15);color:var(--purple);">🔗</div>
+    技能依赖关系
+  </div>
+  <div class="rel-map">
+    <svg viewBox="0 0 1000 600" xmlns="http://www.w3.org/2000/svg" style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;">
+      <!-- Title -->
+      <text x="500" y="30" text-anchor="middle" fill="#e6edf3" font-size="15" font-weight="700">Superpowers 技能依赖关系图</text>
+
+      <!-- Layer 0: Entry -->
+      <rect x="380" y="50" width="240" height="44" rx="10" fill="#1c2333" stroke="#58a6ff" stroke-width="2"/>
+      <text x="500" y="74" text-anchor="middle" fill="#58a6ff" font-size="12" font-weight="700">🚀 using-superpowers</text>
+      <text x="500" y="90" text-anchor="middle" fill="#8b949e" font-size="10">入口 · 技能调度器</text>
+
+      <!-- Layer 1: Design -->
+      <rect x="80" y="130" width="200" height="44" rx="10" fill="#1c2333" stroke="#58a6ff" stroke-width="2"/>
+      <text x="180" y="154" text-anchor="middle" fill="#58a6ff" font-size="12" font-weight="700">🧠 brainstorming</text>
+      <text x="180" y="170" text-anchor="middle" fill="#8b949e" font-size="10">设计前强制流程</text>
+
+      <rect x="660" y="130" width="260" height="44" rx="10" fill="#1c2333" stroke="#db6d28" stroke-width="2"/>
+      <text x="790" y="154" text-anchor="middle" fill="#db6d28" font-size="12" font-weight="700">🐛 systematic-debugging</text>
+      <text x="790" y="170" text-anchor="middle" fill="#8b949e" font-size="10">遇到 Bug 时进入</text>
+
+      <!-- Layer 2: Plan -->
+      <rect x="300" y="210" width="240" height="44" rx="10" fill="#1c2333" stroke="#58a6ff" stroke-width="2"/>
+      <text x="420" y="234" text-anchor="middle" fill="#58a6ff" font-size="12" font-weight="700">📝 writing-plans</text>
+      <text x="420" y="250" text-anchor="middle" fill="#8b949e" font-size="10">输出详细实施计划</text>
+
+      <!-- Layer 3: Isolation -->
+      <rect x="300" y="280" width="280" height="44" rx="10" fill="#1c2333" stroke="#39d2c0" stroke-width="2"/>
+      <text x="440" y="304" text-anchor="middle" fill="#39d2c0" font-size="12" font-weight="700">🔒 using-git-worktrees</text>
+      <text x="440" y="320" text-anchor="middle" fill="#8b949e" font-size="10">创建隔离工作区（两技能都调用）</text>
+
+      <!-- Layer 4: Execution -->
+      <rect x="60" y="360" width="260" height="56" rx="10" fill="#1c2333" stroke="#3fb950" stroke-width="2"/>
+      <text x="190" y="384" text-anchor="middle" fill="#3fb950" font-size="12" font-weight="700">🤖 subagent-driven-development</text>
+      <text x="190" y="400" text-anchor="middle" fill="#8b949e" font-size="10">每任务派发子代理</text>
+      <text x="190" y="414" text-anchor="middle" fill="#8b949e" font-size="10">两阶段审查</text>
+
+      <rect x="380" y="360" width="200" height="56" rx="10" fill="#1c2333" stroke="#3fb950" stroke-width="2"/>
+      <text x="480" y="384" text-anchor="middle" fill="#3fb950" font-size="12" font-weight="700">⚡ executing-plans</text>
+      <text x="480" y="400" text-anchor="middle" fill="#8b949e" font-size="10">无子代理时的</text>
+      <text x="480" y="414" text-anchor="middle" fill="#8b949e" font-size="10">替代方案</text>
+
+      <rect x="660" y="360" width="200" height="56" rx="10" fill="#1c2333" stroke="#3fb950" stroke-width="2"/>
+      <text x="760" y="384" text-anchor="middle" fill="#3fb950" font-size="12" font-weight="700">📡 dispatching-parallel-agents</text>
+      <text x="760" y="400" text-anchor="middle" fill="#8b949e" font-size="10">并行派发独立任务</text>
+      <text x="760" y="414" text-anchor="middle" fill="#8b949e" font-size="10">子代理内部使用</text>
+
+      <!-- Layer 5: Quality (throughout) -->
+      <rect x="60" y="460" width="180" height="44" rx="10" fill="#1c2333" stroke="#d29922" stroke-width="2"/>
+      <text x="150" y="480" text-anchor="middle" fill="#d29922" font-size="11" font-weight="700">🧪 test-driven-development</text>
+      <text x="150" y="498" text-anchor="middle" fill="#8b949e" font-size="9">每个步骤都遵循 TDD</text>
+
+      <rect x="300" y="460" width="180" height="44" rx="10" fill="#1c2333" stroke="#d29922" stroke-width="2"/>
+      <text x="390" y="480" text-anchor="middle" fill="#d29922" font-size="11" font-weight="700">🔍 requesting-code-review</text>
+      <text x="390" y="498" text-anchor="middle" fill="#8b949e" font-size="9">每个任务后审查</text>
+
+      <rect x="540" y="460" width="160" height="44" rx="10" fill="#1c2333" stroke="#d29922" stroke-width="2"/>
+      <text x="620" y="480" text-anchor="middle" fill="#d29922" font-size="11" font-weight="700">✅ verification-before-completion</text>
+      <text x="620" y="498" text-anchor="middle" fill="#8b949e" font-size="9">完成前验证</text>
+
+      <rect x="760" y="460" width="160" height="44" rx="10" fill="#1c2333" stroke="#d29922" stroke-width="2"/>
+      <text x="840" y="480" text-anchor="middle" fill="#d29922" font-size="11" font-weight="700">📬 receiving-code-review</text>
+      <text x="840" y="498" text-anchor="middle" fill="#8b949e" font-size="9">接收外部审查</text>
+
+      <!-- Layer 6: Finish -->
+      <rect x="300" y="540" width="240" height="44" rx="10" fill="#1c2333" stroke="#bc8cff" stroke-width="2"/>
+      <text x="420" y="564" text-anchor="middle" fill="#bc8cff" font-size="12" font-weight="700">🏁 finishing-a-development-branch</text>
+      <text x="420" y="580" text-anchor="middle" fill="#8b949e" font-size="10">完成后的收尾工作</text>
+
+      <!-- Edges -->
+      <defs>
+        <marker id="arr-b" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#58a6ff"/>
+        </marker>
+        <marker id="arr-g" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#3fb950"/>
+        </marker>
+        <marker id="arr-y" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#d29922"/>
+        </marker>
+        <marker id="arr-r" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#db6d28"/>
+        </marker>
+      </defs>
+
+      <!-- Entry to others -->
+      <line x1="500" y1="94" x2="180" y2="130" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arr-b)"/>
+      <line x1="500" y1="94" x2="790" y2="130" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arr-b)" stroke-dasharray="4"/>
+
+      <!-- brainstorming to writing-plans -->
+      <line x1="300" y1="174" x2="420" y2="210" stroke="#58a6ff" stroke-width="2" marker-end="url(#arr-b)"/>
+
+      <!-- writing-plans to execution -->
+      <line x1="420" y1="254" x2="190" y2="360" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arr-b)"/>
+      <line x1="420" y1="254" x2="480" y2="360" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arr-b)"/>
+
+      <!-- execution to TDD -->
+      <line x1="190" y1="416" x2="150" y2="460" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arr-g)"/>
+
+      <!-- execution to quality -->
+      <line x1="190" y1="416" x2="390" y2="460" stroke="#3fb950" stroke-width="1.5" stroke-dasharray="3" marker-end="url(#arr-y)"/>
+
+      <!-- execution to finish -->
+      <line x1="190" y1="416" x2="420" y2="540" stroke="#3fb950" stroke-width="2" marker-end="url(#arr-g)"/>
+      <line x1="480" y1="416" x2="420" y2="540" stroke="#3fb950" stroke-width="2" marker-end="url(#arr-g)"/>
+
+      <!-- debugging to TDD -->
+      <line x1="660" y1="174" x2="150" y2="460" stroke="#db6d28" stroke-width="1.5" stroke-dasharray="4" marker-end="url(#arr-r)"/>
+
+      <!-- Legend -->
+      <rect x="60" y="510" width="160" height="20" rx="4" fill="none" stroke="#58a6ff" stroke-width="1"/>
+      <text x="136" y="524" text-anchor="middle" fill="#58a6ff" font-size="9">流程调用</text>
+
+      <rect x="240" y="510" width="160" height="20" rx="4" fill="none" stroke="#3fb950" stroke-width="1"/>
+      <text x="320" y="524" text-anchor="middle" fill="#3fb950" font-size="9">执行流转</text>
+
+      <line x1="440" y1="520" x2="500" y2="520" stroke="#d29922" stroke-width="1.5" stroke-dasharray="3"/>
+      <text x="510" y="524" fill="#d29922" font-size="9">质量保障（辅助）</text>
+    </svg>
+  </div>
+</div>
+
+<!-- ==================== SECTION 6: 总结 ==================== -->
+<div class="section">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(57,210,192,0.15);color:var(--cyan);">📚</div>
+    快速参考表
+  </div>
+  <div class="table-wrap">
+    <table>
+      <tr>
+        <th>技能名称</th>
+        <th>分类</th>
+        <th>核心铁律/原则</th>
+        <th>关键触发时机</th>
+      </tr>
+      <tr>
+        <td><strong>using-superpowers</strong></td>
+        <td><span class="badge blue">流程</span></td>
+        <td>有 1% 可能性就调用技能</td>
+        <td>每个对话开始时</td>
+      </tr>
+      <tr>
+        <td><strong>brainstorming</strong></td>
+        <td><span class="badge blue">流程</span></td>
+        <td>设计审批前禁止实施</td>
+        <td>任何创造性工作前</td>
+      </tr>
+      <tr>
+        <td><strong>writing-plans</strong></td>
+        <td><span class="badge blue">流程</span></td>
+        <td>无占位符，每步含完整代码</td>
+        <td>有设计文档后</td>
+      </tr>
+      <tr>
+        <td><strong>using-git-worktrees</strong></td>
+        <td><span class="badge blue">流程</span></td>
+        <td>先检测，再原生工具，最后 git 兜底</td>
+        <td>开始功能工作前</td>
+      </tr>
+      <tr>
+        <td><strong>subagent-driven-development</strong></td>
+        <td><span class="badge blue">流程</span></td>
+        <td>每任务全新子代理 + 两阶段审查</td>
+        <td>有实施计划后</td>
+      </tr>
+      <tr>
+        <td><strong>executing-plans</strong></td>
+        <td><span class="badge green">执行</span></td>
+        <td>严格按步骤执行，卡住时停止</td>
+        <td>无子代理平台</td>
+      </tr>
+      <tr>
+        <td><strong>dispatching-parallel-agents</strong></td>
+        <td><span class="badge green">执行</span></td>
+        <td>一个独立问题域 = 一个代理</td>
+        <td>2+ 独立任务可并行时</td>
+      </tr>
+      <tr>
+        <td><strong>finishing-a-development-branch</strong></td>
+        <td><span class="badge green">执行</span></td>
+        <td>验证测试后再呈现选项</td>
+        <td>所有任务完成后</td>
+      </tr>
+      <tr>
+        <td><strong>test-driven-development</strong></td>
+        <td><span class="badge yellow">质量</span></td>
+        <td>无失败测试前无生产代码</td>
+        <td>任何功能或修复实施前</td>
+      </tr>
+      <tr>
+        <td><strong>requesting-code-review</strong></td>
+        <td><span class="badge yellow">质量</span></td>
+        <td>早审查，常审查</td>
+        <td>每个任务完成后</td>
+      </tr>
+      <tr>
+        <td><strong>receiving-code-review</strong></td>
+        <td><span class="badge yellow">质量</span></td>
+        <td>技术严谨性优先于社交舒适度</td>
+        <td>接收审查反馈时</td>
+      </tr>
+      <tr>
+        <td><strong>verification-before-completion</strong></td>
+        <td><span class="badge yellow">质量</span></td>
+        <td>证据先于断言，永远</td>
+        <td>声称完成前</td>
+      </tr>
+      <tr>
+        <td><strong>systematic-debugging</strong></td>
+        <td><span class="badge orange">调试</span></td>
+        <td>先找根因，再谈修复</td>
+        <td>遇到任何 Bug 时</td>
+      </tr>
+      <tr>
+        <td><strong>writing-skills</strong></td>
+        <td><span class="badge purple">元技能</span></td>
+        <td>无失败测试前无技能（TDD 应用于文档）</td>
+        <td>创建/编辑技能时</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<!-- Footer -->
+<div style="text-align:center;padding:32px 24px;color:var(--text2);font-size:0.82rem;border-top:1px solid var(--border);margin-top:32px;">
+  <p>Superpowers 技能体系学习指南 — 基于 <a href="https://github.com/obra/superpowers" style="color:var(--accent);">github.com/obra/superpowers</a> 原始文档制作</p>
+  <p style="margin-top:6px;">生成时间：2026-05-10 | 涵盖全部 14 个技能 | 中文解读</p>
+</div>
+
+</div>
+
+<script>
+function switchTab(tabEl, targetId) {
+  // Deactivate all tabs in same parent
+  const tabBar = tabEl.parentElement;
+  const contentBox = tabBar.parentElement.querySelector('.detail-content');
+  tabBar.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+  contentBox.querySelectorAll('.detail-section').forEach(s => s.classList.remove('active'));
+  tabEl.classList.add('active');
+  document.getElementById(targetId).classList.add('active');
+}
+
+function scrollToDetail(id) {
+  const el = document.getElementById('detail-' + id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
 </body>
 </html>
