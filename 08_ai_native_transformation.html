@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 原生转型路径：从采纳 Agent 到编排一切</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0e17; color: #e6edf3; line-height: 1.7; }
+  a { color: #58a6ff; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .hero { background: linear-gradient(135deg, #0a1628 0%, #0a0e17 100%); border-bottom: 2px solid #f59e0b; padding: 48px 40px 36px; }
+  .hero h1 { font-size: 2.2rem; font-weight: 800; color: #f0f6fc; margin-bottom: 12px; }
+  .hero .subtitle { color: #8b949e; font-size: 1.05rem; margin-bottom: 18px; }
+  .hero .meta { display: flex; gap: 24px; flex-wrap: wrap; }
+  .hero .meta span { background: #1a2035; border: 1px solid #2d3748; border-radius: 20px; padding: 4px 14px; font-size: 0.85rem; color: #8b949e; }
+  .hero .orig-link { margin-top: 16px; }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+
+  .section { margin-bottom: 56px; }
+  .section-title { font-size: 1.5rem; font-weight: 700; color: #f0f6fc; margin-bottom: 24px; padding-bottom: 10px; border-bottom: 2px solid #1a2035; display: flex; align-items: center; gap: 10px; }
+  .section-title .icon { font-size: 1.3rem; }
+
+  .insight-banner { background: linear-gradient(135deg, #1a1030 0%, #161b22 100%); border: 1px solid #f59e0b44; border-left: 5px solid #f59e0b; border-radius: 10px; padding: 28px 32px; margin-bottom: 32px; }
+  .insight-banner .big-text { font-size: 1.35rem; font-weight: 700; color: #fbbf24; margin-bottom: 8px; }
+
+  /* Stage cards */
+  .stages-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 24px 0; }
+  .stage-card { background: #0f172a; border: 2px solid #1e293b; border-radius: 14px; padding: 20px; position: relative; }
+  .stage-card.stage-1 { border-color: #3b82f6; }
+  .stage-card.stage-2 { border-color: #8b5cf6; }
+  .stage-card.stage-3 { border-color: #f59e0b; }
+  .stage-card.stage-4 { border-color: #10b981; }
+  .stage-card .stage-num { position: absolute; top: -14px; left: 16px; background: #0f172a; padding: 0 8px; font-size: 0.8rem; font-weight: 700; }
+  .stage-1 .stage-num { color: #3b82f6; }
+  .stage-2 .stage-num { color: #8b5cf6; }
+  .stage-3 .stage-num { color: #f59e0b; }
+  .stage-4 .stage-num { color: #10b981; }
+  .stage-card h3 { color: #f0f6fc; font-size: 1rem; margin: 10px 0 8px; }
+  .stage-card .stage-pct { font-size: 1.8rem; font-weight: 800; margin: 8px 0; }
+  .stage-1 .stage-pct { color: #3b82f6; }
+  .stage-2 .stage-pct { color: #8b5cf6; }
+  .stage-3 .stage-pct { color: #f59e0b; }
+  .stage-4 .stage-pct { color: #10b981; }
+  .stage-card p { color: #8b949e; font-size: 0.85rem; line-height: 1.6; }
+
+  /* AIDLC phases */
+  .phases-wrap { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .phase-box { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 20px; border-left: 5px solid; }
+  .phase-box.phase-idea { border-left-color: #3b82f6; }
+  .phase-box.phase-code { border-left-color: #8b5cf6; }
+  .phase-box.phase-review { border-left-color: #f59e0b; }
+  .phase-box.phase-val { border-left-color: #10b981; }
+  .phase-box.phase-build { border-left-color: #ef4444; }
+  .phase-box.phase-incident { border-left-color: #f97316; }
+  .phase-box .phase-title { font-weight: 700; color: #f0f6fc; font-size: 1rem; margin-bottom: 6px; }
+  .phase-box .phase-owner { font-size: 0.82rem; margin-bottom: 8px; }
+  .phase-owner.human { color: #3b82f6; }
+  .phase-owner.agent { color: #8b5cf6; }
+  .phase-owner.co { color: #f59e0b; }
+  .phase-box .phase-desc { font-size: 0.85rem; color: #8b949e; line-height: 1.6; }
+
+  /* Mindset shift */
+  .mindset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 24px 0; }
+  .mindset-box { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 24px; }
+  .mindset-box h3 { font-size: 1rem; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid #1e293b; }
+  .mindset-box.old h3 { color: #f85149; }
+  .mindset-box.new h3 { color: #3fb950; }
+  .mindset-box ul { list-style: none; padding: 0; }
+  .mindset-box ul li { font-size: 0.9rem; color: #c9d1d9; padding: 7px 0; border-bottom: 1px solid #1e293b; }
+  .mindset-box ul li:last-child { border-bottom: none; }
+
+  /* Hiring radar */
+  .hiring-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 24px 0; }
+  .hiring-item { background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; padding: 16px; text-align: center; }
+  .hiring-item .hiring-icon { font-size: 1.8rem; margin-bottom: 8px; }
+  .hiring-item h4 { color: #f0f6fc; font-size: 0.95rem; margin-bottom: 6px; }
+  .hiring-item p { color: #8b949e; font-size: 0.82rem; }
+
+  .quote-box { background: #0f172a; border-left: 5px solid #f59e0b; border-radius: 0 10px 10px 0; padding: 20px 24px; margin: 20px 0; font-style: italic; color: #c9d1d9; font-size: 1rem; }
+  .quote-author { text-align: right; color: #8b949e; font-size: 0.85rem; margin-top: 8px; font-style: normal; }
+
+  .footer { text-align: center; padding: 32px 24px; color: #484f58; font-size: 0.82rem; border-top: 1px solid #21262d; margin-top: 40px; }
+
+  @media (max-width: 900px) { .stages-grid { grid-template-columns: repeat(2, 1fr); } .phases-wrap { grid-template-columns: 1fr; } .mindset-grid { grid-template-columns: 1fr; } .hiring-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .stages-grid { grid-template-columns: 1fr; } .hiring-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>🚀 AI 原生转型路径：端到端指南</h1>
+  <div class="subtitle">这不是一个工具问题——而是一个组织转型问题。本文提供了一张地图，帮助工程领导者理解他们的组织 12 个月后应该是什么样子。</div>
+  <div class="meta">
+    <span>👤 Igor Ostrovsky (CTO) · Anshuman Pandey (GTM) · John Edstrom (Dir. Engineering)</span>
+    <span>📅 2026-04-07 发布 · 2026-04-09 更新</span>
+    <span>🏷️ AI 转型 · AIDLC · 工程组织</span>
+  </div>
+  <div class="orig-link">🔗 原文链接：<a href="https://www.augmentcode.com/blog/the-ai-native-transformation-path-end-to-end" target="_blank">augmentcode.com/blog/the-ai-native-transformation-path-end-to-end</a></div>
+</div>
+
+<div class="container">
+
+  <div class="section">
+    <div class="insight-banner">
+      <div class="big-text">🎯 核心问题：不是"选哪个工具"，而是"谁和我们走完这段转型路"</div>
+      <div style="color:#8b949e;font-size:0.95rem;margin-top:8px;">当你把 SDLC 改变为 AIDLC 时，它是可见的。但更难的改变是改变组织中每个人都如何思考他们的工作。</div>
+    </div>
+  </div>
+
+  <!-- 4 Stages -->
+  <div class="section">
+    <div class="section-title"><span class="icon">📊</span> 四个转型阶段（当前分布）</div>
+    <div class="stages-grid">
+      <div class="stage-card stage-1">
+        <div class="stage-num">STAGE 1</div>
+        <h3>采纳 Agent</h3>
+        <div class="stage-pct">~70%</div>
+        <p>开发者在日常工作流中使用 AI 编码工具。POC 运行中，席位许可正在讨论。</p>
+      </div>
+      <div class="stage-card stage-2">
+        <div class="stage-num">STAGE 2</div>
+        <h3>转向 AI 原生</h3>
+        <div class="stage-pct">~20%</div>
+        <p>Agent 有权自主构建、测试、部署和诊断 CI/CD 故障。</p>
+      </div>
+      <div class="stage-card stage-3">
+        <div class="stage-num">STAGE 3</div>
+        <h3>扩展范围</h3>
+        <div class="stage-pct">~10%</div>
+        <p>Agent 拥有代码审查、较小任务端到端、事件响应。存在点自动化，但系统未完全集成。</p>
+      </div>
+      <div class="stage-card stage-4">
+        <div class="stage-num">STAGE 4</div>
+        <h3>编排一切</h3>
+        <div class="stage-pct">&lt;1%</div>
+        <p>Agent 监督的层级放大每一个人类行动。一个决策级联通过 Agent 层级。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- AIDLC -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🔄</span> AIDLC：AI 驱动生命周期的六个阶段</div>
+    <p style="color:#8b949e;margin-bottom:20px;font-size:0.95rem;">Augment 内部已经在多个阶段实现了 Agent 驱动。以下是每个阶段的详细情况：</p>
+    <div class="phases-wrap">
+
+      <div class="phase-box phase-idea">
+        <div class="phase-title">1. 构思 <span style="font-size:0.82rem;color:#8b949e;font-weight:400;">（人类主导）</span></div>
+        <div class="phase-owner human">👤 产品负责人或工程师定义意图</div>
+        <div class="phase-desc">较大功能：人类写规格 → Agent 辅助研究/上下文 → 人类通过迭代定稿。<br>较小任务：从 Slack/Linear/web 接收触发 → Agent 自主拥有范围。</div>
+      </div>
+
+      <div class="phase-box phase-code">
+        <div class="phase-title">2. 代码生成 <span style="font-size:0.82rem;color:#8b949e;font-weight:400;">（Agent 驱动）</span></div>
+        <div class="phase-owner agent">🤖 Agent 写代码、创建 PR</div>
+        <div class="phase-desc"><strong>核心思维转变："人类不应该写代码。"</strong><br>较小任务：Agent 自主拥有完整 PR（代码、测试、文档），处理审查意见和冲突。<br><strong style="color:#3fb950;">"PR 落地时已准备好合并，人类没有碰过一行。"</strong></div>
+      </div>
+
+      <div class="phase-box phase-review">
+        <div class="phase-title">3. 代码审查 <span style="font-size:0.82rem;color:#8b949e;font-weight:400;">（共同拥有）</span></div>
+        <div class="phase-owner co">🤝 Agent 初审 + 人类最终审查</div>
+        <div class="phase-desc">低风险变更：自动批准（无需人类）。<br>高风险变更：协作审查，Agent 揭示关键风险和架构决策。<br>📊 一家企业客户在 <strong style="color:#f59e0b;">3 周内</strong>将开发者被代码审查阻塞的时间从 <strong style="color:#f85149;">每周 30%</strong> 降至 <strong style="color:#3fb950;">10% 以下</strong>。</div>
+      </div>
+
+      <div class="phase-box phase-val">
+        <div class="phase-title">4. 验证 <span style="font-size:0.82rem;color:#8b949e;font-weight:400;">（Agent 驱动）</span></div>
+        <div class="phase-owner agent">🤖 Agent 部署、测试、验证端到端</div>
+        <div class="phase-desc">Agent 部署 PR 到预发环境，通过浏览器自动化演练功能，验证端到端工作。<br>门槛：不是"能编译吗"或"单元测试通过吗"，而是<strong style="color:#f59e0b;">"它做了正确的事吗，端到端？"</strong></div>
+      </div>
+
+      <div class="phase-box phase-build">
+        <div class="phase-title">5. 构建/测试失败 <span style="font-size:0.82rem;color:#8b949e;font-weight:400;">（知识复利）</span></div>
+        <div class="phase-owner co">🤖 Agent 自动修复简单情况 + 人类协作调查困难情况</div>
+        <div class="phase-desc">每次会话（自主或协作）都会被提炼和持久化。<br><strong style="color:#3fb950;">复利效应：</strong>"下次发生类似故障时，Agent 无需人类参与即可处理。"</div>
+      </div>
+
+      <div class="phase-box phase-incident">
+        <div class="phase-title">6. 事件响应 <span style="font-size:0.82rem;color:#8b949e;font-weight:400;">（最不成熟阶段）</span></div>
+        <div class="phase-owner co">🤖 协调的 Agent 团队 + 人类待命</div>
+        <div class="phase-desc">代替凌晨 2 点呼叫人类工程师：分级员、调查员、PR 作者、Slack 协调员、SRE 组成的 Agent 团队工作事件。<br>人类角色：<strong style="color:#f59e0b;">"可用，但不驾驶。"</strong></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Mindset shift -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🧠</span> 思维转变：不只是工作流改变</div>
+    <div class="quote-box">
+      "当 Agent 写代码时，工程师失去了通过写代码培养的直觉。新的技能是通过规格和审查（而不是通过实现）来维护系统理解。"
+      <div class="quote-author">— Augment Code 工程团队</div>
+    </div>
+    <div class="mindset-grid">
+      <div class="mindset-box old">
+        <h3>❌ 旧思维</h3>
+        <ul>
+          <li>"我是一个写代码的人"</li>
+          <li>原始编码能力是核心评价维度</li>
+          <li>通过实现来建立系统理解</li>
+          <li>工具评估基于功能特性对比</li>
+        </ul>
+      </div>
+      <div class="mindset-box new">
+        <h3>✅ 新思维</h3>
+        <ul>
+          <li>"我是一个定义意图并引导 Agent 走向正确结果的人"</li>
+          <li>六大评价维度（原始编码能力不再是独立维度）</li>
+          <li>通过规格和审查维护系统理解</li>
+          <li>转型伙伴比工具特性更重要</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hiring dimensions -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🎯</span> AI 原生工程师的六大评价维度</div>
+    <p style="color:#8b949e;margin-bottom:16px;font-size:0.95rem;">原始编码能力不再是独立维度。组织现在从六个维度筛选：</p>
+    <div class="hiring-grid">
+      <div class="hiring-item">
+        <div class="hiring-icon">🎨</div>
+        <h4>产品品味</h4>
+        <p>判断什么值得构建、用户体验是否正确的直觉</p>
+      </div>
+      <div class="hiring-item">
+        <div class="hiring-icon">🏗️</div>
+        <h4>架构判断</h4>
+        <p>在系统层级做出正确权衡的能力</p>
+      </div>
+      <div class="hiring-item">
+        <div class="hiring-icon">🤖</div>
+        <h4>Agent 利用能力</h4>
+        <p>高效引导 Agent 完成复杂任务</p>
+      </div>
+      <div class="hiring-item">
+        <div class="hiring-icon">💬</div>
+        <h4>沟通能力</h4>
+        <p>清晰表达意图、提供有效反馈</p>
+      </div>
+      <div class="hiring-item">
+        <div class="hiring-icon">🏆</div>
+        <h4>主人翁精神</h4>
+        <p>对结果负责，而不仅仅是对输出负责</p>
+      </div>
+      <div class="hiring-item">
+        <div class="hiring-icon">⚡</div>
+        <h4>学习速度</h4>
+        <p>快速适应新工具、新模型、新范式</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wrong question -->
+  <div class="section">
+    <div class="section-title"><span class="icon">❌</span> 错误的问题 vs 正确的问题</div>
+    <div style="background:#1a1030;border:1px solid #f59e0b44;border-radius:10px;padding:24px;margin-bottom:20px;">
+      <div style="color:#f85149;font-weight:700;font-size:1.05rem;margin-bottom:10px;">❌ 错误的问题（VP 工程们每天都在问的）</div>
+      <div style="color:#c9d1d9;font-size:0.95rem;">"帮我对比这些 AI 编码工具的功能和定价……"</div>
+    </div>
+    <div style="background:#0f172a;border:1px solid #3fb95044;border-radius:10px;padding:24px;">
+      <div style="color:#3fb950;font-weight:700;font-size:1.05rem;margin-bottom:10px;">✅ 正确的问题（应该问的）</div>
+      <div style="color:#c9d1d9;font-size:0.95rem;">"不是'哪个工具'，而是'谁会和我们一起走完这段转型路'。"</div>
+    </div>
+  </div>
+
+  <!-- Conclusion -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🎯</span> 核心结论</div>
+    <div style="background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:24px;">
+      <ol style="color:#c9d1d9;font-size:0.92rem;line-height:2.2;padding-left:20px;">
+        <li><strong>这不是工具变更</strong>——角色改变、技能改变、评估工程师的方式改变</li>
+        <li><strong>没有通用剧本</strong>——必须根据每个组织的流程、内部工具和现有工作流定制</li>
+        <li><strong>200 人 vs 2000 人工程组织</strong>——遇到的摩擦点不同</li>
+        <li><strong>不能用无限 token 填补差距</strong>——工程始终不止是写代码</li>
+        <li><strong>正确的对话</strong>——"不是哪个工具，而是谁和我们走完这段转型路"</li>
+      </ol>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  可视化摘要基于 <a href="https://www.augmentcode.com/blog/the-ai-native-transformation-path-end-to-end" target="_blank">Augment Code 官方博客</a> 制作 · 生成于 2026-05-10 · 仅供参考，以原文为准
+</div>
+
+</body>
+</html>
