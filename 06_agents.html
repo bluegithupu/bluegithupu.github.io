@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AGENTS.md：好的文档是模型升级，坏的是灾难</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0d1117; color: #e6edf3; line-height: 1.7; }
+  a { color: #58a6ff; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .hero { background: linear-gradient(135deg, #161b22 0%, #0d1117 100%); border-bottom: 2px solid #388bfd; padding: 48px 40px 36px; }
+  .hero h1 { font-size: 2.2rem; font-weight: 800; color: #f0f6fc; margin-bottom: 12px; }
+  .hero .subtitle { color: #8b949e; font-size: 1.05rem; margin-bottom: 18px; }
+  .hero .meta { display: flex; gap: 24px; flex-wrap: wrap; }
+  .hero .meta span { background: #21262d; border: 1px solid #30363d; border-radius: 20px; padding: 4px 14px; font-size: 0.85rem; color: #8b949e; }
+  .hero .orig-link { margin-top: 16px; }
+  .hero .orig-link a { font-size: 0.95rem; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+
+  .section { margin-bottom: 56px; }
+  .section-title { font-size: 1.5rem; font-weight: 700; color: #f0f6fc; margin-bottom: 24px; padding-bottom: 10px; border-bottom: 2px solid #21262d; display: flex; align-items: center; gap: 10px; }
+  .section-title .icon { font-size: 1.3rem; }
+
+  /* Key insight banner */
+  .insight-banner { background: linear-gradient(135deg, #1a2332 0%, #161b22 100%); border: 1px solid #388bfd44; border-left: 5px solid #388bfd; border-radius: 10px; padding: 28px 32px; margin-bottom: 32px; }
+  .insight-banner .big-text { font-size: 1.35rem; font-weight: 700; color: #58a6ff; margin-bottom: 8px; }
+  .insight-banner .detail { color: #8b949e; font-size: 0.95rem; }
+
+  /* Pattern cards */
+  .patterns-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+  .pattern-card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 24px; transition: border-color 0.2s; }
+  .pattern-card:hover { border-color: #388bfd; }
+  .pattern-card .num { display: inline-block; background: #388bfd; color: #fff; width: 32px; height: 32px; border-radius: 50%; text-align: center; line-height: 32px; font-weight: 700; font-size: 0.9rem; margin-bottom: 14px; }
+  .pattern-card h3 { font-size: 1.05rem; color: #f0f6fc; margin-bottom: 10px; }
+  .pattern-card p { color: #8b949e; font-size: 0.9rem; margin-bottom: 10px; }
+  .pattern-card .tag { display: inline-block; background: #21262d; color: #3fb950; font-size: 0.8rem; padding: 2px 10px; border-radius: 12px; }
+
+  /* Metric bar chart */
+  .metric-row { display: flex; align-items: center; margin-bottom: 14px; }
+  .metric-label { width: 200px; font-size: 0.9rem; color: #8b949e; flex-shrink: 0; }
+  .metric-bar-wrap { flex: 1; background: #21262d; border-radius: 6px; height: 28px; overflow: hidden; position: relative; }
+  .metric-bar { height: 100%; border-radius: 6px; display: flex; align-items: center; padding-left: 10px; font-size: 0.82rem; font-weight: 600; color: #fff; min-width: 40px; transition: width 0.6s; }
+  .bar-green { background: linear-gradient(90deg, #238636, #2ea043); }
+  .bar-red { background: linear-gradient(90deg, #da3633, #f85149); }
+  .bar-blue { background: linear-gradient(90deg, #0556a3, #388bfd); }
+
+  /* Comparison table */
+  .compare-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+  .compare-table th { background: #21262d; color: #f0f6fc; padding: 12px 16px; text-align: left; font-size: 0.9rem; border-bottom: 2px solid #30363d; }
+  .compare-table td { padding: 11px 16px; border-bottom: 1px solid #21262d; font-size: 0.88rem; color: #c9d1d9; }
+  .compare-table tr:hover td { background: #161b22; }
+  .check { color: #3fb950; font-weight: 700; }
+  .cross { color: #f85149; font-weight: 700; }
+
+  /* Warning box */
+  .warning-box { background: #2d1f00; border: 1px solid #d29922; border-left: 5px solid #d29922; border-radius: 10px; padding: 20px 24px; margin: 20px 0; }
+  .warning-box .warn-title { color: #d29922; font-weight: 700; font-size: 1rem; margin-bottom: 8px; }
+  .warning-box p { color: #e6c07b; font-size: 0.9rem; }
+
+  /* Discovery rate visual */
+  .discovery-list { list-style: none; }
+  .discovery-list li { display: flex; align-items: center; padding: 12px 16px; background: #161b22; border: 1px solid #30363d; border-radius: 8px; margin-bottom: 10px; }
+  .discovery-rate { margin-left: auto; font-weight: 700; font-size: 1.1rem; }
+  .rate-high { color: #3fb950; }
+  .rate-mid { color: #d29922; }
+  .rate-low { color: #f85149; }
+
+  /* Footer */
+  .footer { text-align: center; padding: 32px 24px; color: #484f58; font-size: 0.82rem; border-top: 1px solid #21262d; margin-top: 40px; }
+  .footer a { color: #58a6ff; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } .patterns-grid { grid-template-columns: 1fr; } .metric-label { width: 140px; } }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>📝 好的 AGENTS.md = 模型升级<br>坏的 AGENTS.md = 不如没有</h1>
+  <div class="subtitle">Augment Code 对数十个 AGENTS.md 文件的实证研究：同一份文件可以让某项任务提升 25%，也可以让另一项任务下降 30%。</div>
+  <div class="meta">
+    <span>👤 Slava Zhenylenko · Member of Technical Staff</span>
+    <span>📅 2026-04-22 发布 · 2026-04-23 更新</span>
+    <span>🏷️ 实证研究 · AGENTS.md · Agent 文档</span>
+  </div>
+  <div class="orig-link">🔗 原文链接：<a href="https://www.augmentcode.com/blog/how-to-write-good-agents-dot-md-files" target="_blank">augmentcode.com/blog/how-to-write-good-agents-dot-md-files</a></div>
+</div>
+
+<div class="container">
+
+  <!-- Key Insight -->
+  <div class="section">
+    <div class="insight-banner">
+      <div class="big-text">🧪 核心发现：AGENTS.md 的质量影响 ≈ 换一个模型</div>
+      <div class="detail">最好的 AGENTS.md 带来的质量提升，相当于从 Haiku 升级到 Opus；最坏的 AGENTS.md 让输出比没有文档还差。同一份文件可以对不同任务产生截然相反的效果（±30%）。</div>
+    </div>
+  </div>
+
+  <!-- Methodology -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🔬</span> 研究方法</div>
+    <div class="two-col">
+      <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:20px;">
+        <h3 style="color:#f0f6fc;margin-bottom:10px;font-size:1rem;">评估方法</h3>
+        <ul style="color:#8b949e;font-size:0.9rem;padding-left:18px;line-height:2;">
+          <li>使用 <strong style="color:#58a6ff;">AuggieBench</strong>（内部评估套件）</li>
+          <li>对比 Agent 输出与资深工程师审查的高质量 PR</li>
+          <li>每个任务运行两次：有/无 AGENTS.md，比较得分</li>
+        </ul>
+      </div>
+      <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:20px;">
+        <h3 style="color:#f0f6fc;margin-bottom:10px;font-size:1rem;">过滤标准</h3>
+        <ul style="color:#8b949e;font-size:0.9rem;padding-left:18px;line-height:2;">
+          <li>PR 必须限定在单个模块/应用内</li>
+          <li>范围须是 AGENTS.md 信息可能有帮助的场景</li>
+          <li>覆盖中层模块（~100 核心文件）效果最佳</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7 Patterns -->
+  <div class="section">
+    <div class="section-title"><span class="icon">✅</span> 7 个有效模式</div>
+    <div class="patterns-grid">
+
+      <div class="pattern-card">
+        <div class="num">1</div>
+        <h3>渐进式披露 > 全面覆盖</h3>
+        <p>把 AGENTS.md 当作技能文档——常见情况高级别描述，细节推到参考文件。最优配置：主文件 <strong style="color:#3fb950;">100–150 行</strong> + 若干聚焦的参考文档。</p>
+        <span class="tag">+10–15% 全面改善</span>
+      </div>
+
+      <div class="pattern-card">
+        <div class="num">2</div>
+        <h3>程序化工作流：从失败到完成</h3>
+        <p>将任务描述为带编号的多步骤工作流。影响最显著的模式之一：让 Agent 从"无法完成"变为"首次尝试即正确解决方案"。</p>
+        <span class="tag">正确性 +25% · 完整性 +20%</span>
+      </div>
+
+      <div class="pattern-card">
+        <div class="num">3</div>
+        <h3>决策表：在写代码前消除歧义</h3>
+        <p>当代码库有 2-3 种合理方法时，强制提前做出选择。用决策表对比（如 React Query vs Zustand）。</p>
+        <span class="tag">best_practices +25%</span>
+      </div>
+
+      <div class="pattern-card">
+        <div class="num">4</div>
+        <h3>真实代码样例提升代码复用</h3>
+        <p>包含 3-10 行真实生产代码片断。Agent 会遵循模板而不是发明新模式。</p>
+        <span class="tag">code_reuse +20%</span>
+      </div>
+
+      <div class="pattern-card">
+        <div class="num">5</div>
+        <h3>领域特定规则仍然重要</h3>
+        <p>语言或组织特定的"陷阱"（如用 Decimal 而非 float 处理金融计算）。规则须具体且可执行。</p>
+        <span class="tag">减少截断/精度问题</span>
+      </div>
+
+      <div class="pattern-card">
+        <div class="num">6</div>
+        <h3>每个"不要"都要配一个"要"</h3>
+        <p>仅有警告的文档表现持续不佳。须同时给出反模式和正确替代方案。</p>
+        <span class="tag">避免过度探索</span>
+      </div>
+
+      <div class="pattern-card">
+        <div class="num">7</div>
+        <h3>保持代码模块化——AGENTS.md 也是</h3>
+        <p>表现最好的 Agent 文档描述的是相对隔离的子模块。超大、跨领域的根目录 AGENTS.md 表现较差。</p>
+        <span class="tag">最优：中层模块</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Overexploration Trap -->
+  <div class="section">
+    <div class="section-title"><span class="icon">⚠️</span> 最大失败模式：过度探索陷阱（Context Rot）</div>
+
+    <div class="warning-box">
+      <div class="warn-title">⚠️ 模式 1：过多的架构概述</div>
+      <p><strong>现象：</strong>Agent 被拉去读取数十个文档文件，试图"更好地理解架构"。</p>
+      <p><strong>后果：</strong>加载数万 token 不相关上下文，输出变差。</p>
+      <p><strong>真实案例：</strong>一个两行配置修改任务，Agent 读了 12 个文档，加载约 80K token，搞混了哪个服务拥有该配置。<strong style="color:#f85149;">completeness 下降 25%</strong>。</p>
+    </div>
+
+    <div class="warning-box">
+      <div class="warn-title">⚠️ 模式 2：过多的警告（缺乏对应的"要"）</div>
+      <p><strong>现象：</strong>长"不要"段落缺乏对应的"要" → Agent 针对每个警告验证解决方案。</p>
+      <p><strong>真实案例：</strong>AGENTS.md 含 30+ 条"不要"规则，简单 CRUD 端点任务，Agent 逐一检查每个警告是否相关。<strong style="color:#f85149;">耗时翻倍，完整度降低 20%</strong>。</p>
+    </div>
+  </div>
+
+  <!-- Metric improvements -->
+  <div class="section">
+    <div class="section-title"><span class="icon">📊</span> 各模式对指标的改善效果</div>
+
+    <div class="metric-label" style="margin-bottom:8px;color:#8b949e;font-size:0.85rem;">指标改善幅度（相对基线）</div>
+
+    <div class="metric-row">
+      <div class="metric-label">code_reuse（真实代码样例）</div>
+      <div class="metric-bar-wrap"><div class="metric-bar bar-green" style="width:80%;">+20%</div></div>
+    </div>
+    <div class="metric-row">
+      <div class="metric-label">best_practices（决策表）</div>
+      <div class="metric-bar-wrap"><div class="metric-bar bar-green" style="width:85%;">+25%</div></div>
+    </div>
+    <div class="metric-row">
+      <div class="metric-label">correctness（程序化工作流）</div>
+      <div class="metric-bar-wrap"><div class="metric-bar bar-green" style="width:83%;">+25%</div></div>
+    </div>
+    <div class="metric-row">
+      <div class="metric-label">completeness（程序化工作流）</div>
+      <div class="metric-bar-wrap"><div class="metric-bar bar-green" style="width:73%;">+20%</div></div>
+    </div>
+    <div class="metric-row">
+      <div class="metric-label">overall（中层模块，100-150行）</div>
+      <div class="metric-bar-wrap"><div class="metric-bar bar-green" style="width:63%;">+10-15%</div></div>
+    </div>
+    <div class="metric-row">
+      <div class="metric-label">completeness（过多架构概述）</div>
+      <div class="metric-bar-wrap"><div class="metric-bar bar-red" style="width:50%;">-25%</div></div>
+    </div>
+    <div class="metric-row">
+      <div class="metric-label">completeness（过多警告）</div>
+      <div class="metric-bar-wrap"><div class="metric-bar bar-red" style="width:40%;">-20%</div></div>
+    </div>
+  </div>
+
+  <!-- Documentation Discovery -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🔍</span> Agent 如何找到文档（发现率）</div>
+    <ul class="discovery-list">
+      <li>
+        <span style="color:#c9d1d9;font-size:0.95rem;"><code style="color:#58a6ff;">AGENTS.md</code>（层级中自动发现）</span>
+        <span class="discovery-rate rate-high">100%</span>
+      </li>
+      <li>
+        <span style="color:#c9d1d9;font-size:0.95rem;">AGENTS.md 引用的参考文件（按需加载）</span>
+        <span class="discovery-rate rate-high">90%+</span>
+      </li>
+      <li>
+        <span style="color:#c9d1d9;font-size:0.95rem;">目录级 <code style="color:#58a6ff;">README.md</code>（不自动加载但会被读取）</span>
+        <span class="discovery-rate rate-mid">80%+</span>
+      </li>
+      <li>
+        <span style="color:#c9d1d9;font-size:0.95rem;">嵌套 <code>README</code>（子目录）</span>
+        <span class="discovery-rate rate-mid">~40%</span>
+      </li>
+      <li>
+        <span style="color:#c9d1d9;font-size:0.95rem;">孤立文档（<code>_docs/</code> 文件夹，无引用）</span>
+        <span class="discovery-rate rate-low">&lt;10%</span>
+      </li>
+    </ul>
+    <div style="margin-top:16px;padding:14px 18px;background:#1a2332;border-radius:8px;font-size:0.88rem;color:#8b949e;">💡 <strong style="color:#58a6ff;">关键洞察：</strong>AGENTS.md 是唯一具有可靠发现机制的文档位置。如果某些内容需要被看到，它要么放在那里，要么从那里直接引用。</div>
+  </div>
+
+  <!-- Pattern Selection Matrix -->
+  <div class="section">
+    <div class="section-title"><span class="icon">🎯</span> 模式选择矩阵：根据你的实际问题选择</div>
+    <table class="compare-table">
+      <thead>
+        <tr><th>如果你想改善...</th><th>使用此模式</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>现有代码复用</td><td>来自生产代码的若干清晰、相关的样例</td></tr>
+        <tr><td>遵循既定实践</td><td>组件和库的决策表</td></tr>
+        <tr><td>确保大型功能的正确连接</td><td>程序化 AGENTS.md</td></tr>
+        <tr><td>处理陷阱/边界情况</td><td>"不要"配"要"</td></tr>
+        <tr><td>上下文腐烂</td><td>通过参考文件渐进式披露</td></tr>
+        <tr><td>上下文腐烂</td><td>参考文件中清晰的逻辑分离</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Key Takeaways -->
+  <div class="section">
+    <div class="section-title"><span class="icon">💡</span> 核心结论</div>
+    <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:24px;">
+      <ol style="color:#c9d1d9;font-size:0.92rem;line-height:2.2;padding-left:20px;">
+        <li>差距巨大：最好的 AGENTS.md = Haiku→Opus 的质量跃升；最坏的 = 不如没有文档</li>
+        <li>同一份文件可以产生相反效果：一项任务 +25%，另一项 -30%</li>
+        <li>最优大小：100-150 行 + 参考文件，优于全面覆盖</li>
+        <li>程序化工作流具有变革性：可让 Agent 从失败变为首次即正确完成</li>
+        <li>每个"不要"都配对一个"要"：仅有警告的文档持续表现不佳</li>
+        <li>过度探索是最大失败原因：过多架构概述和过多警告导致上下文腐烂</li>
+        <li>文档环境很重要：好的 AGENTS.md 无法克服糟糕的文档环境（如 500K 规格文档）</li>
+        <li>AGENTS.md 是唯一可靠发现的文档位置</li>
+        <li>对于全新架构，不要用 AGENTS.md——使用规范驱动开发</li>
+      </ol>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  可视化摘要基于 <a href="https://www.augmentcode.com/blog/how-to-write-good-agents-dot-md-files" target="_blank">Augment Code 官方博客</a> 制作 · 生成于 2026-05-10 · 仅供参考，以原文为准
+</div>
+
+</body>
+</html>
