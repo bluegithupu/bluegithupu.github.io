@@ -1,234 +1,38 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>项目目录导航</title>
+    <title>项目导航</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 2rem;
-        }
-
-        .container {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             max-width: 800px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-            padding: 2rem;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            font-weight: 700;
-        }
-
-        .header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-
-        .pages-list {
-            padding: 2rem;
-        }
-
-        .page-item {
-            display: block;
-            text-decoration: none;
+            margin: 40px auto;
+            padding: 0 20px;
             color: #333;
-            background: #f8f9fa;
-            margin-bottom: 1rem;
-            padding: 1.5rem;
-            border-radius: 12px;
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            line-height: 1.8;
         }
-
-        .page-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-            transition: left 0.5s;
-        }
-
-        .page-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            border-color: #4facfe;
-            background: #ffffff;
-        }
-
-        .page-item:hover::before {
-            left: 100%;
-        }
-
-        .page-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: #2c3e50;
-        }
-
-        .page-description {
-            color: #666;
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-
-        .page-icon {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            margin-right: 10px;
-            vertical-align: middle;
-        }
-
-        .footer {
-            text-align: center;
-            padding: 1.5rem;
-            color: #666;
-            border-top: 1px solid #eee;
-            font-size: 0.9rem;
-        }
-
-        @media (max-width: 600px) {
-            body {
-                padding: 1rem;
-            }
-
-            .header h1 {
-                font-size: 2rem;
-            }
-
-            .pages-list {
-                padding: 1rem;
-            }
-
-            .page-item {
-                padding: 1rem;
-            }
-        }
+        h1 { font-size: 20px; margin-bottom: 24px; color: #000; }
+        ul { list-style: none; padding: 0; }
+        li { margin-bottom: 8px; }
+        a { color: #0066cc; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .desc { color: #666; font-size: 14px; margin-left: 8px; }
     </style>
 </head>
-
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🚀 项目导航</h1>
-            <p>选择你想要访问的页面</p>
-        </div>
-
-        <div class="pages-list">
-            <a href="snake-game.html" class="page-item">
-                <div class="page-title">
-                    <span class="page-icon">🐍</span>
-                    贪吃蛇游戏 (Snake Game)
-                </div>
-                <div class="page-description">
-                    使用Three.js构建的2.5D贪吃蛇游戏，支持多种难度选择和暂停功能
-                </div>
-            </a>
-
-            <a href="npm-tutorial.html" class="page-item">
-                <div class="page-title">
-                    <span class="page-icon">📦</span>
-                    NPM 教程
-                </div>
-                <div class="page-description">
-                    Node.js包管理器的使用指南和教程
-                </div>
-            </a>
-
-            <a href="maven-tutorial.html" class="page-item">
-                <div class="page-title">
-                    <span class="page-icon">☕</span>
-                    Maven 教程
-                </div>
-                <div class="page-description">
-                    Java 构建工具 Maven 的使用指南和教程
-                </div>
-            </a>
-
-            <a href="java-threadpool-tutorial.html" class="page-item">
-                <div class="page-title">
-                    <span class="page-icon">🧵</span>
-                    Java 线程池入门
-                </div>
-                <div class="page-description">
-                    了解 Executor 框架、核心参数与自定义线程池的关键实践
-                </div>
-            </a>
-
-            <a href="opencode-system-architecture.html" class="page-item">
-                <div class="page-title">
-                    <span class="page-icon">🏗️</span>
-                    OpenCode 系统架构
-                </div>
-                <div class="page-description">
-                    OpenCode项目的系统架构设计和技术文档
-                </div>
-            </a>
-
-            <a href="opencode-tools-manual.html" class="page-item">
-                <div class="page-title">
-                    <span class="page-icon">🛠️</span>
-                    OpenCode 工具手册
-                </div>
-                <div class="page-description">
-                    OpenCode开发工具的使用说明和操作指南
-                </div>
-            </a>
-
-            <a href="vllm-tutorial.html" class="page-item">
-                <div class="page-title">
-                    <span class="page-icon">🚀</span>
-                    vLLM 教程
-                </div>
-                <div class="page-description">
-                    高性能大语言模型推理和服务库的完整使用指南
-                </div>
-            </a>
-
-            <a href="superpowers-guide.html" class="page-item">
-                <div class="page-title">
-                    <span class="page-icon">⚡</span>
-                    Superpowers 框架学习指南
-                </div>
-                <div class="page-description">
-                    Superpowers 框架的完整学习指南，包含核心理念、工作流和技能体系
-                </div>
-            </a>
-
-        </div>
-
-        <div class="footer">
-            <p>💡 点击任意项目卡片即可访问对应页面</p>
-        </div>
-    </div>
+    <h1>项目导航</h1>
+    <ul>
+        <li><a href="superpowers-guide.html">Superpowers 框架学习指南</a></li>
+        <li><a href="snake-game.html">贪吃蛇游戏</a></li>
+        <li><a href="npm-tutorial.html">NPM 教程</a></li>
+        <li><a href="maven-tutorial.html">Maven 教程</a></li>
+        <li><a href="java-threadpool-tutorial.html">Java 线程池入门</a></li>
+        <li><a href="opencode-system-architecture.html">OpenCode 系统架构</a></li>
+        <li><a href="opencode-tools-manual.html">OpenCode 工具手册</a></li>
+        <li><a href="vllm-tutorial.html">vLLM 教程</a></li>
+        <li><a href="go_py.html">Go + Python 互调用</a></li>
+    </ul>
 </body>
-
 </html>
