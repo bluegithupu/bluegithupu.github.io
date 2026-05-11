@@ -11,6 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **npm-tutorial.html** - NPM 教程页面
 - **opencode-system-architecture.html** - OpenCode 系统架构文档
 - **opencode-tools-manual.html** - OpenCode 工具手册
+- **hermes-kanban-tutorial.html** - Hermes Kanban 看板教程
 - **vllm-tutorial.html** - vLLM 高性能大语言模型推理教程
 - **vllm-k8s-tutorial.html** - vLLM + Kubernetes 部署教程
 
