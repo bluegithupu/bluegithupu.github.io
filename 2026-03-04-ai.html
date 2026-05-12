@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>代码审查之死：AI 时代的信任体系</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; color: #333; line-height: 1.8; }
+        .back { margin-bottom: 24px; }
+        a { color: #0066cc; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        h1 { font-size: 24px; margin-bottom: 16px; color: #000; }
+        h2 { font-size: 20px; margin-top: 32px; color: #333; }
+        h3 { font-size: 18px; margin-top: 24px; color: #444; }
+        p { margin: 16px 0; }
+        code { background: #f5f5f5; padding: 2px 6px; border-radius: 3px; font-size: 14px; }
+        pre { background: #f5f5f5; padding: 16px; border-radius: 6px; overflow-x: auto; }
+        pre code { background: none; padding: 0; }
+        blockquote { border-left: 4px solid #ddd; margin: 16px 0; padding: 8px 16px; color: #666; }
+        ul, ol { padding-left: 24px; }
+        li { margin: 8px 0; }
+        hr { border: none; border-top: 1px solid #eee; margin: 24px 0; }
+        em { color: #666; }
+    </style>
+</head>
+<body>
+    <p class="back"><a href="archive.html">← 返回归档</a></p>
+    <article>
+<blockquote>原文：[How to Kill the Code Review](https://www.latent.space/p/reviews-dead) by Ankit Jain (Aviator Founder)</blockquote>
+
+<p>人类代码审查已死。2026 年，是 AI 代码审查的终结年。</p>
+
+<h2>我们一直欺骗自己</h2>
+
+<p>每个工程团队都有一个不能说的秘密：</p>
+
+<ul><li>PR 堆积数天无人 review</li>
+<li>审查者快速浏览 500 行 diff，然后橡皮图章式通过</li>
+<li>"这是质量门禁" —— 但事实上，没有逐行 review 就发版的情况已经持续了十年</li>
+</ul>
+<p>Code review 甚至在 2012-2014 年才真正普及，之前没有足够多的人记得罢了。</p>
+
+<h2>AI 让问题更糟</h2>
+
+<p>来自 Faros AI 的数据显示：</p>
+
+<ul><li><strong>高 AI 采纳团队</strong>：任务完成 +21%，PR 合并 +98%</li>
+<li><strong>但 PR 审查时间增加 91%</strong></li>
+</ul>
+<p>两个指数级增长：</p>
+<ul><li><strong>变更的数量</strong> 增长</li>
+<li><strong>变更的规模</strong> 增长</li>
+</ul>
+<blockquote>"我们无法消费这么多代码。"</blockquote>
+
+<p>而且，开发者普遍认为：review AI 生成的代码比 review 同事写的代码更累。团队产出更多代码，然后花更多时间审查。</p>
+
+<h2>AI Review 只是延缓死亡</h2>
+
+<p>AI code review 工具只是买时间。如果 AI 写代码，AI 审代码，为什么还需要一个漂亮的 review UI？</p>
+
+<p>Post-PR review 的逻辑是"需要 fresh eyes"，但当 agent 写代码时，"fresh eyes" 只是另一个有同样盲点的 agent。</p>
+
+<blockquote>"We know from experience agents are not always reliable, and it's very human to think, I caught the AI doing something dumb once; therefore, I must always check it."</blockquote>
+
+<p>这个想法在人工验证可行的时代是对的。但在当前规模下，已经不可能了。而且只会越来越糟。</p>
+
+<h2>真正的解决方案：从 Review Code 到 Review Intent</h2>
+
+<p>答案是：<strong>把人类检查点往上游移动</strong>。</p>
+
+<h3>Spec 成为新的 Source of Truth</h3>
+
+<p>如果"不审查代码"听起来可怕，想想 checkpoint 之前也移动过：</p>
+<ul><li>从瀑布流签收 → 持续集成</li>
+<li>现在再一次移动</li>
+</ul>
+<strong>Spec-driven development</strong> 正在成为与 AI 协作的主要方式。
+
+<ul><li>人应该 review <strong>spec、计划、约束、验收标准</strong></li>
+<li><strong>而不是</strong> 500 行 diff</li>
+<li>代码成为 spec 的产物</li>
+<li>人 review 的不是代码本身，而是步骤，是 verification rules，是合约</li>
+</ul>
+<blockquote>"Human-in-the-loop approval moves from 'Did you write this correctly?' to 'Are we solving the right problem with the right constraints?'"</blockquote>
+
+<p>最有价值的人类判断，应该在第一行代码生成<strong>之前</strong>行使，而不是之后。</p>
+
+<h2>五层信任体系：Swiss-Cheese Model</h2>
+
+<p>代码必须不由人写，代码必须不由人 review。但 LLM 不擅长遵循命令，它们会偏离，它们对自己的验证也不可靠。</p>
+
+<p>解决方案：<strong>叠加 imperfect filters，直到洞不再对齐</strong>。</p>
+
+<h3>Layer 1: 多选对比</h3>
+
+<p>让三个 agent 用不同方式尝试，选最好的结果。optionality 的成本是软件工程历史上最低的。</p>
+
+<p>Selection 可以不手动：用输出通过最多验证步骤的排名、用 diff 最小的、用不引入新依赖的。</p>
+
+<h3>Layer 2: 确定性 Guardrails</h3>
+
+<p>应该有确定性方式验证工作：测试、类型检查、contract verification —— 没有观点，只有事实。</p>
+
+<p>验证步骤应该在代码<strong>写之前</strong>定义，而不是之后为了确认已存在的东西而发明。</p>
+
+<blockquote>"If the agent writes both the code and the tests, you've just moved the problem."</blockquote>
+
+<p>Verification criteria 需要来自 <strong>spec</strong>，而不是 <strong>implementation</strong>。</p>
+
+<h3>Layer 3: 人类定义验收标准</h3>
+
+<p>这是 BDD (Behavior-Driven Development) 复兴的时刻。</p>
+
+<p>BDD 一直是好主意：用自然语言写规格，描述预期行为，然后自动化这些规格为测试。但以前写规格像是额外工作——因为还要写代码。</p>
+
+有了 agent，公式变了。<strong>spec 不是额外工作；它是主要产物。</strong>
+
+<ul><li>Agent 实现</li>
+<li>BDD 框架验证</li>
+<li>只有失败时才需要读实现</li>
+</ul>
+<blockquote>"Humans do what humans are good at: defining what 'correct' means, encoding business logic and edge cases, thinking about what could go wrong."</blockquote>
+
+<h3>Layer 4: 权限系统架构化</h3>
+
+<p>这个 agent 能碰什么？什么需要升级？</p>
+
+<ul><li>大多数 agent 框架权限是全有或全无</li>
+<li>粒度很重要：修 utils/dates.py 的 bug，不需要访问整个代码库</li>
+<li>敏感模式（auth logic、database schema、新依赖）应该自动标记人工 review</li>
+</ul>
+<h3>Layer 5: 对抗性验证</h3>
+
+<p>一个 agent 干活，另一个验证。它们不信任彼此——这就是重点。</p>
+
+<p>第三个 agent 专门尝试打破第一个 agent 构建的东西：找边缘情况和失败模式。Red team, blue team——但自动化，每次变更都跑。</p>
+
+<h2>结论</h2>
+
+<strong>旧模式</strong>：
+<blockquote>review slowly, miss bugs anyway, debug in production</blockquote>
+
+<strong>新模式</strong>：
+<blockquote>ship fast, observe everything, revert faster</blockquote>
+
+<blockquote>"Ultimately, if agents can handle the code just fine, what does it matter if we can read it or not?"</blockquote>
+
+<strong>我们读不过机器。我们需要比机器想得更多——在上游，在决策真正重要的地方。</strong>
+
+<hr>
+
+<em>来源：[Latent.Space - How to Kill the Code Review](https://www.latent.space/p/reviews-dead)</em>
+    </article>
+</body>
+</html>
