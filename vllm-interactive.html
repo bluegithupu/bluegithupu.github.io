@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>vLLM 推理引擎运行原理 — 交互式可视化</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0e17;
+      --surface: rgba(15, 23, 42, 0.6);
+      --border: #1e2d4a;
+      --cyan: #22d3ee;
+      --emerald: #34d399;
+      --violet: #a78bfa;
+      --amber: #fbbf24;
+      --rose: #fb7185;
+      --orange: #fb923c;
+      --slate: #94a3b8;
+      --text: #e2e8f0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(30, 45, 74, 0.3) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(30, 45, 74, 0.3) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding: 2rem 0;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(34, 211, 238, 0.1);
+      border: 1px solid rgba(34, 211, 238, 0.3);
+      color: var(--cyan);
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      margin-bottom: 1rem;
+    }
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #fff 0%, var(--cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle {
+      color: var(--slate);
+      font-size: 1rem;
+    }
+
+    /* Tab navigation */
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .tab-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--slate);
+      padding: 0.5rem 1.25rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+    .tab-btn.active {
+      background: rgba(34, 211, 238, 0.1);
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    /* Panels */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* Diagram container */
+    .diagram-wrapper {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      overflow-x: auto;
+    }
+    .diagram-wrapper svg {
+      width: 100%;
+      min-width: 900px;
+      display: block;
+    }
+
+    /* SVG component styles */
+    .comp-box {
+      cursor: pointer;
+      transition: filter 0.2s;
+    }
+    .comp-box:hover { filter: brightness(1.2); }
+    .comp-box.highlighted { filter: brightness(1.3) drop-shadow(0 0 8px currentColor); }
+
+    .comp-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; fill: white; text-anchor: middle; pointer-events: none; }
+    .comp-sublabel { font-family: 'JetBrains Mono', monospace; font-size: 8px; fill: #94a3b8; text-anchor: middle; pointer-events: none; }
+    .comp-annotation { font-family: 'JetBrains Mono', monospace; font-size: 7px; fill: #64748b; text-anchor: middle; pointer-events: none; }
+
+    .legend-title { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; fill: white; }
+    .legend-item { font-family: 'JetBrains Mono', monospace; font-size: 8px; fill: #94a3b8; }
+
+    /* Flow animations */
+    @keyframes flowRight {
+      0% { stroke-dashoffset: 20; }
+      100% { stroke-dashoffset: 0; }
+    }
+    @keyframes flowDown {
+      0% { stroke-dashoffset: 20; }
+      100% { stroke-dashoffset: 0; }
+    }
+    .flow-animated { animation: flowRight 1.5s linear infinite; }
+    .flow-down { animation: flowDown 1.5s linear infinite; }
+
+    /* Info Panel (right sidebar) */
+    .info-layout {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 1.5rem;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .info-layout { grid-template-columns: 1fr; }
+    }
+
+    .info-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      position: sticky;
+      top: 1rem;
+    }
+    .info-panel h3 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--cyan);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .info-panel h3::before {
+      content: '';
+      display: inline-block;
+      width: 8px; height: 8px;
+      background: var(--cyan);
+      border-radius: 50%;
+    }
+    .info-panel p {
+      color: var(--slate);
+      font-size: 0.8rem;
+      line-height: 1.6;
+      margin-bottom: 0.75rem;
+    }
+    .info-panel ul {
+      list-style: none;
+      font-size: 0.78rem;
+      color: var(--slate);
+    }
+    .info-panel ul li {
+      padding: 0.3rem 0;
+      border-bottom: 1px solid rgba(30, 45, 74, 0.5);
+    }
+    .info-panel ul li:last-child { border-bottom: none; }
+    .info-panel code {
+      background: rgba(34, 211, 238, 0.1);
+      color: var(--cyan);
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+    }
+    .info-placeholder {
+      color: #475569;
+      font-size: 0.8rem;
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+
+    /* Cards */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .card-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .card h3 { font-size: 0.85rem; font-weight: 600; }
+    .card ul {
+      list-style: none;
+      color: var(--slate);
+      font-size: 0.75rem;
+      line-height: 1.8;
+    }
+
+    /* KV Cache visualizer */
+    .kv-visualizer {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 4px;
+      margin-top: 1rem;
+    }
+    .kv-block {
+      aspect-ratio: 1;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      transition: transform 0.15s, filter 0.15s;
+    }
+    .kv-block:hover { transform: scale(1.1); filter: brightness(1.2); z-index: 2; }
+    .kv-block.free { background: rgba(34, 211, 238, 0.2); border: 1px solid rgba(34, 211, 238, 0.4); }
+    .kv-block.used { background: rgba(251, 191, 36, 0.6); border: 1px solid rgba(251, 191, 36, 0.8); }
+    .kv-block.seq { background: rgba(168, 85, 247, 0.6); border: 1px solid rgba(168, 85, 247, 0.8); }
+    .kv-block.waste { background: rgba(148, 163, 184, 0.15); border: 1px solid rgba(148, 163, 184, 0.3); }
+
+    /* Stats bar */
+    .stats-bar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .stat-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      flex: 1;
+      min-width: 120px;
+    }
+    .stat-label { font-size: 0.7rem; color: var(--slate); margin-bottom: 0.25rem; }
+    .stat-value { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 700; }
+    .stat-value.cyan { color: var(--cyan); }
+    .stat-value.amber { color: var(--amber); }
+    .stat-value.violet { color: var(--violet); }
+
+    /* Timeline */
+    .timeline-section { margin-top: 1.5rem; }
+    .timeline-title { font-size: 0.85rem; font-weight: 600; color: var(--cyan); margin-bottom: 1rem; }
+    .timeline {
+      position: relative;
+      padding-left: 2rem;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 6px; top: 0; bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--cyan), var(--violet), var(--amber));
+      border-radius: 2px;
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 1.25rem;
+      padding: 0.75rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .timeline-item:hover { border-color: var(--cyan); }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -1.5rem; top: 50%;
+      transform: translateY(-50%);
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--cyan);
+      border: 3px solid var(--bg);
+    }
+    .timeline-item pre {
+      background: rgba(0,0,0,0.3);
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--emerald);
+      margin-top: 0.5rem;
+      overflow-x: auto;
+    }
+    .timeline-item .phase {
+      font-size: 0.7rem;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 0.35rem;
+    }
+    .phase-prefill { background: rgba(34, 211, 238, 0.2); color: var(--cyan); }
+    .phase-decode { background: rgba(251, 191, 36, 0.2); color: var(--amber); }
+    .phase-sampling { background: rgba(168, 85, 247, 0.2); color: var(--violet); }
+    .timeline-item h4 { font-size: 0.85rem; margin-bottom: 0.35rem; }
+    .timeline-item p { font-size: 0.75rem; color: var(--slate); line-height: 1.5; }
+
+    /* Pulsing arrow */
+    @keyframes marchRight {
+      0% { stroke-dashoffset: 20; }
+      100% { stroke-dashoffset: 0; }
+    }
+    .march { stroke-dasharray: 8 4; animation: marchRight 1s linear infinite; }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .blink { animation: blink 1.5s ease-in-out infinite; }
+
+    /* Phase highlight button */
+    .phase-nav {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .phase-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--slate);
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .phase-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+    .phase-btn.active-prefill { border-color: var(--cyan); background: rgba(34, 211, 238, 0.1); color: var(--cyan); }
+    .phase-btn.active-decode { border-color: var(--amber); background: rgba(251, 191, 36, 0.1); color: var(--amber); }
+    .phase-btn.active-sampling { border-color: var(--violet); background: rgba(168, 85, 247, 0.1); color: var(--violet); }
+    .phase-btn.active-batching { border-color: var(--emerald); background: rgba(52, 211, 153, 0.1); color: var(--emerald); }
+
+    /* KV block status legend */
+    .kv-legend {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .kv-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.7rem;
+      color: var(--slate);
+    }
+    .kv-legend-swatch {
+      width: 12px; height: 12px;
+      border-radius: 3px;
+    }
+    .kv-legend-swatch.free { background: rgba(34, 211, 238, 0.4); border: 1px solid rgba(34, 211, 238, 0.6); }
+    .kv-legend-swatch.used { background: rgba(251, 191, 36, 0.6); border: 1px solid rgba(251, 191, 36, 0.8); }
+    .kv-legend-swatch.seq { background: rgba(168, 85, 247, 0.6); border: 1px solid rgba(168, 85, 247, 0.8); }
+    .kv-legend-swatch.waste { background: rgba(148, 163, 184, 0.15); border: 1px solid rgba(148, 163, 184, 0.3); }
+
+    /* Throughput comparison */
+    .throughput-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 1.5rem;
+      margin-top: 1rem;
+      padding: 1rem 0;
+    }
+    .bar-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .bar {
+      width: 48px;
+      border-radius: 6px 6px 0 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 0.35rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: white;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    .bar:hover { filter: brightness(1.2); transform: scaleY(1.02); transform-origin: bottom; }
+    .bar-label { font-size: 0.7rem; color: var(--slate); text-align: center; }
+
+    .footer {
+      text-align: center;
+      margin-top: 2rem;
+      padding: 1.5rem 0;
+      color: #475569;
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="badge">Interactive Visualization</div>
+    <h1>vLLM 推理引擎运行原理</h1>
+    <p class="subtitle">点击下方组件，深入理解 PagedAttention · Continuous Batching · Tensor Parallelism</p>
+  </header>
+
+  <!-- Tab navigation -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showPanel('overview')">🔬 系统架构总览</button>
+    <button class="tab-btn" onclick="showPanel('prefill')">⚡ Prefill 阶段</button>
+    <button class="tab-btn" onclick="showPanel('decode')">🔄 Decode 阶段</button>
+    <button class="tab-btn" onclick="showPanel('batching')">📦 Continuous Batching</button>
+    <button class="tab-btn" onclick="showPanel('paged')">🧠 PagedAttention</button>
+  </div>
+
+  <!-- ===================== PANEL 0: Overview ===================== -->
+  <div id="panel-overview" class="panel active">
+
+    <div class="diagram-wrapper">
+      <svg viewBox="0 0 1100 600" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#64748b"/>
+          </marker>
+          <marker id="arr-cyan" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#22d3ee"/>
+          </marker>
+          <marker id="arr-amber" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#fbbf24"/>
+          </marker>
+          <marker id="arr-violet" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#a78bfa"/>
+          </marker>
+          <marker id="arr-emerald" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#34d399"/>
+          </marker>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e2d4a" stroke-width="0.5"/>
+          </pattern>
+          <!-- Glow filter -->
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        <rect width="100%" height="100%" fill="url(#grid)"/>
+
+        <!-- ===== Boundary: vLLM Process ===== -->
+        <rect x="160" y="30" width="920" height="540" rx="14"
+          fill="rgba(34, 211, 238, 0.03)" stroke="#22d3ee" stroke-width="1" stroke-dasharray="8 4"/>
+        <text x="176" y="50" fill="#22d3ee" font-size="10" font-weight="600" font-family="JetBrains Mono,monospace">vLLM Process (Ray Distributed)</text>
+
+        <!-- ===== Boundary: GPU Memory ===== -->
+        <rect x="460" y="100" width="600" height="440" rx="12"
+          fill="rgba(251, 191, 36, 0.03)" stroke="#fbbf24" stroke-width="1" stroke-dasharray="6 3"/>
+        <text x="476" y="120" fill="#fbbf24" font-size="9" font-weight="600" font-family="JetBrains Mono,monospace">GPU Memory (HBM)</text>
+
+        <!-- ===== Request Scheduler ===== -->
+        <g class="comp-box" onclick="selectComponent('scheduler')" filter="url(#glow)">
+          <rect x="20" y="160" width="120" height="70" rx="8"
+            fill="rgba(251, 146, 60, 0.15)" stroke="#fb923c" stroke-width="1.5"/>
+          <text x="80" y="182" class="comp-label" fill="#fb923c">Scheduler</text>
+          <text x="80" y="197" class="comp-sublabel">Block Manager</text>
+          <text x="80" y="213" class="comp-annotation">Seq → Physical Blocks</text>
+        </g>
+
+        <!-- ===== Model Workers ===== -->
+        <g class="comp-box" onclick="selectComponent('worker')" filter="url(#glow)">
+          <rect x="20" y="300" width="120" height="80" rx="8"
+            fill="rgba(6, 78, 59, 0.3)" stroke="#34d399" stroke-width="1.5"/>
+          <text x="80" y="322" class="comp-label" fill="#34d399">Worker</text>
+          <text x="80" y="337" class="comp-sublabel">Model Execution</text>
+          <text x="80" y="350" class="comp-annotation">Attention Kernel</text>
+          <text x="80" y="363" class="comp-annotation">MLP/Transformer</text>
+        </g>
+
+        <!-- ===== CPU → GPU Arrow (Requests) ===== -->
+        <line x1="140" y1="195" x2="200" y2="195" stroke="#fb923c" stroke-width="1.5"
+          stroke-dasharray="6 3" marker-end="url(#arr)"/>
+        <text x="170" y="187" fill="#fb923c" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">Req Queue</text>
+
+        <!-- ===== Scheduler → Cache Arrow ===== -->
+        <line x1="80" y1="230" x2="80" y2="295" stroke="#fbbf24" stroke-width="1.5"
+          marker-end="url(#arr)"/>
+        <text x="92" y="265" fill="#fbbf24" font-size="8" font-family="JetBrains Mono,monospace">Metadata</text>
+
+        <!-- ===== KV Cache ===== -->
+        <g class="comp-box" onclick="selectComponent('kvcache')" filter="url(#glow)">
+          <rect x="480" y="130" width="260" height="100" rx="8"
+            fill="rgba(251, 191, 36, 0.15)" stroke="#fbbf24" stroke-width="1.5"/>
+          <text x="610" y="153" class="comp-label" fill="#fbbf24">KV Cache</text>
+          <text x="610" y="168" class="comp-sublabel">PagedAttention Block Tables</text>
+
+          <!-- Mini KV block visualization -->
+          <rect x="500" y="178" width="18" height="12" rx="2" fill="rgba(168, 85, 247, 0.7)"/>
+          <rect x="521" y="178" width="18" height="12" rx="2" fill="rgba(168, 85, 247, 0.5)"/>
+          <rect x="542" y="178" width="18" height="12" rx="2" fill="rgba(168, 85, 247, 0.3)"/>
+          <rect x="563" y="178" width="18" height="12" rx="2" fill="rgba(168, 85, 247, 0.7)"/>
+          <rect x="584" y="178" width="18" height="12" rx="2" fill="rgba(251, 191, 36, 0.15)" stroke="rgba(251, 191, 36, 0.4)" stroke-width="1"/>
+          <rect x="605" y="178" width="18" height="12" rx="2" fill="rgba(251, 191, 36, 0.15)" stroke="rgba(251, 191, 36, 0.4)" stroke-width="1"/>
+          <rect x="626" y="178" width="18" height="12" rx="2" fill="rgba(251, 191, 36, 0.15)" stroke="rgba(251, 191, 36, 0.4)" stroke-width="1"/>
+          <rect x="647" y="178" width="18" height="12" rx="2" fill="rgba(251, 191, 36, 0.15)" stroke="rgba(251, 191, 36, 0.4)" stroke-width="1"/>
+          <rect x="668" y="178" width="18" height="12" rx="2" fill="rgba(251, 191, 36, 0.15)" stroke="rgba(251, 191, 36, 0.4)" stroke-width="1"/>
+          <rect x="689" y="178" width="18" height="12" rx="2" fill="rgba(251, 191, 36, 0.15)" stroke="rgba(251, 191, 36, 0.4)" stroke-width="1"/>
+          <rect x="710" y="178" width="18" height="12" rx="2" fill="rgba(34, 211, 238, 0.15)" stroke="rgba(34, 211, 238, 0.4)" stroke-width="1"/>
+          <text x="610" y="212" class="comp-annotation" fill="#fbbf24">■ Seq A  ■ Free  ■ Seq B</text>
+        </g>
+
+        <!-- ===== Model Weights ===== -->
+        <g class="comp-box" onclick="selectComponent('weights')" filter="url(#glow)">
+          <rect x="760" y="130" width="280" height="100" rx="8"
+            fill="rgba(76, 29, 149, 0.25)" stroke="#a78bfa" stroke-width="1.5"/>
+          <text x="900" y="153" class="comp-label" fill="#a78bfa">Model Weights</text>
+          <text x="900" y="168" class="comp-sublabel">Transformer Layers (Sharded)</text>
+          <!-- Weight bars -->
+          <rect x="780" y="178" width="240" height="6" rx="3" fill="rgba(167, 139, 250, 0.2)"/>
+          <rect x="780" y="178" width="160" height="6" rx="3" fill="rgba(167, 139, 250, 0.6)"/>
+          <text x="900" y="202" class="comp-annotation" fill="#a78bfa">Tensor Parallelism: 2/4 shards loaded</text>
+          <text x="900" y="216" class="comp-annotation">Q, K, V, O projections per layer</text>
+        </g>
+
+        <!-- ===== Attention Compute ===== -->
+        <g class="comp-box" onclick="selectComponent('attention')" filter="url(#glow)">
+          <rect x="480" y="270" width="260" height="80" rx="8"
+            fill="rgba(34, 211, 238, 0.1)" stroke="#22d3ee" stroke-width="1.5"/>
+          <text x="610" y="293" class="comp-label" fill="#22d3ee">Attention Compute</text>
+          <text x="610" y="308" class="comp-sublabel">FlashAttention / PagedAttention Kernel</text>
+          <text x="610" y="323" class="comp-annotation">Q @ K^T → Softmax → Q @ V → Output</text>
+        </g>
+
+        <!-- ===== Sampling ===== -->
+        <g class="comp-box" onclick="selectComponent('sampling')" filter="url(#glow)">
+          <rect x="480" y="390" width="260" height="70" rx="8"
+            fill="rgba(168, 85, 247, 0.1)" stroke="#a78bfa" stroke-width="1.5"/>
+          <text x="610" y="413" class="comp-label" fill="#a78bfa">Sampling / Logits</text>
+          <text x="610" y="428" class="comp-sublabel">Temperature · Top-p · Top-k</text>
+          <text x="610" y="443" class="comp-annotation">Output token selection</text>
+        </g>
+
+        <!-- ===== PP/TP workers ===== -->
+        <!-- Worker 0 -->
+        <g class="comp-box" onclick="selectComponent('worker0')" filter="url(#glow)">
+          <rect x="780" y="270" width="120" height="80" rx="8"
+            fill="rgba(6, 78, 59, 0.25)" stroke="#34d399" stroke-width="1.5"/>
+          <text x="840" y="292" class="comp-label" fill="#34d399">Worker 0</text>
+          <text x="840" y="307" class="comp-sublabel">GPU 0+1 (TP=2)</text>
+          <text x="840" y="322" class="comp-annotation">Layer 0–15</text>
+        </g>
+        <!-- Worker 1 -->
+        <g class="comp-box" onclick="selectComponent('worker1')" filter="url(#glow)">
+          <rect x="920" y="270" width="120" height="80" rx="8"
+            fill="rgba(6, 78, 59, 0.25)" stroke="#34d399" stroke-width="1.5"/>
+          <text x="980" y="292" class="comp-label" fill="#34d399">Worker 1</text>
+          <text x="980" y="307" class="comp-sublabel">GPU 2+3 (TP=2)</text>
+          <text x="980" y="322" class="comp-annotation">Layer 16–31</text>
+        </g>
+
+        <!-- ===== Arrows between components ===== -->
+        <!-- Worker → Attention -->
+        <line x1="140" y1="340" x2="475" y2="310" stroke="#34d399" stroke-width="1.5"
+          class="march" marker-end="url(#arr-emerald)"/>
+        <text x="300" y="320" fill="#34d399" font-size="8" font-family="JetBrains Mono,monospace">Hidden States</text>
+
+        <!-- Attention → Sampling -->
+        <line x1="610" y1="350" x2="610" y2="388" stroke="#22d3ee" stroke-width="1.5"
+          marker-end="url(#arr-cyan)"/>
+        <text x="625" y="372" fill="#22d3ee" font-size="8" font-family="JetBrains Mono,monospace">Scores</text>
+
+        <!-- KV Cache ↔ Attention -->
+        <line x1="610" y1="230" x2="610" y2="268" stroke="#fbbf24" stroke-width="1.5"
+          marker-end="url(#arr-amber)"/>
+        <line x1="610" y1="268" x2="610" y2="230" stroke="#fbbf24" stroke-width="1.5"
+          stroke-dasharray="4 2" marker-end="url(#arr-amber)"/>
+        <text x="625" y="252" fill="#fbbf24" font-size="8" font-family="JetBrains Mono,monospace">KV Read</text>
+
+        <!-- Weights → Worker -->
+        <line x1="840" y1="230" x2="840" y2="268" stroke="#a78bfa" stroke-width="1.5"
+          class="march" marker-end="url(#arr-violet)"/>
+        <line x1="980" y1="230" x2="980" y2="268" stroke="#a78bfa" stroke-width="1.5"
+          class="march" marker-end="url(#arr-violet)"/>
+        <text x="1000" y="252" fill="#a78bfa" font-size="8" font-family="JetBrains Mono,monospace">Weights</text>
+
+        <!-- Scheduler → KV Cache -->
+        <line x1="140" y1="220" x2="475" y2="180" stroke="#fb923c" stroke-width="1.5"
+          stroke-dasharray="6 3" marker-end="url(#arr)"/>
+        <text x="300" y="193" fill="#fb923c" font-size="8" font-family="JetBrains Mono,monospace">Block Alloc</text>
+
+        <!-- Worker 0/1 → Attention (output) -->
+        <line x1="780" y1="310" x2="742" y2="310" stroke="#34d399" stroke-width="1.5"
+          class="march" marker-end="url(#arr-emerald)"/>
+        <line x1="920" y1="310" x2="738" y2="310" stroke="#34d399" stroke-width="1.5"
+          class="march" marker-end="url(#arr-emerald)"/>
+        <text x="750" y="302" fill="#34d399" font-size="8" font-family="JetBrains Mono,monospace">AllReduce</text>
+
+        <!-- ===== Legend ===== -->
+        <text x="30" y="450" class="legend-title">Legend</text>
+        <rect x="30" y="460" width="14" height="10" rx="2" fill="rgba(251, 146, 60, 0.3)" stroke="#fb923c"/>
+        <text x="50" y="469" class="legend-item">Scheduler / CPU Side</text>
+        <rect x="30" y="476" width="14" height="10" rx="2" fill="rgba(34, 211, 238, 0.2)" stroke="#22d3ee"/>
+        <text x="50" y="485" class="legend-item">Attention Compute</text>
+        <rect x="30" y="492" width="14" height="10" rx="2" fill="rgba(251, 191, 36, 0.2)" stroke="#fbbf24"/>
+        <text x="50" y="501" class="legend-item">KV Cache (HBM)</text>
+        <rect x="30" y="508" width="14" height="10" rx="2" fill="rgba(76, 29, 149, 0.4)" stroke="#a78bfa"/>
+        <text x="50" y="517" class="legend-item">Model Weights</text>
+        <rect x="30" y="524" width="14" height="10" rx="2" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399"/>
+        <text x="50" y="533" class="legend-item">Worker (GPU)</text>
+        <line x1="30" y1="548" x2="44" y2="548" stroke="#34d399" stroke-width="1.5" class="march"/>
+        <text x="50" y="551" class="legend-item">Data Flow (animated)</text>
+        <line x1="30" y1="562" x2="44" y2="562" stroke="#fb923c" stroke-width="1.5" stroke-dasharray="6 3"/>
+        <text x="50" y="565" class="legend-item">Control Signal</text>
+
+        <!-- Click hint -->
+        <text x="840" y="555" fill="#475569" font-size="9" font-family="JetBrains Mono,monospace" text-anchor="end">
+          👆 点击任意组件查看详情
+        </text>
+      </svg>
+    </div>
+
+    <div class="info-layout">
+      <div>
+        <div class="stats-bar">
+          <div class="stat-item">
+            <div class="stat-label">Throughput vs naive</div>
+            <div class="stat-value cyan">~24×</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">KV Cache Utilization</div>
+            <div class="stat-value amber">60–80%</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Tensor Parallelism</div>
+            <div class="stat-value violet">N GPUs</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Max Sequence Length</div>
+            <div class="stat-value cyan">~32K</div>
+          </div>
+        </div>
+
+        <div class="cards">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-dot" style="background:#22d3ee"></div>
+              <h3>核心技术：PagedAttention</h3>
+            </div>
+            <ul>
+              <li>• 受 OS 虚拟内存分页启发</li>
+              <li>• KV Cache 非连续存储，按需分配</li>
+              <li>• 消除传统方案的内存碎片</li>
+              <li>• 支持长达 22B token 的上下文</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-dot" style="background:#fb923c"></div>
+              <h3>核心技术：Continuous Batching</h3>
+            </div>
+            <ul>
+              <li>• 动态 batching，不等 batch 结束</li>
+              <li>• 推理完成即刻退出，释放显存</li>
+              <li>• 吞吐量比静态 batching 高 10+ 倍</li>
+              <li>• 配合 iteration-level scheduling</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-dot" style="background:#a78bfa"></div>
+              <h3>核心技术：Tensor Parallelism</h3>
+            </div>
+            <ul>
+              <li>• 模型权重横向切分到多 GPU</li>
+              <li>• AllReduce 汇总各 GPU 结果</li>
+              <li>• 支持任意数量的 GPU（1/2/4/8…）</li>
+              <li>• 与 PagedAttention 协同调度</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-panel" id="info-panel-overview">
+        <h3>系统架构总览</h3>
+        <p>点击左侧架构图中的<strong>任意组件</strong>，查看该模块的详细说明。</p>
+        <p>主要组件包括：</p>
+        <ul>
+          <li><code>Scheduler</code> — 调度请求，管理序列与物理块映射</li>
+          <li><code>Worker</code> — 执行模型 forward</li>
+          <li><code>KV Cache</code> — 存储注意力键值对</li>
+          <li><code>Attention</code> — PagedAttention 计算核心</li>
+          <li><code>Sampling</code> — Token 采样策略</li>
+        </ul>
+        <p style="margin-top:0.75rem;font-size:0.72rem;color:#64748b">提示：使用顶部 Tab 切换到具体阶段演示</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== PANEL 1: Prefill ===================== -->
+  <div id="panel-prefill" class="panel">
+    <div class="phase-nav">
+      <button class="phase-btn active-prefill" onclick="highlightPhase('prefill')">⚡ Prefill 阶段</button>
+      <button class="phase-btn" onclick="highlightPhase('decode')">🔄 Decode 阶段</button>
+      <button class="phase-btn" onclick="highlightPhase('sampling')">🎯 Sampling</button>
+      <button class="phase-btn" onclick="highlightPhase('batching')">📦 Batching</button>
+    </div>
+
+    <div class="diagram-wrapper">
+      <svg viewBox="0 0 900 380" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="ap" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#22d3ee"/></marker>
+          <pattern id="grid2" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e2d4a" stroke-width="0.5"/></pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid2)"/>
+
+        <!-- Input tokens -->
+        <rect x="20" y="80" width="180" height="50" rx="8" fill="rgba(34, 211, 238, 0.1)" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="110" y="102" class="comp-label" fill="#22d3ee">Input Tokens</text>
+        <text x="110" y="117" class="comp-sublabel">"The cat sat on the"</text>
+        <!-- Token boxes -->
+        <rect x="35" y="125" width="22" height="22" rx="3" fill="rgba(34, 211, 238, 0.3)" stroke="#22d3ee" stroke-width="1"/>
+        <text x="46" y="139" fill="#22d3ee" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">T₁</text>
+        <rect x="60" y="125" width="22" height="22" rx="3" fill="rgba(34, 211, 238, 0.3)" stroke="#22d3ee" stroke-width="1"/>
+        <text x="71" y="139" fill="#22d3ee" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">T₂</text>
+        <rect x="85" y="125" width="22" height="22" rx="3" fill="rgba(34, 211, 238, 0.3)" stroke="#22d3ee" stroke-width="1"/>
+        <text x="96" y="139" fill="#22d3ee" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">T₃</text>
+        <rect x="110" y="125" width="22" height="22" rx="3" fill="rgba(34, 211, 238, 0.3)" stroke="#22d3ee" stroke-width="1"/>
+        <text x="121" y="139" fill="#22d3ee" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">T₄</text>
+        <rect x="135" y="125" width="22" height="22" rx="3" fill="rgba(34, 211, 238, 0.3)" stroke="#22d3ee" stroke-width="1"/>
+        <text x="146" y="139" fill="#22d3ee" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">T₅</text>
+        <rect x="160" y="125" width="22" height="22" rx="3" fill="rgba(34, 211, 238, 0.3)" stroke="#22d3ee" stroke-width="1"/>
+        <text x="171" y="139" fill="#22d3ee" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">T₆</text>
+
+        <!-- Arrow -->
+        <line x1="200" y1="105" x2="255" y2="105" stroke="#22d3ee" stroke-width="2" marker-end="url(#ap)"/>
+
+        <!-- Embedding -->
+        <rect x="260" y="65" width="110" height="80" rx="8" fill="rgba(168, 85, 247, 0.1)" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="315" y="88" class="comp-label" fill="#a78bfa">Embedding</text>
+        <text x="315" y="103" class="comp-sublabel">Token → Vector</text>
+        <text x="315" y="118" class="comp-annotation">dim = hidden_size</text>
+
+        <!-- Arrow -->
+        <line x1="370" y1="105" x2="415" y2="105" stroke="#a78bfa" stroke-width="2" marker-end="url(#ap)"/>
+
+        <!-- Transformer Layer -->
+        <rect x="420" y="50" width="300" height="110" rx="10" fill="rgba(34, 211, 238, 0.05)" stroke="#22d3ee" stroke-width="1" stroke-dasharray="4 2"/>
+        <text x="570" y="70" fill="#22d3ee" font-size="10" font-family="JetBrains Mono,monospace" text-anchor="middle" font-weight="600">× N Transformer Layers (Prefill)</text>
+
+        <!-- Q K V projections inside -->
+        <rect x="435" y="85" width="85" height="55" rx="6" fill="rgba(6, 78, 59, 0.3)" stroke="#34d399" stroke-width="1"/>
+        <text x="477" y="106" class="comp-label" fill="#34d399" style="font-size:9px">Q, K, V</text>
+        <text x="477" y="120" class="comp-annotation" style="font-size:7px">Projection</text>
+
+        <rect x="528" y="85" width="85" height="55" rx="6" fill="rgba(34, 211, 238, 0.15)" stroke="#22d3ee" stroke-width="1"/>
+        <text x="570" y="106" class="comp-label" fill="#22d3ee" style="font-size:9px">Attention</text>
+        <text x="570" y="120" class="comp-annotation" style="font-size:7px">PagedAttn</text>
+
+        <rect x="621" y="85" width="85" height="55" rx="6" fill="rgba(6, 78, 59, 0.3)" stroke="#34d399" stroke-width="1"/>
+        <text x="663" y="106" class="comp-label" fill="#34d399" style="font-size:9px">MLP / FFN</text>
+        <text x="663" y="120" class="comp-annotation" style="font-size:7px">Feed-Forward</text>
+
+        <!-- KV Cache write -->
+        <line x1="570" y1="160" x2="570" y2="200" stroke="#fbbf24" stroke-width="2" marker-end="url(#ap)"/>
+        <rect x="470" y="205" width="200" height="55" rx="8" fill="rgba(251, 191, 36, 0.1)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="570" y="226" class="comp-label" fill="#fbbf24">Write KV Cache</text>
+        <text x="570" y="241" class="comp-sublabel">All 6 tokens at once (batch)</text>
+
+        <!-- Output -->
+        <line x1="720" y1="105" x2="775" y2="105" stroke="#a78bfa" stroke-width="2" marker-end="url(#ap)"/>
+        <rect x="780" y="65" width="100" height="80" rx="8" fill="rgba(168, 85, 247, 0.1)" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="830" y="88" class="comp-label" fill="#a78bfa">Output Logits</text>
+        <text x="830" y="103" class="comp-sublabel">Next Token Probs</text>
+        <text x="830" y="130" class="comp-annotation" fill="#fbbf24">Token ID: 342</text>
+        <text x="830" y="140" class="comp-annotation">prob=0.18</text>
+
+        <!-- Explanation note -->
+        <text x="20" y="310" fill="#e2e8f0" font-size="11" font-family="Inter,sans-serif" font-weight="600">Prefill 阶段发生了什么？</text>
+        <text x="20" y="332" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">
+          <tspan x="20" dy="0">1. 输入 prompt 的所有 token 同时并行经过 Transformer</tspan>
+          <tspan x="20" dy="18">2. 计算每个位置的 Query，以及与所有历史 token 的 Key/Value</tspan>
+          <tspan x="20" dy="18">3. 一次性将所有 K、V 写入 KV Cache（6 个 token × 一次写入）</tspan>
+          <tspan x="20" dy="18">4. 输出下一个 token 的概率分布 → 采样得到 "mat"</tspan>
+        </text>
+      </svg>
+    </div>
+
+    <div class="info-layout">
+      <div>
+        <div class="timeline-section">
+          <div class="timeline-title">⚡ Prefill 执行流程（Iteration by Iteration）</div>
+          <div class="timeline">
+            <div class="timeline-item" onclick="this.style.borderColor='#22d3ee'">
+              <span class="phase phase-prefill">STEP 1</span>
+              <h4>输入编码 — Embedding Lookup</h4>
+              <p>将输入 token 序列 [The, cat, sat, on, the, mat] 转换为 embedding 向量</p>
+              <pre>H₀ = Embed(token_ids)  // [seq_len, hidden_dim]</pre>
+            </div>
+            <div class="timeline-item">
+              <span class="phase phase-prefill">STEP 2</span>
+              <h4>Q / K / V 投影</h4>
+              <p>通过线性层生成 Query、Key、Value 向量，用于注意力计算</p>
+              <pre>Q = H · W_q,  K = H · W_k,  V = H · W_v</pre>
+            </div>
+            <div class="timeline-item">
+              <span class="phase phase-prefill">STEP 3</span>
+              <h4>PagedAttention 前向计算</h4>
+              <p>所有 6 个 token 的注意力分数并行计算，共享 KV Cache 写入</p>
+              <pre>Attn(Q, K, V) = softmax(Q · K^T / √d) · V</pre>
+            </div>
+            <div class="timeline-item">
+              <span class="phase phase-prefill">STEP 4</span>
+              <h4>KV Cache 填充 — Batch Write</h4>
+              <p>一次性将 6 个 token 的 K、V 块写入 HBM，比逐个写入效率高得多</p>
+              <pre>KV_cache["block_0"] ← [K₁..K₆, V₁..V₆]  // contiguous</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="info-panel">
+        <h3>Prefill 阶段</h3>
+        <p>Prefill 是<strong>首个前向传播</strong>，处理整个输入 prompt，建立 KV Cache。</p>
+        <p style="margin-top:0.75rem;"><strong>特点：</strong></p>
+        <ul>
+          <li>✅ 计算密集型，适合并行</li>
+          <li>✅ 所有 KV 一次性写入 Cache</li>
+          <li>✅ 首 token 延迟（Time to First Token, TTFT）</li>
+          <li>⚠️ prompt 越长，Prefill 越慢</li>
+        </ul>
+        <p style="margin-top:0.75rem;"><strong>关键技术：</strong></p>
+        <ul>
+          <li>FlashAttention — IO-aware 注意力</li>
+          <li>KV Cache 预填充策略</li>
+          <li>Chunked Prefill — 长 prompt 拆分</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== PANEL 2: Decode ===================== -->
+  <div id="panel-decode" class="panel">
+    <div class="phase-nav">
+      <button class="phase-btn" onclick="highlightPhase('prefill')">⚡ Prefill 阶段</button>
+      <button class="phase-btn active-decode" onclick="highlightPhase('decode')">🔄 Decode 阶段</button>
+      <button class="phase-btn" onclick="highlightPhase('sampling')">🎯 Sampling</button>
+      <button class="phase-btn" onclick="highlightPhase('batching')">📦 Batching</button>
+    </div>
+
+    <div class="diagram-wrapper">
+      <svg viewBox="0 0 900 380" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="ad" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#fbbf24"/></marker>
+          <pattern id="grid3" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e2d4a" stroke-width="0.5"/></pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid3)"/>
+
+        <!-- Single new token -->
+        <rect x="20" y="100" width="120" height="60" rx="8" fill="rgba(251, 191, 36, 0.1)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="80" y="122" class="comp-label" fill="#fbbf24">New Token</text>
+        <text x="80" y="137" class="comp-sublabel">"mat" (1 token)</text>
+        <text x="80" y="152" class="comp-annotation blink" fill="#fbbf24">⚡ autoregressive</text>
+
+        <line x1="140" y1="130" x2="200" y2="130" stroke="#fbbf24" stroke-width="2" marker-end="url(#ad)"/>
+
+        <!-- Embedding -->
+        <rect x="205" y="90" width="100" height="80" rx="8" fill="rgba(168, 85, 247, 0.1)" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="255" y="113" class="comp-label" fill="#a78bfa">Embedding</text>
+        <text x="255" y="128" class="comp-sublabel">+ Positional</text>
+        <text x="255" y="143" class="comp-annotation">step = 7</text>
+
+        <line x1="305" y1="130" x2="355" y2="130" stroke="#a78bfa" stroke-width="2" marker-end="url(#ad)"/>
+
+        <!-- Transformer (single step) -->
+        <rect x="360" y="70" width="280" height="120" rx="10" fill="rgba(34, 211, 238, 0.05)" stroke="#22d3ee" stroke-width="1" stroke-dasharray="4 2"/>
+        <text x="500" y="92" fill="#22d3ee" font-size="10" font-family="JetBrains Mono,monospace" text-anchor="middle" font-weight="600">× 1 Transformer Layer (Decode Step)</text>
+
+        <rect x="375" y="108" width="75" height="55" rx="6" fill="rgba(6, 78, 59, 0.3)" stroke="#34d399" stroke-width="1"/>
+        <text x="412" y="129" class="comp-label" fill="#34d399" style="font-size:9px">Q₇</text>
+        <text x="412" y="143" class="comp-annotation" style="font-size:7px">1 token only</text>
+
+        <rect x="458" y="108" width="85" height="55" rx="6" fill="rgba(34, 211, 238, 0.15)" stroke="#22d3ee" stroke-width="1"/>
+        <text x="500" y="129" class="comp-label" fill="#22d3ee" style="font-size:9px">PagedAttn</text>
+        <text x="500" y="143" class="comp-annotation" style="font-size:7px">Q₇ vs [K₁..K₆]</text>
+
+        <rect x="551" y="108" width="75" height="55" rx="6" fill="rgba(6, 78, 59, 0.3)" stroke="#34d399" stroke-width="1"/>
+        <text x="588" y="129" class="comp-label" fill="#34d399" style="font-size:9px">MLP</text>
+        <text x="588" y="143" class="comp-annotation" style="font-size:7px">1 vector</text>
+
+        <!-- KV Cache Read -->
+        <line x1="500" y1="190" x2="500" y2="230" stroke="#fbbf24" stroke-width="2" marker-end="url(#ad)"/>
+        <line x1="500" y1="230" x2="500" y2="190" stroke="#fbbf24" stroke-width="2" stroke-dasharray="4 2" marker-end="url(#ad)"/>
+        <rect x="380" y="235" width="240" height="60" rx="8" fill="rgba(251, 191, 36, 0.1)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="500" y="256" class="comp-label" fill="#fbbf24">Read: K₇, V₇ from KV Cache</text>
+        <text x="500" y="271" class="comp-sublabel">PagedAttention uses block_table[block_id] → physical addr</text>
+        <text x="500" y="286" class="comp-annotation" fill="#fbbf24">Q₇ · [K₁..K₇] → softmax → weighted sum [V₁..V₇]</text>
+
+        <!-- Output -->
+        <line x1="640" y1="130" x2="700" y2="130" stroke="#a78bfa" stroke-width="2" marker-end="url(#ad)"/>
+        <rect x="705" y="90" width="175" height="80" rx="8" fill="rgba(168, 85, 247, 0.1)" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="792" y="113" class="comp-label" fill="#a78bfa">Output Logits</text>
+        <text x="792" y="128" class="comp-sublabel">Next Token Distribution</text>
+        <text x="792" y="143" class="comp-annotation">Top-3: mat(0.18), dog(0.12), on(0.08)</text>
+
+        <!-- Note -->
+        <text x="20" y="340" fill="#e2e8f0" font-size="11" font-family="Inter,sans-serif" font-weight="600">Decode 阶段发生了什么？</text>
+        <text x="20" y="362" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">
+          <tspan x="20" dy="0">1. 单个新生 token 进入 Transformer（ autoregressive，auto-regressive 自回归）</tspan>
+          <tspan x="20" dy="18">2. Query 只来自当前 token，但需要读取全部历史 KV Cache（PagedAttention）</tspan>
+          <tspan x="20" dy="18">3. 新 K₇, V₇ 追加写入 KV Cache（按需分配物理块，不连续）</tspan>
+          <tspan x="20" dy="18">4. 输出概率分布 → 采样得到下一个 token → 循环直到 EOS</tspan>
+        </text>
+      </svg>
+    </div>
+
+    <div class="info-layout">
+      <div>
+        <div class="timeline-section">
+          <div class="timeline-title">🔄 Autoregressive Decoding 循环</div>
+          <div class="timeline">
+            <div class="timeline-item">
+              <span class="phase phase-decode">STEP 1</span>
+              <h4>Token Embedding</h4>
+              <p>新 token 转换为 embedding 向量，加上位置编码（RoPE 等）</p>
+              <pre>H₇ = Embed(token_id=342) + PosEnc(7)</pre>
+            </div>
+            <div class="timeline-item">
+              <span class="phase phase-decode">STEP 2</span>
+              <h4>PagedAttention — Q₇ vs [K₁..K₇]</h4>
+              <p>Query 只有当前 token，但 Key/Value 读取全部历史缓存，通过 block_table 映射</p>
+              <pre>Q₇ · [K₁..K₂..K₃..K₄..K₅..K₆..K₇]^T</pre>
+            </div>
+            <div class="timeline-item">
+              <span class="phase phase-decode">STEP 3</span>
+              <h4>KV Cache Append</h4>
+              <p>新 token 的 K₇, V₇ 通过 Scheduler 分配物理块，写入 HBM</p>
+              <pre>block_table[7] = free_block_id  // allocate on demand</pre>
+            </div>
+            <div class="timeline-item">
+              <span class="phase phase-decode">STEP 4</span>
+              <h4>采样下一个 Token</h4>
+              <p>通过 SamplingParams（temperature/top_p）采样下一个 token</p>
+              <pre>next_token ~ Categorical(softmax(logits / T))</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="info-panel">
+        <h3>Decode 阶段</h3>
+        <p>Decode 是<strong>逐 token 自回归生成</strong>，每个 step 只处理 1 个 token。</p>
+        <p style="margin-top:0.75rem;"><strong>特点：</strong></p>
+        <ul>
+          <li>⚠️ Memory Bound（内存密集）</li>
+          <li>📖 大量 KV Cache 读取，少量计算</li>
+          <li>🔗 依赖链长 → 生成慢</li>
+          <li>⏱️ Time Per Output Token (TPOT)</li>
+        </ul>
+        <p style="margin-top:0.75rem;"><strong>性能瓶颈：</strong></p>
+        <ul>
+          <li>KV Cache 带宽（HBM）</li>
+          <li>PagedAttention block table lookup</li>
+          <li>内存复制开销</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== PANEL 3: Continuous Batching ===================== -->
+  <div id="panel-batching" class="panel">
+    <div class="phase-nav">
+      <button class="phase-btn" onclick="highlightPhase('prefill')">⚡ Prefill 阶段</button>
+      <button class="phase-btn" onclick="highlightPhase('decode')">🔄 Decode 阶段</button>
+      <button class="phase-btn" onclick="highlightPhase('sampling')">🎯 Sampling</button>
+      <button class="phase-btn active-batching" onclick="highlightPhase('batching')">📦 Batching</button>
+    </div>
+
+    <div class="diagram-wrapper">
+      <svg viewBox="0 0 900 420" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="ab" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#34d399"/></marker>
+          <pattern id="grid4" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e2d4a" stroke-width="0.5"/></pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid4)"/>
+
+        <!-- Title -->
+        <text x="450" y="30" fill="#e2e8f0" font-size="13" font-family="Inter,sans-serif" font-weight="700" text-anchor="middle">Continuous Batching vs Static Batching — GPU Time</text>
+
+        <!-- Time axis -->
+        <line x1="50" y1="55" x2="850" y2="55" stroke="#475569" stroke-width="1"/>
+        <text x="50" y="48" fill="#94a3b8" font-size="9" font-family="JetBrains Mono,monospace">t=0</text>
+        <text x="450" y="48" fill="#94a3b8" font-size="9" font-family="JetBrains Mono,monospace">t=mid</text>
+        <text x="850" y="48" fill="#94a3b8" font-size="9" font-family="JetBrains Mono,monospace">t=end</text>
+
+        <!-- STATIC BATCHING -->
+        <text x="50" y="80" fill="#fb7185" font-size="11" font-family="Inter,sans-serif" font-weight="600">❌ Static Batching（传统方案）</text>
+        <!-- Batches -->
+        <!-- Batch 1 -->
+        <rect x="50" y="95" width="240" height="40" rx="4" fill="rgba(251, 113, 133, 0.2)" stroke="#fb7185" stroke-width="1"/>
+        <text x="170" y="119" fill="#fb7185" font-size="9" font-family="JetBrains Mono,monospace" text-anchor="middle">Req A (短 prompt)</text>
+        <!-- Batch 2 -->
+        <rect x="290" y="95" width="380" height="40" rx="4" fill="rgba(251, 113, 133, 0.15)" stroke="#fb7185" stroke-width="1"/>
+        <text x="480" y="119" fill="#fb7185" font-size="9" font-family="JetBrains Mono,monospace" text-anchor="middle">Req B (中等 prompt)</text>
+        <!-- Batch 3 -->
+        <rect x="670" y="95" width="200" height="40" rx="4" fill="rgba(251, 113, 133, 0.1)" stroke="#fb7185" stroke-width="1" stroke-dasharray="3 2"/>
+        <text x="770" y="119" fill="#fb7185" font-size="9" font-family="JetBrains Mono,monospace" text-anchor="middle">Req C (长 prompt)</text>
+
+        <!-- GPU Utilization bar (static - lots of idle time) -->
+        <text x="50" y="165" fill="#475569" font-size="9" font-family="Inter,sans-serif">GPU 利用率</text>
+        <rect x="130" y="155" width="600" height="20" rx="4" fill="rgba(251, 113, 133, 0.15)" stroke="#475569" stroke-width="1"/>
+        <rect x="130" y="155" width="150" height="20" rx="4" fill="rgba(251, 113, 133, 0.4)"/>
+        <rect x="280" y="155" width="280" height="20" rx="4" fill="rgba(251, 113, 133, 0.25)"/>
+        <rect x="560" y="155" width="170" height="20" rx="4" fill="rgba(251, 113, 133, 0.1)" stroke-dasharray="3 2"/>
+        <text x="130" y="168" fill="white" font-size="8" font-family="JetBrains Mono,monospace">B1</text>
+        <text x="280" y="168" fill="white" font-size="8" font-family="JetBrains Mono,monospace">B2</text>
+        <text x="560" y="168" fill="#fb7185" font-size="8" font-family="JetBrains Mono,monospace">等待中...</text>
+
+        <!-- Idle annotation -->
+        <line x1="730" y1="175" x2="730" y2="190" stroke="#475569" stroke-width="1"/>
+        <text x="735" y="195" fill="#475569" font-size="8" font-family="JetBrains Mono,monospace">GPU 空闲</text>
+
+        <!-- CONTINUOUS BATCHING -->
+        <text x="50" y="230" fill="#34d399" font-size="11" font-family="Inter,sans-serif" font-weight="600">✅ Continuous Batching（vLLM）</text>
+
+        <!-- Iter 1 -->
+        <rect x="50" y="250" width="100" height="30" rx="4" fill="rgba(34, 211, 238, 0.2)" stroke="#22d3ee" stroke-width="1"/>
+        <text x="100" y="268" fill="#22d3ee" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">Iter 1</text>
+
+        <!-- Dynamic arrivals -->
+        <rect x="155" y="250" width="80" height="30" rx="4" fill="rgba(168, 85, 247, 0.2)" stroke="#a78bfa" stroke-width="1"/>
+        <text x="195" y="268" fill="#a78bfa" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">新请求</text>
+
+        <rect x="240" y="250" width="80" height="30" rx="4" fill="rgba(251, 191, 36, 0.2)" stroke="#fbbf24" stroke-width="1"/>
+        <text x="280" y="268" fill="#fbbf24" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">新请求</text>
+
+        <!-- Preemptions -->
+        <rect x="380" y="250" width="60" height="30" rx="4" fill="rgba(148, 163, 184, 0.15)" stroke="#64748b" stroke-width="1" stroke-dasharray="3 2"/>
+        <text x="410" y="268" fill="#64748b" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">完成退出</text>
+
+        <!-- More iterations -->
+        <rect x="445" y="250" width="100" height="30" rx="4" fill="rgba(34, 211, 238, 0.2)" stroke="#22d3ee" stroke-width="1"/>
+        <text x="495" y="268" fill="#22d3ee" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">Iter N</text>
+
+        <rect x="550" y="250" width="80" height="30" rx="4" fill="rgba(168, 85, 247, 0.2)" stroke="#a78bfa" stroke-width="1"/>
+        <text x="590" y="268" fill="#a78bfa" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">新请求</text>
+
+        <rect x="635" y="250" width="100" height="30" rx="4" fill="rgba(34, 211, 238, 0.2)" stroke="#22d3ee" stroke-width="1"/>
+        <text x="685" y="268" fill="#22d3ee" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">...</text>
+
+        <!-- Arrow showing iteration -->
+        <line x1="50" y1="285" x2="740" y2="285" stroke="#34d399" stroke-width="1" stroke-dasharray="4 4"/>
+        <text x="395" y="298" fill="#34d399" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">← iteration 推进，批次动态变化 →</text>
+
+        <!-- Throughput comparison -->
+        <text x="50" y="330" fill="#e2e8f0" font-size="11" font-family="Inter,sans-serif" font-weight="600">吞吐量对比</text>
+        <div class="throughput-chart">
+          <div class="bar-group">
+            <div class="bar" style="height:60px; background:rgba(251,113,133,0.6);">10</div>
+            <div class="bar-label">Static</div>
+          </div>
+          <div class="bar-group">
+            <div class="bar" style="height:240px; background:rgba(52,211,153,0.6);">24</div>
+            <div class="bar-label">Continuous</div>
+          </div>
+          <div class="bar-group">
+            <div class="bar" style="height:100px; background:rgba(34,211,238,0.6);">16</div>
+            <div class="bar-label">Chunked<br>Prefill</div>
+          </div>
+        </div>
+        <text x="50" y="410" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">
+          <tspan x="50" dy="0">Continuous Batching 在请求完成时立即释放资源，新请求无缝加入，GPU 利用率接近 100%</tspan>
+          <tspan x="50" dy="18">vs Static Batching 必须等待所有请求完成，造成大量 GPU 空闲等待时间</tspan>
+        </text>
+      </svg>
+    </div>
+
+    <div class="info-layout">
+      <div>
+        <div class="cards">
+          <div class="card">
+            <div class="card-header"><div class="card-dot" style="background:#fb7185"></div><h3>Static Batching 问题</h3></div>
+            <ul>
+              <li>• 等所有请求到达才开始处理</li>
+              <li>• 短 prompt 等长 prompt 完成</li>
+              <li>• GPU 大量空闲等待</li>
+              <li>• 吞吐量为 Continuous 的 1/10</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-dot" style="background:#34d399"></div><h3>Continuous Batching 优势</h3></div>
+            <ul>
+              <li>• Iteration-level 调度</li>
+              <li>• 完成即退出（EVICT）</li>
+              <li>• 新请求随时加入（APPEND）</li>
+              <li>• Preemption 保障公平</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-dot" style="background:#a78bfa"></div><h3>Iteration-level Scheduling</h3></div>
+            <ul>
+              <li>• 每个 decode iteration 检查队列</li>
+              <li>• 完成 → 释放 KV Cache 块</li>
+              <li>• 空间足够 → 接纳新请求</li>
+              <li>• 空间不足 → Preempt（抢占）</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="info-panel">
+        <h3>Continuous Batching</h3>
+        <p>也称 <strong>Iteration-level Batching</strong>，是 vLLM 吞吐量的核心保障。</p>
+        <p style="margin-top:0.75rem;"><strong>与 Static Batching 的区别：</strong></p>
+        <ul>
+          <li>Static: batch 固定到所有请求结束</li>
+          <li>Continuous: 每个 token step 重新调度</li>
+        </ul>
+        <p style="margin-top:0.75rem;"><strong>关键操作：</strong></p>
+        <ul>
+          <li><code>APPEND</code> — 新请求加入批次</li>
+          <li><code>EVICT</code> — 完成请求退出</li>
+          <li><code>PREEMPT</code> — 内存不足时抢占</li>
+          <li><code>SWAP</code> — CPU/GPU 间 KV Cache 交换</li>
+        </ul>
+        <p style="margin-top:0.75rem;font-size:0.72rem;color:#64748b">配合 PagedAttention 实现精细的显存管理</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== PANEL 4: PagedAttention ===================== -->
+  <div id="panel-paged" class="panel">
+    <div class="phase-nav">
+      <button class="phase-btn" onclick="highlightPhase('prefill')">⚡ Prefill 阶段</button>
+      <button class="phase-btn" onclick="highlightPhase('decode')">🔄 Decode 阶段</button>
+      <button class="phase-btn" onclick="highlightPhase('sampling')">🎯 Sampling</button>
+      <button class="phase-btn" onclick="highlightPhase('batching')">📦 Batching</button>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-item">
+        <div class="stat-label">Block Size</div>
+        <div class="stat-value cyan">16 tokens/block</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">物理块数（演示）</div>
+        <div class="stat-value amber">24 blocks</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">当前序列</div>
+        <div class="stat-value violet">Seq A, B, C</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">已分配</div>
+        <div class="stat-value" style="color:#fb7185" id="alloc-count">~60%</div>
+      </div>
+    </div>
+
+    <div class="diagram-wrapper">
+      <svg viewBox="0 0 900 280" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="grid5" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e2d4a" stroke-width="0.5"/></pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid5)"/>
+
+        <text x="20" y="28" fill="#e2e8f0" font-size="12" font-family="Inter,sans-serif" font-weight="700">KV Cache Block Manager — 点击色块切换序列 highlight</text>
+        <text x="20" y="46" fill="#64748b" font-size="9" font-family="Inter,sans-serif">虚拟块按需映射到物理块，非连续存储，按 block 为单位管理，避免碎片</text>
+
+        <!-- Block table -->
+        <text x="20" y="70" fill="#94a3b8" font-size="9" font-family="JetBrains Mono,monospace">Block Table:</text>
+        <text x="20" y="86" fill="#a78bfa" font-size="9" font-family="JetBrains Mono,monospace">Seq A (8 tokens): v0→p2, v1→p5, v2→p8, v3→p12</text>
+        <text x="20" y="100" fill="#22d3ee" font-size="9" font-family="JetBrains Mono,monospace">Seq B (6 tokens): v0→p0, v1→p3, v2→p7</text>
+        <text x="20" y="114" fill="#fbbf24" font-size="9" font-family="JetBrains Mono,monospace">Seq C (3 tokens): v0→p15, v1→p18</text>
+
+        <!-- Physical blocks grid -->
+        <!-- Row 1 -->
+        <g class="comp-box" onclick="toggleSeq('B')">
+          <rect x="20" y="130" width="52" height="40" rx="4" fill="rgba(34, 211, 238, 0.5)" stroke="#22d3ee" stroke-width="1.5" id="pb0"/>
+          <text x="46" y="150" fill="white" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">P0</text>
+          <text x="46" y="162" fill="rgba(255,255,255,0.6)" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle">Seq B</text>
+        </g>
+        <g class="comp-box" onclick="toggleSeq('free')">
+          <rect x="76" y="130" width="52" height="40" rx="4" fill="rgba(148, 163, 184, 0.1)" stroke="rgba(148,163,184,0.3)" stroke-width="1" id="pb1"/>
+          <text x="102" y="150" fill="#475569" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">P1</text>
+          <text x="102" y="162" fill="#475569" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle">FREE</text>
+        </g>
+        <g class="comp-box" onclick="toggleSeq('A')">
+          <rect x="132" y="130" width="52" height="40" rx="4" fill="rgba(168, 85, 247, 0.5)" stroke="#a78bfa" stroke-width="1.5" id="pb2"/>
+          <text x="158" y="150" fill="white" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">P2</text>
+          <text x="158" y="162" fill="rgba(255,255,255,0.6)" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle">Seq A</text>
+        </g>
+        <g class="comp-box" onclick="toggleSeq('B')">
+          <rect x="188" y="130" width="52" height="40" rx="4" fill="rgba(34, 211, 238, 0.5)" stroke="#22d3ee" stroke-width="1.5" id="pb3"/>
+          <text x="214" y="150" fill="white" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">P3</text>
+          <text x="214" y="162" fill="rgba(255,255,255,0.6)" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle">Seq B</text>
+        </g>
+        <g class="comp-box" onclick="toggleSeq('free')">
+          <rect x="244" y="130" width="52" height="40" rx="4" fill="rgba(148, 163, 184, 0.1)" stroke="rgba(148,163,184,0.3)" stroke-width="1" id="pb4"/>
+          <text x="270" y="150" fill="#475569" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">P4</text>
+          <text x="270" y="162" fill="#475569" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle">FREE</text>
+        </g>
+        <g class="comp-box" onclick="toggleSeq('A')">
+          <rect x="300" y="130" width="52" height="40" rx="4" fill="rgba(168, 85, 247, 0.5)" stroke="#a78bfa" stroke-width="1.5" id="pb5"/>
+          <text x="326" y="150" fill="white" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">P5</text>
+          <text x="326" y="162" fill="rgba(255,255,255,0.6)" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle">Seq A</text>
+        </g>
+        <g class="comp-box" onclick="toggleSeq('free')">
+          <rect x="356" y="130" width="52" height="40" rx="4" fill="rgba(148, 163, 184, 0.1)" stroke="rgba(148,163,184,0.3)" stroke-width="1" id="pb6"/>
+          <text x="382" y="150" fill="#475569" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">P6</text>
+          <text x="382" y="162" fill="#475569" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle">FREE</text>
+        </g>
+        <g class="comp-box" onclick="toggleSeq('B')">
+          <rect x="412" y="130" width="52" height="40" rx="4" fill="rgba(34, 211, 238, 0.5)" stroke="#22d3ee" stroke-width="1.5" id="pb7"/>
+          <text x="438" y="150" fill="white" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">P7</text>
+          <text x="438" y="162" fill="rgba(255,255,255,0.6)" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle">Seq B</text>
+        </g>
+        <g class="comp-box" onclick="toggleSeq('A')">
+          <rect x="468" y="130" width="52" height="40" rx="4" fill="rgba(168, 85, 247, 0.5)" stroke="#a78bfa" stroke-width="1.5" id="pb8"/>
+          <text x="494" y="150" fill="white" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">P8</text>
+          <text x="494" y="162" fill="rgba(255,255,255,0.6)" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle">Seq A</text>
+        </g>
+        <g class="comp-box" onclick="toggleSeq('free')">
+          <rect x="524" y="130" width="52" height="40" rx="4" fill="rgba(148, 163, 184, 0.1)" stroke="rgba(148,163,184,0.3)" stroke-width="1" id="pb9"/>
+          <text x="550" y="150" fill="#475569" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">P9</text>
+          <text x="550" y="162" fill="#475569" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle">FREE</text>
+        </g>
+        <g class="comp-box" onclick="toggleSeq('free')">
+          <rect x="580" y="130" width="52" height="40" rx="4" fill="rgba(148, 163, 184, 0.1)" stroke="rgba(148,163,184,0.3)" stroke-width="1" id="pb10"/>
+          <text x="606" y="150" fill="#475569" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">P10</text>
+          <text x="606" y="162" fill="#475569" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle">FREE</text>
+        </g>
+        <g class="comp-box" onclick="toggleSeq('A')">
+          <rect x="636" y="130" width="52" height="40" rx="4" fill="rgba(168, 85, 247, 0.5)" stroke="#a78bfa" stroke-width="1.5" id="pb11"/>
+          <text x="662" y="150" fill="white" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">P11</text>
+          <text x="662" y="162" fill="rgba(255,255,255,0.6)" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle">Seq A</text>
+        </g>
+        <!-- Row 2 -->
+        <g class="comp-box" onclick="toggleSeq('A')">
+          <rect x="20" y="180" width="52" height="40" rx="4" fill="rgba(168, 85, 247, 0.5)" stroke="#a78bfa" stroke-width="1.5" id="pb12"/>
+          <text x="46" y="200" fill="white" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">P12</text>
+          <text x="46" y="212" fill="rgba(255,255,255,0.6)" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle">Seq A</text>
+        </g>
+        <g class="comp-box" onclick="toggleSeq('C')">
+          <rect x="76" y="180" width="52" height="40" rx="4" fill="rgba(251, 191, 36, 0.5)" stroke="#fbbf24" stroke-width="1.5" id="pb13"/>
+          <text x="102" y="200" fill="white" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">P13</text>
+          <text x="102" y="212" fill="rgba(255,255,255,0.6)" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle">Seq C</text>
+        </g>
+        <g class="comp-box" onclick="toggleSeq('free')">
+          <rect x="132" y="180" width="52" height="40" rx="4" fill="rgba(148, 163, 184, 0.1)" stroke="rgba(148,163,184,0.3)" stroke-width="1" id="pb14"/>
+          <text x="158" y="200" fill="#475569" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">P14</text>
+          <text x="158" y="212" fill="#475569" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle">FREE</text>
+        </g>
+        <g class="comp-box" onclick="toggleSeq('C')">
+          <rect x="188" y="180" width="52" height="40" rx="4" fill="rgba(251, 191, 36, 0.5)" stroke="#fbbf24" stroke-width="1.5" id="pb15"/>
+          <text x="214" y="200" fill="white" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">P15</text>
+          <text x="214" y="212" fill="rgba(255,255,255,0.6)" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle">Seq C</text>
+        </g>
+        <g class="comp-box" onclick="toggleSeq('free')">
+          <rect x="244" y="180" width="52" height="40" rx="4" fill="rgba(148, 163, 184, 0.1)" stroke="rgba(148,163,184,0.3)" stroke-width="1" id="pb16"/>
+          <text x="270" y="200" fill="#475569" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">P16</text>
+          <text x="270" y="212" fill="#475569" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle">FREE</text>
+        </g>
+        <g class="comp-box" onclick="toggleSeq('free')">
+          <rect x="300" y="180" width="52" height="40" rx="4" fill="rgba(148, 163, 184, 0.1)" stroke="rgba(148,163,184,0.3)" stroke-width="1" id="pb17"/>
+          <text x="326" y="200" fill="#475569" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">P17</text>
+          <text x="326" y="212" fill="#475569" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle">FREE</text>
+        </g>
+        <g class="comp-box" onclick="toggleSeq('C')">
+          <rect x="356" y="180" width="52" height="40" rx="4" fill="rgba(251, 191, 36, 0.5)" stroke="#fbbf24" stroke-width="1.5" id="pb18"/>
+          <text x="382" y="200" fill="white" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">P18</text>
+          <text x="382" y="212" fill="rgba(255,255,255,0.6)" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle">Seq C</text>
+        </g>
+        <g class="comp-box" onclick="toggleSeq('free')">
+          <rect x="412" y="180" width="52" height="40" rx="4" fill="rgba(148, 163, 184, 0.1)" stroke="rgba(148,163,184,0.3)" stroke-width="1" id="pb19"/>
+          <text x="438" y="200" fill="#475569" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">P19</text>
+          <text x="438" y="212" fill="#475569" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle">FREE</text>
+        </g>
+        <g class="comp-box" onclick="toggleSeq('free')">
+          <rect x="468" y="180" width="52" height="40" rx="4" fill="rgba(148, 163, 184, 0.1)" stroke="rgba(148,163,184,0.3)" stroke-width="1" id="pb20"/>
+          <text x="494" y="200" fill="#475569" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">P20</text>
+          <text x="494" y="212" fill="#475569" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle">FREE</text>
+        </g>
+        <g class="comp-box" onclick="toggleSeq('free')">
+          <rect x="524" y="180" width="52" height="40" rx="4" fill="rgba(148, 163, 184, 0.1)" stroke="rgba(148,163,184,0.3)" stroke-width="1" id="pb21"/>
+          <text x="550" y="200" fill="#475569" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">P21</text>
+          <text x="550" y="212" fill="#475569" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle">FREE</text>
+        </g>
+        <g class="comp-box" onclick="toggleSeq('free')">
+          <rect x="580" y="180" width="52" height="40" rx="4" fill="rgba(148, 163, 184, 0.1)" stroke="rgba(148,163,184,0.3)" stroke-width="1" id="pb22"/>
+          <text x="606" y="200" fill="#475569" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">P22</text>
+          <text x="606" y="212" fill="#475569" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle">FREE</text>
+        </g>
+        <g class="comp-box" onclick="toggleSeq('free')">
+          <rect x="636" y="180" width="52" height="40" rx="4" fill="rgba(148, 163, 184, 0.1)" stroke="rgba(148,163,184,0.3)" stroke-width="1" id="pb23"/>
+          <text x="662" y="200" fill="#475569" font-size="8" font-family="JetBrains Mono,monospace" text-anchor="middle">P23</text>
+          <text x="662" y="212" fill="#475569" font-size="7" font-family="JetBrains Mono,monospace" text-anchor="middle">FREE</text>
+        </g>
+
+        <!-- Legend -->
+        <g class="kv-legend" style="position:absolute;right:2rem;top:3rem">
+          <div class="kv-legend-item"><div class="kv-legend-swatch seq"></div>Seq A (violet)</div>
+          <div class="kv-legend-item"><div class="kv-legend-swatch used"></div>Seq B (cyan)</div>
+          <div class="kv-legend-item"><div class="kv-legend-swatch free"></div>Seq C (amber)</div>
+          <div class="kv-legend-item"><div class="kv-legend-swatch waste"></div>FREE</div>
+        </g>
+      </svg>
+    </div>
+
+    <div class="info-layout">
+      <div>
+        <div class="timeline-section">
+          <div class="timeline-title">🧠 PagedAttention 核心原理</div>
+          <div class="timeline">
+            <div class="timeline-item">
+              <span class="phase phase-prefill">灵感</span>
+              <h4>OS 虚拟内存分页</h4>
+              <p>操作系统用页表将虚拟地址映射到物理地址，按需分配，Page Fault 时再加载。PagedAttention 借鉴了这一思想。</p>
+            </div>
+            <div class="timeline-item">
+              <span class="phase phase-decode">传统方案</span>
+              <h4>连续 KV Cache（碎片化）</h4>
+              <p>每个序列的 KV 必须放在连续内存区域。序列长度不同 → 预留过长 → 大量浪费（Internal Fragmentation）。</p>
+              <pre>Seq A: [K₁ K₂ K₃ ... K₁₆] ← contiguous, pre-allocated 32 slots</pre>
+            </div>
+            <div class="timeline-item">
+              <span class="phase phase-decode">PagedAttention</span>
+              <h4>非连续块映射（block_table）</h4>
+              <p>序列逻辑上连续（v0, v1, v2...），物理上分散在不同的 16-token 块中。按需分配，无内部碎片。</p>
+              <pre>Seq A: v[0..3]→p2, v[4..7]→p5, v[8..11]→p8, v[12..15]→p12</pre>
+            </div>
+            <div class="timeline-item">
+              <span class="phase phase-sampling">效果</span>
+              <h4>KV Cache 利用率大幅提升</h4>
+              <p>传统方案：~30-40% 利用率。PagedAttention：~60-80%。相同显存可支持 2-4x 更多并发请求。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="info-panel">
+        <h3>PagedAttention</h3>
+        <p>由 <strong>University of Washington &amp; Meta</strong> 提出（2023），是 vLLM 的核心技术。</p>
+        <p style="margin-top:0.75rem;"><strong>解决的问题：</strong></p>
+        <ul>
+          <li>传统方案：连续内存分配 → 碎片化</li>
+          <li>内存预留过长，浪费严重</li>
+          <li>长上下文支持受限</li>
+        </ul>
+        <p style="margin-top:0.75rem;"><strong>工作原理：</strong></p>
+        <ul>
+          <li><code>block_size=16</code> tokens/block</li>
+          <li><code>block_table</code> 虚拟→物理映射</li>
+          <li>GPU kernel 直接通过 table 寻址</li>
+          <li>Copy-on-write 支持 fork</li>
+        </ul>
+        <p style="margin-top:0.75rem;"><strong>实测收益：</strong></p>
+        <ul>
+          <li>吞吐量提升 ~24x vs HuggingFace</li>
+          <li>支持 22B+ token 上下文</li>
+          <li>KV Cache 利用率 &gt;60%</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    vLLM 推理引擎运行原理 — 交互式可视化 · 基于 v0.4+ 架构
+  </div>
+</div>
+
+<script>
+  // Panel switching
+  function showPanel(name) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+  }
+
+  // Component selection for info panel
+  const componentInfo = {
+    scheduler: {
+      title: 'Scheduler（调度器）',
+      color: '#fb923c',
+      desc: 'Scheduler 是 vLLM 的大脑，负责管理请求队列和 KV Cache 块分配。',
+      points: [
+        '接收 API 请求，加入 waiting 队列',
+        '决定每个 iteration 哪些序列执行 prefill/decode',
+        '调用 BlockManager 分配/释放 KV Cache 物理块',
+        '处理 Preemption（当显存不足时抢占低优先级序列）',
+        '与 Worker 通信，发送执行计划'
+      ]
+    },
+    worker: {
+      title: 'Worker（GPU Worker）',
+      color: '#34d399',
+      desc: '每个 Worker 管理一块 GPU，负责执行模型的前向传播。',
+      points: [
+        '执行 Transformer 层的矩阵运算',
+        '调用 PagedAttention CUDA Kernel',
+        '管理模型权重分片（Tensor Parallelism）',
+        '每个 forward 返回 hidden states 和 logits'
+      ]
+    },
+    kvcache: {
+      title: 'KV Cache（HBM）',
+      color: '#fbbf24',
+      desc: '存储注意力层的 Key 和 Value 向量，供后续 token 生成时读取。',
+      points: [
+        '存储格式：[num_layers, num_blocks, block_size, num_kv_heads, head_dim]',
+        '通过 block_table 映射到物理内存地址',
+        'PagedAttention kernel 直接通过指针数组访问',
+        'HBM 带宽是主要性能瓶颈之一'
+      ]
+    },
+    weights: {
+      title: 'Model Weights',
+      color: '#a78bfa',
+      desc: 'Transformer 模型权重，按 Tensor Parallelism 策略分片到多 GPU。',
+      points: [
+        'Q/K/V/O 投影矩阵按列切分（Column Parallel）',
+        'FFN 层的 Gate/Up/Down 投影也支持 TP',
+        'AllReduce 汇总各 GPU 的 partial results',
+        '权重常驻 HBM，避免重复加载'
+      ]
+    },
+    attention: {
+      title: 'Attention Compute',
+      color: '#22d3ee',
+      desc: 'PagedAttention 计算核心，通过 CUDA Kernel 实现高效的注意力计算。',
+      points: [
+        'FlashAttention-2 风格 IO-aware 实现',
+        '按 block_table 遍历物理块，避免内存碎片',
+        '支持 GQA/MQA（多 Query 注意力）',
+        'Softmax、矩阵乘法高度优化'
+      ]
+    },
+    sampling: {
+      title: 'Sampling / Logits',
+      color: '#a78bfa',
+      desc: '根据 logits 进行 token 采样，决定下一个生成的 token。',
+      points: [
+        'Temperature 控制随机性（T=0 → greedy）',
+        'Top-p (nucleus) 采样：累积概率前 p 的 token',
+        'Top-k 采样：限制在概率最高的 k 个 token 中',
+        '重复惩罚（presence/frequency penalty）'
+      ]
+    },
+    worker0: {
+      title: 'Worker 0（GPU 0+1）',
+      color: '#34d399',
+      desc: 'Tensor Parallelism Worker，处理前半部分 Transformer 层。',
+      points: [
+        'Layer 0–15（共 32 层模型）',
+        '跨 GPU AllReduce 同步',
+        '接收 Worker 1 的 hidden states，汇总后继续'
+      ]
+    },
+    worker1: {
+      title: 'Worker 1（GPU 2+3）',
+      color: '#34d399',
+      desc: 'Tensor Parallelism Worker，处理后半部分 Transformer 层。',
+      points: [
+        'Layer 16–31',
+        '与 Worker 0 并行执行',
+        '通过 NVLink 进行高速 GPU 间通信'
+      ]
+    }
+  };
+
+  function selectComponent(name) {
+    const info = componentInfo[name];
+    if (!info) return;
+
+    const panel = document.getElementById('info-panel-overview');
+    if (!panel) return;
+
+    let html = `<h3 style="color:${info.color}">${info.title}</h3>`;
+    html += `<p>${info.desc}</p>`;
+    html += '<ul>';
+    info.points.forEach(p => {
+      html += `<li>• ${p}</li>`;
+    });
+    html += '</ul>';
+    panel.innerHTML = html;
+  }
+
+  // PagedAttention block interaction
+  let activeSeq = null;
+
+  const seqColors = {
+    A: { fill: 'rgba(168, 85, 247, 0.8)', stroke: '#a78bfa', bg: 'rgba(168, 85, 247, 0.15)' },
+    B: { fill: 'rgba(34, 211, 238, 0.8)', stroke: '#22d3ee', bg: 'rgba(34, 211, 238, 0.15)' },
+    C: { fill: 'rgba(251, 191, 36, 0.8)', stroke: '#fbbf24', bg: 'rgba(251, 191, 36, 0.15)' },
+    free: { fill: 'rgba(148, 163, 184, 0.2)', stroke: 'rgba(148, 163, 184, 0.4)', bg: 'rgba(148, 163, 184, 0.05)' }
+  };
+
+  function toggleSeq(seq) {
+    // If clicking same seq, reset
+    if (activeSeq === seq) {
+      resetBlocks();
+      activeSeq = null;
+      return;
+    }
+    activeSeq = seq;
+
+    // Dim all blocks, highlight selected seq
+    for (let i = 0; i < 24; i++) {
+      const el = document.getElementById('pb' + i);
+      if (!el) continue;
+      const blockData = getBlockData(i);
+      if (blockData === seq) {
+        el.style.filter = 'brightness(1.4) drop-shadow(0 0 6px ' + seqColors[seq].stroke + ')';
+        el.setAttribute('stroke-width', '2');
+      } else {
+        el.style.filter = 'opacity(0.3)';
+        el.setAttribute('stroke-width', '1');
+      }
+    }
+  }
+
+  function resetBlocks() {
+    for (let i = 0; i < 24; i++) {
+      const el = document.getElementById('pb' + i);
+      if (!el) continue;
+      const blockData = getBlockData(i);
+      const colors = seqColors[blockData] || seqColors.free;
+      el.style.filter = '';
+      el.setAttribute('stroke-width', '1.5');
+    }
+  }
+
+  // Block data: which sequence owns each physical block
+  const blockMap = {
+    0: 'B', 1: 'free', 2: 'A', 3: 'B', 4: 'free', 5: 'A',
+    6: 'free', 7: 'B', 8: 'A', 9: 'free', 10: 'free', 11: 'A',
+    12: 'A', 13: 'C', 14: 'free', 15: 'C', 16: 'free', 17: 'free',
+    18: 'C', 19: 'free', 20: 'free', 21: 'free', 22: 'free', 23: 'free'
+  };
+
+  function getBlockData(idx) {
+    return blockMap[idx] || 'free';
+  }
+
+  function highlightPhase(phase) {
+    // Just update tab styling - handled by CSS classes
+    document.querySelectorAll('.phase-btn').forEach(btn => {
+      btn.className = 'phase-btn';
+    });
+    event.target.className = 'phase-btn active-' + phase;
+  }
+</script>
+</body>
+</html>
