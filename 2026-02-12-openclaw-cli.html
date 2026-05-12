@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenClaw 命令行（CLI）使用说明：常用命令速查</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; color: #333; line-height: 1.8; }
+        .back { margin-bottom: 24px; }
+        a { color: #0066cc; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        h1 { font-size: 24px; margin-bottom: 16px; color: #000; }
+        h2 { font-size: 20px; margin-top: 32px; color: #333; }
+        h3 { font-size: 18px; margin-top: 24px; color: #444; }
+        p { margin: 16px 0; }
+        code { background: #f5f5f5; padding: 2px 6px; border-radius: 3px; font-size: 14px; }
+        pre { background: #f5f5f5; padding: 16px; border-radius: 6px; overflow-x: auto; }
+        pre code { background: none; padding: 0; }
+        blockquote { border-left: 4px solid #ddd; margin: 16px 0; padding: 8px 16px; color: #666; }
+        ul, ol { padding-left: 24px; }
+        li { margin: 8px 0; }
+        hr { border: none; border-top: 1px solid #eee; margin: 24px 0; }
+        em { color: #666; }
+    </style>
+</head>
+<body>
+    <p class="back"><a href="archive.html">← 返回归档</a></p>
+    <article>
+<p>这篇文章整理一份 <strong>OpenClaw CLI</strong> 的常用命令速查，覆盖：查看状态、启动/管理 Gateway、发消息、定时任务（cron）、配置管理与排错。</p>
+
+<blockquote>文档入口：<https://docs.openclaw.ai/cli></blockquote>
+
+<h2>1. 核心概念：CLI vs Gateway</h2>
+
+<ul><li><strong>openclaw（CLI）</strong>：你在终端里敲的命令。</li>
+<li><strong>Gateway</strong>：OpenClaw 的后台服务（WebSocket），负责承接消息、跑 agent、调度 cron、管理插件等。</li>
+</ul>
+<p>多数“自动化能力”（消息转发、定时、浏览器/节点等）都依赖 Gateway 正常运行。</p>
+
+<h2>2. 全局选项（很常用）</h2>
+
+<pre><code>openclaw -V
+openclaw --help
+</code></pre>
+
+<ul><li><code>--profile <name></code>：使用命名 profile（把配置/状态隔离到 <code>~/.openclaw-<name></code>）</li>
+<li><code>--dev</code>：开发 profile（同样是隔离环境，默认端口会变化）</li>
+<li><code>--no-color</code>：关闭彩色输出（适合日志/CI）</li>
+</ul>
+<h2>3. 一句话检查：我现在是不是正常？</h2>
+
+<pre><code>openclaw status
+openclaw status --all
+openclaw status --deep
+openclaw status --json
+</code></pre>
+
+<ul><li><code>status</code>：快速看渠道健康 + session 概况</li>
+<li><code>--all</code>：更完整但仍然是只读诊断（适合复制粘贴排查）</li>
+<li><code>--deep</code>：对各 channel 做更深入的探测</li>
+</ul>
+<h2>4. Gateway 管理（最关键的一组命令）</h2>
+
+<pre><code>openclaw gateway status
+openclaw gateway start
+openclaw gateway stop
+openclaw gateway restart
+</code></pre>
+
+<p>前台运行（调试用）：</p>
+
+<pre><code>openclaw gateway run
+</code></pre>
+
+<p>常用参数（按需）：</p>
+
+<pre><code>openclaw gateway run --port 18789
+openclaw gateway run --force
+openclaw gateway run --verbose
+openclaw --dev gateway run
+</code></pre>
+
+<blockquote><code>--force</code> 会尝试杀掉占用目标端口的进程；线上环境建议谨慎用。</blockquote>
+
+<h2>5. 发送消息（把 OpenClaw 当“消息命令行”用）</h2>
+
+<pre><code>openclaw message send --channel feishu --target <dest> --message "Hi"
+openclaw message send --channel telegram --target @mychat --message "Hi"
+</code></pre>
+
+<p>查看 <code>--help</code> 能看到支持的 channel 列表以及可选参数（媒体附件、reply-to、thread-id 等）：</p>
+
+<pre><code>openclaw message send --help
+</code></pre>
+
+<h2>6. Cron：定时任务 / 提醒</h2>
+
+<pre><code>openclaw cron status
+openclaw cron list
+openclaw cron add
+openclaw cron edit
+openclaw cron disable
+openclaw cron enable
+openclaw cron run
+openclaw cron runs
+openclaw cron rm
+</code></pre>
+
+<p>快速理解：</p>
+<ul><li><code>cron list</code> 看有哪些任务</li>
+<li><code>cron runs</code> 看历史执行记录</li>
+<li><code>cron run</code> 手动触发一次用于调试</li>
+</ul>
+<blockquote>具体 <code>add/edit</code> 的参数会跟你的 payload 类型、channel、sessionTarget 等有关；如果你只想做“提醒”，通常让 agent/系统事件发一条消息即可。</blockquote>
+
+<h2>7. Config：读取/修改配置（小心但很好用）</h2>
+
+<pre><code>openclaw config get <dot.path>
+openclaw config set <dot.path> <value>
+openclaw config unset <dot.path>
+</code></pre>
+
+<p>例子（示意）：</p>
+
+<pre><code>openclaw config get gateway.bind
+openclaw config get gateway.port
+</code></pre>
+
+<blockquote>修改配置可能需要重启 gateway 才生效：<code>openclaw gateway restart</code>。</blockquote>
+
+<h2>8. 常用“辅助类”命令（按需）</h2>
+
+<p>下面这些命令在日常排障/运维很顺手：</p>
+
+<ul><li>健康检查与快速修复：</li>
+</ul>  <pre><code>  openclaw doctor --help
+  openclaw health --help
+  </code></pre>
+<ul><li>日志：</li>
+</ul>  <pre><code>  openclaw logs --help
+  </code></pre>
+<ul><li>会话与历史：</li>
+</ul>  <pre><code>  openclaw sessions --help
+  </code></pre>
+<ul><li>设备/节点（手机、树莓派等）：</li>
+</ul>  <pre><code>  openclaw devices --help
+  openclaw nodes --help
+  openclaw node --help
+  </code></pre>
+<ul><li>技能与插件：</li>
+</ul>  <pre><code>  openclaw skills --help
+  openclaw plugins --help
+  </code></pre>
+
+<h2>9. 一个推荐的“排错顺序”</h2>
+
+<p>1) 先看总体：</p>
+
+<pre><code>openclaw status --all
+</code></pre>
+
+<p>2) Gateway 起来了吗：</p>
+
+<pre><code>openclaw gateway status
+</code></pre>
+
+<p>3) 不行就重启（成本最低）：</p>
+
+<pre><code>openclaw gateway restart
+</code></pre>
+
+<p>4) 仍有问题，再开更详细日志：</p>
+
+<pre><code>openclaw status --deep
+openclaw gateway run --verbose
+</code></pre>
+
+<h2>10. 结语</h2>
+
+<p>OpenClaw 的 CLI 设计思路很像“运维工具箱”：先把 Gateway 跑稳，再用 <code>message / cron / sessions / skills</code> 把重复劳动变成自动化。</p>
+
+<p>如果你愿意，我也可以在下一篇把“从 0 配好一个飞书 DM 机器人 + 起床提醒 + 博客发布流水线”的整套流程写成一篇可复制粘贴的教程。</p>
+    </article>
+</body>
+</html>
